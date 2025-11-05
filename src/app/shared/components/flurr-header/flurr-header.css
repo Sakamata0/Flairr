@@ -41,24 +41,28 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
     justify-content: center;
     font-size:1.9rem;
     padding: 6px;
-    margin-bottom: 10px;
     color:#000;
     letter-spacing:0.5px;
     width: 160px;
 }
 
 .search-wrap{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width:400px;
+    height: 56px;
     min-width:160px;
 }
 
 .search-container{
     position:relative;
     margin-left: 20ox;
+    width: 100%;
 }
 .search-container input{
     width:100%;
-    height: 1.8rem;
+    height: 47px;
     padding:10px 40px 10px 14px;
     border-radius:26px;
     border: none;
@@ -112,7 +116,7 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
     height:38px;
     border-radius:50%;
     background:transparent;
-    transition: background .18s ease, transform .18s ease;
+    transition: transform .18s ease;
     font-size:16px;
     
 }
@@ -152,6 +156,17 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
     gap:10px;
     width: 600px;
 }
+
+.right a img{
+    height: 35px;
+    margin-right: 25px;
+    transition: transform .18s ease;
+}
+
+.right a img:hover {
+    transform: translateY(-1px);
+}
+
 .small-btn{
     width:38px;
     height:38px;
@@ -165,17 +180,94 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
 }
 .small-btn:hover { background: rgba(0,0,0,0.04); }
 
-.avatar{
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    overflow:hidden;
-    border:2px solid #fff;
+/* Wrapper keeps avatar + overlay together */
+.avatar-wrap {
+    position: relative;
+    width: 40px;   /* match your avatar sizing */
+    height: 40px;
+    display: inline-block;
+}
+
+/* avatar image */
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
     box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
-.avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-/* responsive tweaks */
+/* small circular toggle positioned over bottom-right */
+.avatar-toggle {
+    position: absolute;
+    right: -4px;   /* nudges the button slightly outside avatar circle */
+    bottom: -4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    display: inline-grid;
+    place-items: center;
+    background: #609966;          /* white circle */
+    color: #ffffff;               /* chevron color */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    cursor: pointer;
+    padding: 0;
+    transition: transform .12s ease, background .12s ease;
+    line-height: 0;
+}
+
+/* hover / focus */
+.avatar-toggle:hover,
+.avatar-toggle:focus {
+    transform: translateY(-1px);
+    background: #609966;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(11,102,209,0.12);
+}
+
+/* rotate chevron when open (use .open on wrap or bind style via Angular) */
+.avatar-wrap.profile-open .avatar-toggle svg {
+    transform: rotate(180deg);
+    transition: transform .18s ease;
+}
+
+/* optional menu styling */
+.avatar-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 160px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(11,66,130,0.12);
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 40;
+}
+
+/* menu links */
+.avatar-menu a,
+.avatar-menu button {
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: #111;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+.avatar-menu a:hover,
+.avatar-menu button:hover {
+    background: rgba(11,102,209,0.06);
+}
+
+
 @media (max-width:900px){
     .search-wrap{ width:320px; }
     .center { gap:6px; }
