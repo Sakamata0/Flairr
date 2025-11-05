@@ -4,3 +4,8 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+body {
+  font-family: "anek-bangla-variable", sans-serif;
+  background-color: #EDF1D6;
+}
