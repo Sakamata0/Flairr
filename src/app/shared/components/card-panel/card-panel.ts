@@ -13,8 +13,8 @@ export class CardPanel {
   title = input("Title");
   noItemsMessage = input("No Items to show.");
   items = input<Array<ItemPanelInfo>>([
-    {id: '1', title: 'Mohamed Houcine', imageUrl: 'assets/images/hama.png', withSubtitle: true, subtitle: 'liked your Flurr!', subtitleOnSameLevel: true, withIcon: true, iconUrl: 'assets/icons/like.png', withButton: false},
-    {id: '2', title: 'Mohamed Houcine', imageUrl: 'assets/images/hama.png', withSubtitle: true, subtitle: 'commented on your Flurr!', subtitleOnSameLevel: true, withIcon: true, iconUrl: 'assets/icons/comment.png', withButton: false},
-    {id: '3', title: 'Skander Boughnimi', imageUrl: 'assets/images/skander.png', withSubtitle: true, subtitle: '4.7k Followers', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Follow', buttonAction: () => { console.log('Button clicked'); } }
+    {id: '1', title: 'Mohamed Houcine', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: 'liked your Flurr!', subtitleOnSameLevel: true, withIcon: true, iconUrl: 'assets/icons/panel/like.png', withButton: false},
+    {id: '2', title: 'Mohamed Houcine', imageUrl: '/assets/images/hama.png', withSubtitle: true, subtitle: 'commented on your Flurr!', subtitleOnSameLevel: true, withIcon: true, iconUrl: 'assets/icons/panel/comment.png', withButton: false},
+    {id: '3', title: 'Skander Boughnimi', imageUrl: '/assets/images/skander.png', withSubtitle: true, subtitle: '4.7k Followers', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Follow', buttonAction: () => { console.log('Button clicked'); } }
   ]);
 }

@@ -38,6 +38,12 @@ button {
     border-radius: 10px;
     font-size: .9em;
     font-weight: 700;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    background-color: #4a7c4a;
+    cursor: pointer;
 }
 
 h3 {

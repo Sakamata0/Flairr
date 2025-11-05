@@ -8,11 +8,7 @@
     --header-h:80;
 }
 
-
-
 body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-
-
 
 /* Header layout */
 .site-header{
@@ -23,6 +19,7 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
     padding: 8px 18px;
     box-shadow: 0 2px 0 rgba(11,102,209,0.12);
     gap:18px;
+    background-color: #fff;
 }
 
 /* Left: logo + search */
