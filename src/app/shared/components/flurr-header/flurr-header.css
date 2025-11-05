@@ -101,9 +101,12 @@ body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 
     color:#000;
     text-decoration:none;
     border: none;
-    
 }
-.icon-item:focus { background-color: #ECE6F0; outline-offset:3px; border-radius:999px; }
+
+/* only the active (selected) item gets the highlighted background */
+.icon-item.active {
+    background-color: #ECE6F0;
+}
 
 .icon-bubble{
     display:inline-flex;
