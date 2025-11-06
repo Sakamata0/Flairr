@@ -1,0 +1,33 @@
+<div id="main-container">
+    <header>
+        <h1 class="title">Edit Profile</h1>
+        <button type="button" class="fb-close-btn" (click)="this.afficher()">X</button>
+    </header>
+    <hr>
+    <div id="profile infos">
+        <div id="profile-picture-container">
+            <header>
+                <h1 class="title">Profile Picture</h1>
+            </header>
+            <a href="#">{{info()?.profileImageUrl? 'Edit' : 'Add' }}</a>
+        </div>
+        <div id="banner-container">
+            <header>
+                <h1 class="title">Banner Image</h1>
+            </header>
+            <a href="#">{{info()?.bannerImageUrl? 'Edit' : 'Add' }}</a>
+        </div>
+        <div id="bio-container">
+            <header>
+                <h1 class="title">Bio</h1>
+            </header>
+            <a href="#">{{info()?.bio? 'Edit' : 'Add' }}</a>
+        </div>
+        <div id="details-container">
+            <header>
+                <h1 class="title">Details</h1>
+            </header>
+            <a href="#">{{(info()?.country || info()?.birthday)? 'Edit' : 'Add' }}</a>
+        </div>
+    </div>
+</div>
