@@ -15,13 +15,13 @@
 
         <div class="sub">
           <span class="time">{{ post?.createdAt | date:'short' }}</span>
-          <span class="globe"><img src="../../assets/globe.png" alt="globe" class="globe-img"></span>
+          <span class="globe"><img src="assets/icons/post/globe.png" alt="globe" class="globe-img"></span>
         </div>
       </div>
     </div>
 
     <div class="menu-wrapper" (click)="$event.stopPropagation()">
-      <img src="../../assets/menu.png"
+      <img src="assets/icons/post/menu.png"
            alt="menu"
            class="menu-icon-trigger"
            (click)="toggleMenu($event)">
@@ -29,13 +29,13 @@
       <div class="menu-container" *ngIf="showMenu" (click)="$event.stopPropagation()">
         <ul class="menu-list" role="menu" aria-label="Post actions">
           <li class="menu-item" (click)="hidePost()">
-            <img src="../../assets/hide-icon.png" alt="" class="menu-icon"> Hide post
+            <img src="assets/icons/post/hide-icon.png" alt="" class="menu-icon"> Hide post
           </li>
           <li class="menu-item" (click)="blockUser()">
-            <img src="../../assets/block-icon.png" alt="" class="menu-icon"> Block user
+            <img src="assets/icons/post/block-icon.png" alt="" class="menu-icon"> Block user
           </li>
           <li class="menu-item" (click)="reportPost()">
-            <img src="../../assets/report-icon.png" alt="" class="menu-icon"> Signal (report) post
+            <img src="assets/icons/post/report-icon.png" alt="" class="menu-icon"> Signal (report) post
           </li>
         </ul>
       </div>
@@ -72,12 +72,12 @@
           class="btn reaction"
           (click)="onReact('like')"
           [class.liked]="post?.userHasLiked">
-          <img [src]="post?.userHasLiked ? '../../assets/liked.png' : '../../assets/like.png'" alt="like">
+          <img [src]="post?.userHasLiked ? 'assets/icons/post/liked.png' : 'assets/icons/post/like.png'" alt="like">
           <span class="count">{{ post?.reactions?.['like'] || 0 }}</span>
         </button>
 
         <button class="btn" (click)="toggleComments();openCommentPopUp()">
-          <img src="../../assets/comment.png" alt="comment">
+          <img src="assets/icons/post/comment.png" alt="comment">
           <span class="count">{{ post?.commentsCount || 0 }}</span>
         </button>
 

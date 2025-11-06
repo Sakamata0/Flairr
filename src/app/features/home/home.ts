@@ -3,6 +3,7 @@ import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/f
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
+import { Post } from '../../shared/components/post-components/post/post';
 
 @Component({
   selector: 'app-home',
@@ -10,7 +11,8 @@ import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-
     FlurrCreationCard,
     CardPanel,
     ProfileHeader,
-    MiniProfileCard
+    MiniProfileCard,
+    Post
   ],
   templateUrl: './home.html',
   styleUrl: './home.css'

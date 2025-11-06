@@ -44,11 +44,24 @@ export interface PostInfo {
   styleUrls: ['./post.css']
 })
 export class Post implements OnInit, OnDestroy {
-  @Input() post: PostInfo | null = null;
-  @Input() currentUser: { name: string; avatarUrl: string | null } | null = null;
+  @Input() post: PostInfo | null = {
+    id: 'p1',
+    title: 'Flairr Journey: #Building_my_first_full-stack_app',
+    author: { id: 'u1', name: 'Catharina', avatarUrl: 'assets/icons/post/avatar2-img.avif', title: '', isFollowed: false },
+    content: "🚀 Just finished connecting my Angular frontend #hhahaa to my Node.js API!\nIt took me two days to fix a CORS issue 😂 but I finally understand how it works.\nNext step: adding authentication.\nIf anyone has experience with JWT best practices, I'd love some advice 👇",
+    media: [{ url: 'assets/icons/post/post-img.png', type: 'image', filename: 'screenshot.png' }],
+    reactions: { like: 232 },
+    commentsCount: 120,
+    viewsCount: 1500,
+    createdAt: new Date()
+  };
+  @Input() currentUser: { name: string; avatarUrl: string | null } | null = {
+    name: 'Mohamed Houcine',
+    avatarUrl: 'assets/icons/post/avatar-img.avif'
+  };
 
 
-  defaultAvatar = '../../assets/avatar-img.avif';
+  defaultAvatar = 'assets/icons/post/avatar-img.avif';
   CommentPopUp = CommentPopUp;
 
   showComments = false;
