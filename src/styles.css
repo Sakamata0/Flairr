@@ -21,3 +21,6 @@ body { margin: 0; font-family: "anek-bangla-variable", sans-serif, "Helvetica Ne
   padding: 12px 16px !important;
   background-color: #fff !important;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

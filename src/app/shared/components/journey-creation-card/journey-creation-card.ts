@@ -5,7 +5,6 @@ import {
   MatDialog,
   MatDialogModule,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
@@ -70,7 +69,6 @@ export class JourneyCreationCard {
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatDialogClose,
     MatSelectModule,
     FormsModule
   ],
