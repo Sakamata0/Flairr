@@ -1,4 +1,3 @@
-/* You can add global styles to this file, and also import other style files */
 :root {
   --primary-color: #EDF1D6;
   --secondary-color: #9DC08B;
@@ -20,4 +19,17 @@ body {
 .edit-profile-dialog .mat-mdc-dialog-surface {
   border-radius: 25px !important;
   padding: 0;
+}
+
+.edit-profile-dialog #main-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 25px;
+  background: white;
+  overflow: auto;
+}
+
+.edit-profile-dialog .fb-close-btn {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #b0b3b8;
 }
