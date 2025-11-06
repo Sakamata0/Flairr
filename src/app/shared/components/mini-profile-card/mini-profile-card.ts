@@ -14,4 +14,9 @@ export class MiniProfileCard {
         followingCount: 150,
         postsCount: 15
     });
+
+    getHandle(name: string): string {
+        return '@' + name.replace(' ', '_').toLowerCase();
+    }
+
 }

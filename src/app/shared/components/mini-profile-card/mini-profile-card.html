@@ -1,3 +1,37 @@
-<div class="mini-profile-card">
-    <img [src]="info().bannerImageUrl || 'assets/images/default-banner-image.png'" alt="banner pic">
+<div class="profile-card">
+    <!-- Banner -->
+    <div class="banner">
+        <img 
+        [src]="info().bannerImageUrl || 'assets/images/default-banner-image.png'" 
+        alt="Banner" 
+        class="banner-img"
+        />
+        <img 
+        [src]="info().profileImageUrl || 'assets/images/default-profile-picture.png'" 
+        alt="Profile" 
+        class="profile-img"
+        />
+    </div>
+
+    <!-- Info -->
+    <div class="content">
+        <h2 class="name">{{ info().username }}</h2>
+        <p class="handle">{{ getHandle(info().username) }}</p>
+        <div class="stats">
+            <div>
+                <p class="stat-number">{{ info().postsCount }}</p>
+                <p class="stat-label">Flurrs</p>
+            </div>
+            <div>
+                <p class="stat-number">{{ info().followersCount }}</p>
+                <p class="stat-label">Followers</p>
+            </div>
+            <div>
+                <p class="stat-number">{{ info().followingCount }}</p>
+                <p class="stat-label">Following</p>
+            </div>
+        </div>
+
+        <button class="profile-btn">My Profile</button>
+    </div>
 </div>
