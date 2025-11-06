@@ -26,9 +26,7 @@ export class FlurrHeaderComponent {
   // Always select clicked key. Keep it active if clicked again.
   toggle(key: string, event?: Event) {
     event?.stopPropagation();
-    console.log('[toggle] clicked key=', key, 'previous activeKey=', this.activeKey);
     this.activeKey = key;
-    console.log('[toggle] new activeKey=', this.activeKey);
   }
 
   onSearch(event: Event) {
@@ -61,7 +59,6 @@ export class FlurrHeaderComponent {
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent) {
     const target = ev.target as Node;
-    console.log('[onDocumentClick] target=', (target as HTMLElement)?.outerHTML?.slice?.(0,200) ?? target);
 
     // DO NOT clear activeKey — keep nav selection until another icon click.
     // If you want an explicit way to clear it, use Escape key or a UI control.
@@ -69,9 +66,6 @@ export class FlurrHeaderComponent {
     // Close profile if clicking outside avatar
     const wrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
     if (wrap && !wrap.contains(target as Node)) {
-      if (this.profileOpen) {
-        console.log('[onDocumentClick] clicked outside avatar -> closing profile');
-      }
       this.profileOpen = false;
       wrap.classList.remove('profile-open');
     }

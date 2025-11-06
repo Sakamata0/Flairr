@@ -18,6 +18,8 @@ body {
 
 .edit-profile-dialog .mat-mdc-dialog-surface {
   border-radius: 25px !important;
+  max-height: none !important;
+  overflow: auto !important;
   padding: 0;
 }
 
@@ -27,11 +29,6 @@ body {
   border-radius: 25px;
   background: white;
   overflow: auto;
-}
-
-.edit-profile-dialog .fb-close-btn {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #b0b3b8;
 }
 
 .mat-mdc-dialog-container {

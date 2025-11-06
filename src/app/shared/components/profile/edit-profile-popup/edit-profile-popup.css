@@ -1,28 +1,36 @@
-.edit-profile-dialog .mat-mdc-dialog-surface {
-    border-radius: 25px !important;
-}
-
 #main-container {
     width: 100%;
-    height: 600px;
+    height: 850px;
+    overflow-y: auto;
 }
 
-header {
+#profile-infos {
+    overflow: scroll;
+    overflow-x: hidden;
+    height: 650px;
+    padding: 0 10px;
+    padding-bottom: 30px;
+}
+
+#main-container header {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px 10px;
 }
+
 .title {
-    flex-grow: 1;
-    text-align: center;
     font-size: 1.8em;
     font-weight: normal;
     font-family: 'pacifico', cursive;
 }
 
-.fb-close-btn {
+#main-container .title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.close-btn {
   background-color: var(--secondary-color);
   border: none;
   color: #fff;
@@ -31,11 +39,81 @@ header {
   height: 35px;
   font-size: 1.3em;
   cursor: pointer;
+  margin-right: 10px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* hover effect */
-.fb-close-btn:hover {
+.close-btn:hover {
   background-color: var(--third-color);
   color: #fff;
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-header .title {
+    text-align: left !important;
+    margin: 10px 0;
+}
+
+.info-header a {
+    text-decoration: none;
+    color: var(--third-color);
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 10px;
+}
+
+.info-header a:hover {
+    background: rgba(96, 153, 102, 0.1);
+    cursor: pointer;
+}
+
+#profile-picture {
+  display: flex;
+  justify-content: space-around;
+}
+
+#profile-picture img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  text-align: center;
+}
+
+#banner-image {
+  display: flex;
+  justify-content: center;
+}
+
+#banner-image img{
+  width: 500px;
+  height: 175px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+#bio-container p {
+    font-size: 1.1em;
+    padding: 0 30px;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+#additional-info p {
+    font-size: 1.1em;
+    line-height: .5em;
+    padding: 10px 30px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #000;
 }

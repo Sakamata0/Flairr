@@ -6,6 +6,6 @@ export interface profileInfo {
     followersCount: number;
     followingCount: number;
     postsCount: number;
-    birthday?: Date;
+    birthday?: string;
     country?: string;
 }

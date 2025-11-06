@@ -25,9 +25,9 @@
             </div>
             <hr>
             <div id="stats-container">
-                <span><strong>{{ info().followersCount }}</strong> Followers</span>
-                <span><strong>{{ info().followingCount }}</strong> Following</span>
-                <span><strong>{{ info().postsCount }}</strong> Flurrs</span>
+                <span><strong>{{ formatFollowerCount(info().followersCount) }}</strong> Followers</span>
+                <span><strong>{{ formatFollowerCount(info().followingCount) }}</strong> Following</span>
+                <span><strong>{{ formatFollowerCount(info().postsCount) }}</strong> Flurrs</span>
             </div>
         </div>
     </div>

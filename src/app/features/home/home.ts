@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
-import { FlurrHeaderComponent } from '../../shared/components/flurr-header/flurr-header';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 
 @Component({

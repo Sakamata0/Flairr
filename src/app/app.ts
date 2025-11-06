@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FlurrHeaderComponent } from './shared/components/flurr-header/flurr-header';
-import { ProfileHeader } from "./shared/components/profile/profile-header/profile-header";
 
 @Component({
   selector: 'app-root',

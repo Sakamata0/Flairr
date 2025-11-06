@@ -14,28 +14,38 @@ import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
 
 export class ProfileHeader {
   info = input<profileInfo>({
-    username: 'Skander Boughnimi',
-    followersCount: 120,
-    followingCount: 150,
+    username: 'Ismail Mechkene',
+    followersCount: 1_200_000,
+    followingCount: 1_500,
     postsCount: 75,
-    bio: "🌐 Developer | 📚 Learner | 🚀 Creator \n Building clean, responsive web apps. Always learning. Always improving. ✨"
+    profileImageUrl: 'assets/images/profile-picture-test.jpg',
+    bannerImageUrl: 'assets/images/banner-test.png',
+    bio: "🌐 Developer | 📚 Learner | 🚀 Creator \n Building clean, responsive web apps. Always learning. Always improving. ✨",
+    country: 'Tunisia',
+    birthday: '05/11/2004'
   });
 
-  constructor(private dialogRef: MatDialog) {
+  constructor(private dialogRef: MatDialog) {}
 
-    
-  }
+  formatFollowerCount(count: number): string {
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1) + 'M';
+    }
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+  }  
 
   openEditProfileDialog() {
     this.dialogRef.open(EditProfilePopup, 
       {
         width: '750px',
-        height: 'fit-content',
         maxWidth: '90vw',
         maxHeight: '80vh',
         panelClass: 'edit-profile-dialog',
-        disableClose: true,
-        data: this.info
+        autoFocus: false,
+        data: this.info()
       });
   }
 }

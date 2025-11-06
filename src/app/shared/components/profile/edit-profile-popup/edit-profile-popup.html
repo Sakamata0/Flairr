@@ -1,33 +1,50 @@
 <div id="main-container">
     <header>
         <h1 class="title">Edit Profile</h1>
-        <button type="button" class="fb-close-btn" (click)="this.afficher()">X</button>
+        <button type="button" class="close-btn" (click)="this.closeDialog()">X</button>
     </header>
     <hr>
-    <div id="profile infos">
+    <div id="profile-infos">
         <div id="profile-picture-container">
-            <header>
+            <header class="info-header">
                 <h1 class="title">Profile Picture</h1>
+                <a>{{info().profileImageUrl? 'Edit' : 'Add' }}</a>
             </header>
-            <a href="#">{{info()?.profileImageUrl? 'Edit' : 'Add' }}</a>
+            <div id="profile-picture">
+                <img [src]="info().profileImageUrl || 'assets/images/default-profile-picture.png'" alt="Error loading profile picture">
+            </div>
         </div>
+        
         <div id="banner-container">
-            <header>
+            <header class="info-header">
                 <h1 class="title">Banner Image</h1>
+                <a>{{info().bannerImageUrl? 'Edit' : 'Add' }}</a>
             </header>
-            <a href="#">{{info()?.bannerImageUrl? 'Edit' : 'Add' }}</a>
+            <div id="banner-image">
+                <img [src]="info().bannerImageUrl || 'assets/images/default-banner-image.png'" alt="Error loading banner image">
+            </div>
         </div>
         <div id="bio-container">
-            <header>
+            <header class="info-header">
                 <h1 class="title">Bio</h1>
+                <a (click)="editingBio = !editingBio" >{{ editingBio? 'Cancel': info().bio? 'Edit' : 'Add' }}</a>
             </header>
-            <a href="#">{{info()?.bio? 'Edit' : 'Add' }}</a>
+            <p *ngIf="!editingBio">{{ info().bio || 'Describe yourself' }}</p>
+            <textarea *ngIf="editingBio" [(ngModel)]="bioText" rows="3" cols="40" maxlength="101" placeholder="Describe yourself"></textarea>
         </div>
         <div id="details-container">
-            <header>
+            <header class="info-header">
                 <h1 class="title">Details</h1>
+                <a>{{(info().country || info().birthday)? 'Edit' : 'Add' }}</a>
             </header>
-            <a href="#">{{(info()?.country || info()?.birthday)? 'Edit' : 'Add' }}</a>
+            <div id="additional-info">
+                <p *ngIf="info().country"><strong>Country:</strong> {{ info().country }}</p>
+                <p *ngIf="info().birthday"><strong>Birthday:</strong> {{ info().birthday}}</p>
+            </div>
         </div>
     </div>
+    <footer>
+        <button>Cancel</button>
+        <button>Save Changes</button>
+    </footer>
 </div>
