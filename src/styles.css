@@ -1,11 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+html, body { height: 100%; }
+body { margin: 0; font-family: "anek-bangla-variable", sans-serif, "Helvetica Neue", sans-serif; }
+
+.custom-flurr-creation-dialog {
+  width: 600px !important;
+  height: 500px !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 
-body {
-  font-family: "anek-bangla-variable", sans-serif;
-  background-color: #EDF1D6;
+.custom-journey-creation-dialog {
+  width: 600px !important;
+  height: 625px !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+
+.custom-flurr-creation-dialog .mat-mdc-dialog-surface {
+  padding: 12px 16px !important;
+  background-color: #fff !important;
 }
