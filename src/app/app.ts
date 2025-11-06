@@ -8,15 +8,8 @@ import { ProfileHeader } from "./shared/components/profile/profile-header/profil
   standalone: true,
   imports: [
     RouterOutlet,
-<<<<<<< HEAD
-    ProfileHeader,
-    FlurrHeaderComponent,
-    ProfileHeader
-],
-=======
     FlurrHeaderComponent
   ],
->>>>>>> 6f518086c1a69e9e0b02f833feb0e6ad389abfbd
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
