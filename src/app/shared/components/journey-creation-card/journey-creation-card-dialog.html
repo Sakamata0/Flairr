@@ -3,21 +3,19 @@
 <mat-dialog-content class="content-dialog">
   <!-- upper section -->
   <div class="flurr-upper">
-    <div class="left-part">
-      <div class="user-info">
-        <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
-      </div>
-      <div class="user-details">
-        <h4>{{ username }}</h4>
-        <!-- select -->
-        <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
-          <mat-select placeholder="public" [(ngModel)]="selectedPrivacy" name="privacy">
-            <mat-option value="public">public</mat-option>
-            <mat-option value="private">private</mat-option>
-            <mat-option value="friends">friends</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+    <div class="user-info">
+      <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
+    </div>
+    <div class="user-details">
+      <h4>{{ username }}</h4>
+      <!-- select -->
+      <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
+        <mat-select placeholder="public" [(ngModel)]="selectedPrivacy" name="privacy">
+          <mat-option value="public">public</mat-option>
+          <mat-option value="private">private</mat-option>
+          <mat-option value="friends">friends</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
   </div>
 

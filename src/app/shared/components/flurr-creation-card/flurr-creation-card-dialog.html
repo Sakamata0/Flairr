@@ -7,8 +7,12 @@
       <div class="user-info">
         <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
       </div>
+    </div>
+    <div class="right-part">
       <div class="user-details">
         <h4>{{ username }}</h4>
+      </div>
+      <div class="select-divs">
         <!-- select -->
         <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
           <mat-select [(ngModel)]="selectedPrivacy" placeholder="Privacy">
@@ -17,17 +21,15 @@
             <mat-option value="friends">Friends</mat-option>
           </mat-select>
         </mat-form-field>
+        <!-- select -->
+        <mat-form-field appearance="outline" class="flurr-select" id="journey-select">
+          <mat-select [(ngModel)]="selectedJourney" placeholder="Select a Journey">
+            <mat-option *ngFor="let journey of journeys" [value]="journey.value">
+              {{ journey.viewValue }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
-    </div>
-
-    <div class="right-part">
-      <mat-form-field appearance="outline" class="flurr-select" id="journey-select">
-        <mat-select [(ngModel)]="selectedJourney" placeholder="Select a Journey">
-          <mat-option *ngFor="let journey of journeys" [value]="journey.value">
-            {{ journey.viewValue }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
     </div>
   </div>
 

@@ -2,25 +2,36 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: "anek-bangla-variable", sans-serif, "Helvetica Neue", sans-serif; }
 
-.custom-flurr-creation-dialog {
+/* General dialog surface */
+.mat-mdc-dialog-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-flurr-creation-dialog .mat-mdc-dialog-surface {
   width: 600px !important;
   height: 500px !important;
   max-width: none !important;
   max-height: none !important;
-}
-
-.custom-journey-creation-dialog {
-  width: 600px !important;
-  height: 625px !important;
-  max-width: none !important;
-  max-height: none !important;
-}
-
-
-.custom-flurr-creation-dialog .mat-mdc-dialog-surface {
   padding: 12px 16px !important;
   background-color: #fff !important;
+  color: #000 !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  border-radius: 25px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.custom-journey-creation-dialog .mat-mdc-dialog-surface {
+  width: 600px !important;
+  height: 675px !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 12px 16px !important;
+  background-color: #fff !important;
+  color: #000 !important;
+  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  border-radius: 25px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+}
+

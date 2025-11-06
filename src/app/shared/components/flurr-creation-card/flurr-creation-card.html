@@ -2,18 +2,22 @@
 dialog of FlurrCreationCard (FlurrCreationCardDialog) -->
 
 <!-- Trigger card for creating a new Flurr -->
-<div class="flurr-creation-trigger-card" (click)="openFlurrCreationDialog()">
-  <div class="user-info" id="avatar">
-    <img src="assets/avatars/avatar-example.jpg" alt="User avatar" />
-  </div>
+<div class="flurr-creation-trigger-card">
+  <a href="/profile">
+    <div class="user-info" id="avatar">
+      <img src="assets/avatars/avatar-example.jpg" alt="User avatar" />
+    </div>
+  </a>
+  
 
-  <div class="search-container" role="search">
+  <div class="flurr-container" role="search">
     <input
-      id="search-input"
+      id="flurr-input"
       type="text"
       placeholder="What's on your mind?"
       aria-label="Create a new Flurr"
       readonly
+      (click)="openFlurrCreationDialog()"
     />
   </div>
 </div>
