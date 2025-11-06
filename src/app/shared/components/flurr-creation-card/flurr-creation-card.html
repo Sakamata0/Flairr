@@ -1,0 +1,26 @@
+<!-- Here is the button of Create Flurr, clicking it will trigger the event of opening the 
+dialog of FlurrCreationCard (FlurrCreationCardDialog) -->
+
+<!-- Trigger card for creating a new Flurr -->
+<div class="flurr-creation-trigger-card">
+  <a href="/profile">
+    <div class="user-info" id="avatar">
+      <img src="assets/avatars/avatar-example.jpg" alt="User avatar" />
+    </div>
+  </a>
+  
+
+  <div class="flurr-container" role="search">
+    <input
+      id="flurr-input"
+      type="text"
+      placeholder="What's on your mind?"
+      aria-label="Create a new Flurr"
+      readonly
+      (click)="openFlurrCreationDialog()"
+    />
+  </div>
+</div>
+
+
+<!--<button mat-button (click)="openFlurrCreationDialog()">Create Flurr</button>-->

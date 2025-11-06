@@ -1,0 +1,34 @@
+<div id="main-container">
+    <div>
+        <img id="banner-image" [src]="
+        info().bannerImageUrl || 'assets/images/default-banner-image.png'
+        "
+        alt="Error loading banner image"
+    >
+    </div>
+    <div id="main-section">
+        <img id="profile-image" [src]="
+            info().profileImageUrl ||
+            'assets/images/default-profile-picture.png'
+            "
+            alt="Error loading profile picture"
+        >
+        <div id="info-container">
+            <div id="name-a-bio-container">
+                <div id="info">
+                    <h3> {{ info().username }} </h3>
+                    <p id="bio" *ngIf="info().bio">
+                        {{ info().bio }}
+                    </p>
+                </div>
+                <button id="edit-profile-button" (click)="openEditProfileDialog()"><img src="assets/icons/profile/edit.png">Edit</button>
+            </div>
+            <hr>
+            <div id="stats-container">
+                <span><strong>{{ info().followersCount }}</strong> Followers</span>
+                <span><strong>{{ info().followingCount }}</strong> Following</span>
+                <span><strong>{{ info().postsCount }}</strong> Flurrs</span>
+            </div>
+        </div>
+    </div>
+</div>
