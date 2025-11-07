@@ -1,0 +1,23 @@
+
+
+.home-main {
+    min-height: 100vh;          /* lets the page grow if content needs more room */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;    /* avoid vertical centering that causes overlap */
+    box-sizing: border-box;
+    gap: 24px;                  /* spacing between children instead of relying on widths */
+}
+
+.home-nav {
+    padding: clamp(12px, 2.5vw, 35px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: clamp(260px, 28vw, 420px); /* shrinks on small screens / when zoomed */
+    position: relative;
+    box-sizing: border-box;
+    overflow: auto;                     /* lets nav contents scroll instead of overflowing */
+    max-height: calc(100vh - var(--header-height, 0px)); /* keep inside viewport */
+}

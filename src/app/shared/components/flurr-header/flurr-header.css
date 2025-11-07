@@ -5,7 +5,7 @@
     --accent:#0b66d1;
     --search-bg:#EDF1D6;
     --muted:#6b6b6b;
-    --header-h:80;
+    --header-h:80px;
 }
 
 body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }

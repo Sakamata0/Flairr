@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
-import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
 
@@ -10,7 +9,6 @@ import { Post } from '../../shared/components/post-components/post/post';
   imports: [
     FlurrCreationCard,
     CardPanel,
-    ProfileHeader,
     MiniProfileCard,
     Post
   ],
