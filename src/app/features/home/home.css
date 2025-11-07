@@ -40,6 +40,12 @@ main, nav, aside {
     overflow-x: hidden;
 }
 
+nav, aside {
+  overflow-y: scroll;
+  scrollbar-width: none;
+  height: calc(90vh - 10px);
+}
+
 section {
     padding: var(--spacing-between-sections);
     gap: var(--spacing-between-sections);
