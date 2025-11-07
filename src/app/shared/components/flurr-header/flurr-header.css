@@ -1,18 +1,8 @@
 :host { display:block; }
 
-/* variables */
-:root{
-    --accent:#0b66d1;
-    --search-bg:#EDF1D6;
-    --muted:#6b6b6b;
-    --header-h:80;
-}
-
-body, :host { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-
 /* Header layout */
 .site-header{
-    height: var(--header-h);
+    height: var(--flairr-header-height);
     display:flex;
     align-items:center;
     justify-content:space-between;
