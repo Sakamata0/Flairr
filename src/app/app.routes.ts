@@ -9,5 +9,9 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
     },
+    {
+        path: 'profile-name',
+        loadComponent: () => import('./features/flurr-space-profile/flurr-space-profile').then(m => m.FlurrSpaceProfile)
+    },
     { path: '**', redirectTo: '' }
 ];
