@@ -4,7 +4,16 @@
             <img [src]="info()?.imageUrl" id="photo">
             <img [src]="info()?.iconUrl" id="icon">
         </div>
-        <p><span id="title">{{ info()?.title }}</span><br *ngIf="!info()?.subtitleOnSameLevel"><span id="subtitle">{{ info()?.subtitle }}</span></p>
+        <p [class.inline]="info()?.subtitleOnSameLevel">
+            <strong id="title">{{ info()?.title }}</strong>
+            <br *ngIf="!info()?.subtitleOnSameLevel">
+            <span [ngClass]="{
+                'high subtitle':info()?.subtitleOnSameLevel,
+                'low subtitle': !info()?.subtitleOnSameLevel
+                }">
+                {{ info()?.subtitle }}
+            </span>
+        </p>
     </div>
     <button *ngIf="info()?.withButton" (click)="info()?.buttonAction()">
         {{ info()?.buttonText }}

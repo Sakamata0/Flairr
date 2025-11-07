@@ -21,7 +21,6 @@
     gap: 15px;
 }
 
-
 .title-section {
     display: flex;
     flex-direction: column;
@@ -51,19 +50,38 @@ h3 {
 }
 
 p {
-    line-height: 15px;
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
 #title {
-    font-size: .9em;
     font-weight: 600;
-    margin-right: 5px;
+    display: inline;
 }
 
-#subtitle {
-    font-size: .8em;
-    font-weight: 400;
-    color: #666666;
+.subtitle {
+    color: gray;
+    display: inline;
+}
+
+.low {
+    font-size: 0.85rem;
+}
+
+.high {
+    font-size: .95rem;
+}
+
+p.inline {
+  display: inline;
+  white-space: normal;
+  line-height: 15px;
+}
+
+
+p.inline #title::after {
+  content: " ";
 }
 
 .image-section {

@@ -1,3 +1,6 @@
-#app-main {
-    display: block;
+
+app-flurr-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }

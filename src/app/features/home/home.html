@@ -1,18 +1,21 @@
-<main class="home-main">
-    <nav class="home-nav">
+
+<div class="layout">
+    <nav>
         <app-mini-profile-card></app-mini-profile-card>
-        <app-card-panel title="Shortcuts" noItemsMessage="You have no new notifications."></app-card-panel>
+        <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="this.shortcuts"></app-card-panel>
     </nav>
-    <section></section>
-    <aside></aside>
-</main>
+    <main>
+        <app-flurr-creation-card></app-flurr-creation-card>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+    </main>
+    <aside>
+        <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications"></app-card-panel>
+        <app-card-panel title="Friends Suggestions" noItemsMessage="You have no friends suggestions." [items]="this.friendsSuggestions"></app-card-panel>
+    </aside>
+</div>
 
-
-
-
-
-
-<!--<app-flurr-creation-card></app-flurr-creation-card>
-<app-card-panel title="Notifications" noItemsMessage="You have no new notifications."></app-card-panel>
-
-<app-post></app-post>!-->

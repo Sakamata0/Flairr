@@ -4,7 +4,7 @@ import {NgIf, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-item-panel',
-  imports: [NgIf],
+  imports: [NgIf, NgClass],
   templateUrl: './item-panel.html',
   styleUrl: './item-panel.css'
 })
