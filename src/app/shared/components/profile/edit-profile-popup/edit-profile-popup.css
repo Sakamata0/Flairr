@@ -113,7 +113,16 @@
     padding: 10px 30px;
 }
 
-hr {
-    border: none;
-    border-top: 1px solid #000;
+@media (max-) {
+  
+}
+
+::ng-deep .mat-mdc-dialog-container.responsive-dialog {
+  border-radius: 15px;
+  overflow: hidden; /* prevents scrollbars from overflowing */
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  overflow-y: auto;   /* make internal scroll */
+  max-height: 90vh;   /* prevents it from going off-screen */
 }

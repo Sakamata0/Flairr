@@ -1,9 +1,10 @@
 import { Component, input } from '@angular/core';
 import { profileInfo } from '../../model/profile-info.type';
+import { RouterLink } from "@angular/router";
 
 @Component({
     selector: 'app-mini-profile-card',
-    imports: [],
+    imports: [RouterLink],
     templateUrl: './mini-profile-card.html',
     styleUrl: './mini-profile-card.css'
 })

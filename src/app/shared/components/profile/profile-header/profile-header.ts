@@ -40,9 +40,10 @@ export class ProfileHeader {
   openEditProfileDialog() {
     this.dialogRef.open(EditProfilePopup, 
       {
-        width: '750px',
-        maxWidth: '90vw',
-        maxHeight: '80vh',
+        width: '100vw',          // 90% of viewport width
+        maxWidth: '800px',      // but no more than 600px
+        height: 'auto',         // adapt height to content
+        maxHeight: '90vh',      // max 90% of viewport height
         panelClass: 'edit-profile-dialog',
         autoFocus: false,
         data: this.info()

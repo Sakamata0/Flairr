@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
 import { ItemPanel } from '../../shared/components/item-panel/item-panel';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -11,12 +12,18 @@ import { ItemPanel } from '../../shared/components/item-panel/item-panel';
     FlurrCreationCard,
     CardPanel,
     MiniProfileCard,
-    Post
+    Post,
+    NgIf
   ],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
 export class Home {
+  
+  constructor(private elementRef: ElementRef<HTMLElement>) {}
+
+
+
   shortcuts = [
       {id: '1', title: 'Web Developers Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+1.5M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } },
       {id: '2', title: 'Angular Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+800k Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } },
@@ -35,4 +42,16 @@ export class Home {
     {id: '8', title: 'Skander Boughnimi', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '4.7k Followers', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Follow', buttonAction: () => { console.log('Button clicked'); } },
     {id: '9', title: 'Ja3fer', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '16k Followers', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Follow', buttonAction: () => { console.log('Button clicked'); } }
   ];
+
+  sortType: string = 'Top';
+  sortingPostsMethodOpen: boolean = false;
+
+  toggleSortingMethodMenu(ev?: Event) {
+    ev?.stopPropagation();
+    this.sortingPostsMethodOpen = !this.sortingPostsMethodOpen;
+    const wrap = this.elementRef.nativeElement.querySelector('.sorting-posts-method-wrap');
+    if (wrap) {
+      wrap.classList.toggle('sorting-posts-method-open', this.sortingPostsMethodOpen);
+    }
+  }
 }
