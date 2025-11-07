@@ -338,15 +338,35 @@
     color: white;
 }
 
-#createBtn {
-    background-color: white;
-    color: #609966;
-    border: #609966 3px solid;
-    transition: all 0.3s ease;
-}
+/* Responsive adjustments */
+/* Medium devices (tablets, etc.) */
+@media (max-width: 768px) {
+  .footer-dialog {
+      margin-top: 0px;
+  }
+  .btn {
+      width: 100%;
+      height: 40px;
+      font-size: 0.9rem;
+  }
+  #flurrBtn {
+      margin-right: 8px;
+  }
 
-#createBtn:hover {
-    background-color: #609966;   
-    color: #F5F5F0;
-    border: 0;
+  .icon {
+      font-size: 0.9rem;
+      padding: 0px 8px;
+  }
+  
+  .icon:hover {
+      transform: scale(1);
+  }
+}
+/* Small devices (phones) */
+@media (max-width: 400px) {
+  .btn {
+      width: 100px;
+      height: 45px;
+      font-size: 0.8rem;
+  } 
 }

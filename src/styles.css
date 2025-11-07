@@ -9,29 +9,40 @@ body { margin: 0; font-family: "anek-bangla-variable", sans-serif, "Helvetica Ne
   align-items: center;
 }
 
-.custom-flurr-creation-dialog .mat-mdc-dialog-surface {
+/* Base styles for your dialogs */
+.custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+.custom-journey-creation-dialog .mat-mdc-dialog-surface {
   width: 600px !important;
-  height: 500px !important;
-  max-width: none !important;
-  max-height: none !important;
+  height: auto !important;
+  max-width: 90vw !important; /* allow responsiveness even at larger screens */
+  max-height: 90vh !important;
   padding: 12px 16px !important;
   background-color: #fff !important;
   color: #000 !important;
-  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
+  font-family: "anek-bangla-variable", sans-serif, "Helvetica Neue", sans-serif;
   border-radius: 25px !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
-.custom-journey-creation-dialog .mat-mdc-dialog-surface {
-  width: 600px !important;
-  height: 675px !important;
-  max-width: none !important;
-  max-height: none !important;
-  padding: 12px 16px !important;
-  background-color: #fff !important;
-  color: #000 !important;
-  font-family: "Roboto", "Helvetica Neue", sans-serif !important;
-  border-radius: 25px !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+/* Medium devices (tablets, etc.) */
+@media (max-width: 768px) {
+  .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+  .custom-journey-creation-dialog .mat-mdc-dialog-surface {
+    width: 90vw !important;
+    height: auto !important;
+    border-radius: 20px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* Small devices (phones) */
+@media (max-width: 400px) {
+  .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+  .custom-journey-creation-dialog .mat-mdc-dialog-surface {
+    width: 95vw !important;
+    height: auto !important;
+    border-radius: 16px !important;
+    padding: 8px 12px !important;
+  }
 }
 
