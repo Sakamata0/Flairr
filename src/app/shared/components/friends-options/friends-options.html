@@ -6,17 +6,17 @@
     <span>Friends</span>
     <img src="/assets/icons/friends/parametre.png" alt="parametre" class="param">
   </div>
+
   <div class="spaces-types">
     <a *ngFor="let f of friendsOpTypes"
-       [routerLink]="['/', f.name]"
-       routerLinkActive="active"
-       #rla="routerLinkActive"
-       [class.active]="rla.isActive">
-      <div class="icon-wrap" [class.active]="rla.isActive">
-        <img [src]="rla.isActive ? f.activeIconUrl : f.iconUrl" />
+       (click)="setActivefriendsOpTypes(f.key)"
+       [class.active]="f.key === activefriendsOpTypesKey">
+      <div class="icon-wrap" [class.active]="f.key === activefriendsOpTypesKey">
+        <img [src]="f.key === activefriendsOpTypesKey ? f.activeIconUrl : f.iconUrl" />
       </div>
       <span>{{ f.name }}</span>
     </a>
   </div>
 </div>
+
 

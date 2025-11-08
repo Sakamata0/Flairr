@@ -66,6 +66,7 @@ img{
 .spaces-types a.active span {
     color: #609966;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .spaces-types span{
@@ -73,6 +74,7 @@ img{
     font-weight: 600;
     font-size: 20px;
     padding: 15px;
+    cursor: pointer;
 
 }
 .spaces-types span:hover{

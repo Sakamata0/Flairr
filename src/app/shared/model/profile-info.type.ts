@@ -11,3 +11,4 @@ export interface profileInfo {
     birthday?: string;
     country?: string;
 }
+

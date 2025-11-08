@@ -8,6 +8,8 @@ export class CommentNode {
   anwsers: CommentNode[] = [];
   isOpen: boolean = false;
 
+  replyText?: string;
+
   constructor(text: string, author?: { name: string; avatarUrl: string | null }) {
     this.text = text;
     this.author = author;
@@ -20,7 +22,6 @@ export class CommentNode {
   }
 }
 
-
 @Component({
   selector: 'comment-tree',
   standalone: true,
@@ -30,24 +31,23 @@ export class CommentNode {
 })
 export class CommentTree {
   @Input() comments: CommentNode[] = [];
-  text: string = '';
-@Input() currentUser!: { name: string; avatarUrl: string | null };
+  @Input() currentUser!: { name: string; avatarUrl: string | null };
 
   openCommentText(comment: CommentNode) {
     comment.isOpen = !comment.isOpen;
   }
 
- addComment(comment: CommentNode) {
-  if (!this.text.trim() || !this.currentUser) return;
+  addComment(comment: CommentNode) {
+    const draft = (comment.replyText || '').trim();
+    if (!draft || !this.currentUser) return;
 
-  const reply = new CommentNode(this.text, {
-    name: this.currentUser.name,
-    avatarUrl: this.currentUser.avatarUrl ?? null
-  });
+    const reply = new CommentNode(draft, {
+      name: this.currentUser.name,
+      avatarUrl: this.currentUser.avatarUrl ?? null
+    });
 
-  comment.addAnwser(reply);
-  comment.isOpen = false;
-  this.text = '';
-}
-
+    comment.addAnwser(reply);
+    comment.isOpen = false;
+    comment.replyText = '';
+  }
 }

@@ -4,23 +4,35 @@
 
     <div class="banner">
         <img 
-        [src]="info().bannerImageUrl || 'assets/images/default-banner-image.png'" 
+        [src]="info().bannerImageUrl "
+        (error)="onBannerError($event)" 
         alt="Banner" 
         class="banner-img"
         />
         <img 
-        [src]="info().profileImageUrl || 'assets/images/default-profile-picture.png'" 
+        [src]="info().profileImageUrl" 
+        (error)="onImageError($event)"
         alt="Profile" 
         class="profile-img"
         />
+
+
     </div>
 
-    <!-- Info -->
     <div class="content">
         <h2 class="name" >{{ info().username }}</h2>
         <div class="buttons">
-            <button class="Accept" routerLink="/profile">Accept</button>
-            <button class="Delete" routerLink="/profile">Delete</button>
+
+        <button class="Accept" *ngIf="variab() === 0" (click)="accept.emit()">Accept</button>
+        <button class="Accept" *ngIf="variab() === 1" (click)="follow.emit()">Follow</button>
+        <button class="Accept" *ngIf="variab() === 2" (click)="follow.emit()">Follow</button>
+
+        <button class="Accept" *ngIf="variab() === 3" (click)="follow.emit()">Message</button>
+
+        <button class="Delete" *ngIf="variab() !== 3" (click)="remove.emit()">Delete</button>
+        <button class="Delete" *ngIf="variab() === 3" (click)="remove.emit()">Following</button>
+
+
         </div>
     </div>
 </div>

@@ -1,4 +1,5 @@
 <div *ngFor="let comment of comments.slice().reverse()" class="comment">
+  <!-- Comment Header -->
   <div class="comment-header">
     <img
       class="avatar"
@@ -8,16 +9,21 @@
     <span class="author-name">{{ comment.author?.name || 'Anonymous' }}</span>
   </div>
 
+  <!-- Comment Text -->
   <label class="comment-text">{{ comment.text }}</label>
 
+  <!-- Actions -->
   <div class="comment-actions">
     <button (click)="openCommentText(comment)" *ngIf="!comment.isOpen">Reply</button>
   </div>
 
+  <!-- Reply Box -->
   <div *ngIf="comment.isOpen" class="reply-box">
     <button (click)="openCommentText(comment)">Cancel</button>
+
+    <!-- per-comment reply text -->
     <textarea
-      [(ngModel)]="text"
+      [(ngModel)]="comment.replyText"
       cols="60"
       rows="3"
       placeholder="Write your reply..."
@@ -26,5 +32,8 @@
     <button (click)="addComment(comment)">OK</button>
   </div>
 
-  <comment-tree [comments]="comment.anwsers"></comment-tree>
+  <comment-tree
+    [comments]="comment.anwsers"
+    [currentUser]="currentUser"
+  ></comment-tree>
 </div>

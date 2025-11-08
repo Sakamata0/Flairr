@@ -36,7 +36,7 @@ export class CommentPopUp implements OnInit {
   if (!this.text.trim() || !this.data.currentUser) return;
   const newComment = new CommentNode(this.text.trim(), this.data.currentUser);
   this.comments.push(newComment);
-  this.comments = [...this.comments]; // force Angular to refresh the view
+  this.comments = [...this.comments];
   this.text = '';
   if (this.data?.post) {
   this.data.post.commentsCount = (this.data.post.commentsCount || 0) + 1;

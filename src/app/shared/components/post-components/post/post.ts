@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CommentPopUp } from '../comment-pop-up/comment-pop-up';
-import { CommentTree,CommentNode } from '../comment-tree/comment-tree';   // ✅ the recursive component
+import { CommentTree,CommentNode } from '../comment-tree/comment-tree';
 
 
 
@@ -174,7 +174,6 @@ export class Post implements OnInit, OnDestroy {
 
   closeMenuOutside(event: MouseEvent) {
     if (!this.showMenu) return;
-    // if click happened outside this component, close menu
     const hostEl = this.host.nativeElement;
     if (!hostEl.contains(event.target as Node)) {
       this.showMenu = false;
@@ -200,7 +199,7 @@ export class Post implements OnInit, OnDestroy {
       return;
     }
     this.post.author.isBlocked = true;
-    this.post.isHidden = true; // also hide the post
+    this.post.isHidden = true; 
     this.showMenu = false;
   }
 
