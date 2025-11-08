@@ -16,27 +16,26 @@ import { CommonModule } from '@angular/common';
 
 
 @Component({
-  selector: 'app-journey-creation-card',
+  selector: 'app-space-flurr-creation-card',
   standalone: true,
-  templateUrl: './journey-creation-card.html',
-  styleUrls: ['./journey-creation-card.css'],
+  templateUrl: './space-flurr-creation-card.html',
+  styleUrls: ['./space-flurr-creation-card.css'],
   imports: [
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
     MatButtonModule,
     MatDialogModule,
-    
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class JourneyCreationCard {
+export class SpaceFlurrCreationCard {
   readonly dialog = inject(MatDialog);
 
   // method that opens the dialog
-  openJourneyCreationDialog(): void {
-    const dialogRef = this.dialog.open(JourneyCreationCardDialog, {
+  openSpaceFlurrCreationDialog(): void {
+    const dialogRef = this.dialog.open(SpaceFlurrCreationCardDialog, {
       panelClass: 'custom-flurr-creation-dialog',
     });
 
@@ -49,10 +48,10 @@ export class JourneyCreationCard {
 // Dialog component content
 // Definition of the dialog component
 @Component({
-  selector: 'app-journey-creation-card-dialog',
+  selector: 'app-space-flurr-creation-card-dialog',
   standalone: true,
-  templateUrl: './journey-creation-card-dialog.html',
-  styleUrls: ['./journey-creation-card.css'],
+  templateUrl: './space-flurr-creation-card-dialog.html',
+  styleUrls: ['./space-flurr-creation-card.css'],
   imports: [
     CommonModule,
     MatFormFieldModule,
@@ -64,19 +63,16 @@ export class JourneyCreationCard {
     MatDialogContent,
     MatDialogActions,
     MatSelectModule,
-    FormsModule
   ],
 })
 // Dialog component class
-export class JourneyCreationCardDialog {
+export class SpaceFlurrCreationCardDialog {
   // --- Injected dependencies ---
-  readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
-  
+  readonly dialogRef = inject(MatDialogRef<SpaceFlurrCreationCardDialog>);
+  //private readonly dialog = inject(MatDialog);
+
   // --- UI state variables ---
   username: string = 'Ismail Mechkene';
-  selectedPrivacy: string = 'public';
-  journeyName: string = ''; 
-  journeyDescription: string = ''; 
   flurrContent: string = ''; 
 
   // --- Methods ---
