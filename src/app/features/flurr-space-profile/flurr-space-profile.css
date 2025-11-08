@@ -1,19 +1,12 @@
 
-body {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 100vh;
-}
 
 .layout {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  width: 100%;
-  max-width: 1900px;
-  margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1900px;
+    margin: 0 auto;
 }
 
 main {
@@ -25,7 +18,6 @@ main {
     overflow-y: auto;
     scrollbar-width: thin;
 }
-
 nav, aside {
     position: sticky;
     top: var(--flairr-header-height);
@@ -39,6 +31,8 @@ nav, aside {
     overflow-x: hidden;
     scrollbar-width: none;
     height: calc(90vh - 10px);
+    max-width: 400px;
+    width: 100%;
 }
 
 #sort-selection {
@@ -66,9 +60,6 @@ nav, aside {
   width: 15px;
   height: 15px;
 }
-
-
-
 
 /* optional menu styling */
 .sorting-posts-menu {
@@ -108,65 +99,23 @@ nav, aside {
     transition: transform .18s ease;
 }
 
-#credits {
-  display: flex;
-  gap: 5px;
-  justify-content: space-between;
-  padding: 0 10px;
-  color: var(--fourth-color);
+.about-card {
+    width: 100%;
+    padding: var(--spacing-between-sections);
+    height: fit-content;
+    background-color: white;
+    border-radius: 25px;
 }
 
-#credits a {
-  cursor: pointer;
+.legend {
+    font-family: 'Pacifico', cursive;
+    letter-spacing: .7px;
+    font-weight: 500;
+    font-size: 1.5em;
+    margin: 0;
 }
-
-#credits a:hover {
-  text-decoration: underline;
+p {
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
 }
-
-
-@media (max-width: 1600px) {
-  .layout {
-    gap: 0px;
-  }
-  nav, aside{
-    padding: 15px;
-    gap: 15px;
-  }
-  main {
-    padding: 15px 20px;
-  }
-}
-
-
-@media (max-width: 1400px) {
-  .layout {
-    grid-template-columns: 2.5fr 1fr;
-  }
-
-  nav {
-    display: none;
-  }
-
-  aside {
-    padding: 10px;
-    gap: 10px;
-  }
-}
-
-@media (max-width: 1000px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  
-  aside {
-    display: none;
-  }
-
-  main {
-    padding: 20px 10px;
-    gap: 20px;
-  }
-}
-

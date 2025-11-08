@@ -147,6 +147,11 @@
     width: 600px;
 }
 
+.right a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .right a img{
     height: 35px;
     margin-right: 25px;

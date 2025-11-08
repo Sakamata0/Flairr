@@ -10,4 +10,5 @@ import {NgIf, NgClass } from '@angular/common';
 })
 export class ItemPanel {
   info = input<ItemPanelInfo>();
+  
 }
