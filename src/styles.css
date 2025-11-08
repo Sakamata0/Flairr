@@ -80,3 +80,15 @@ hr {
     border: none;
     border-top: 1px solid #000;
 }
+
+
+.hashtag {
+  color: #609966;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hashtag:hover {
+  text-decoration: underline;
+}

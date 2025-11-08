@@ -8,6 +8,10 @@ export const routes: Routes = [
     {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
+    },{
+        path: 'friends',
+        loadComponent: () => import('./features/friends/friends').then(m => m.Friends)
     },
+
     { path: '**', redirectTo: '' }
 ];

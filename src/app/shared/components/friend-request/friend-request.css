@@ -1,0 +1,102 @@
+.profile-card {
+    background-color: white;
+    border-radius: 25px;
+    box-shadow: 1px 1px 10.3px 2px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    width: 270px;
+    height: 288px;
+    margin: auto;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+
+.banner {
+    position: relative;
+}
+
+.banner-img {
+    width: 100%;
+    height: 137px;
+    object-fit: cover;
+    border-radius: 20px 20px 0px 0px ;
+    }
+
+.profile-img {
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 103px;
+    height: 103px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 1)
+}
+
+
+.name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: black;
+}
+
+.content {
+    padding: 45px 0 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 19px;
+}
+
+.buttons{
+    display: flex;
+    gap: 13px;
+}
+
+.profile-btn {
+    margin-top: 1rem;
+    background-color: var(--third-color);
+    width: 100%;
+    height: 40px;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 0.5rem 1.5rem;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.profile-btn:hover {
+    background-color: var(--fourth-color);
+}
+
+button{
+    width: 109px;
+    height: 40px;
+    opacity: 1;
+    border-radius: 20px;
+    border-width: Stroke/Border;
+    padding: Space/300;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-family: "anek-bangla-variable", sans-serif;
+    font-weight: 600;
+    box-shadow: 1px 1px 4px 2px rgba(0, 0, 0, 0.25);
+
+}
+
+.Accept{
+    background-color: rgba(96, 153, 102, 1);
+    color: white;
+}
+
+.Delete{
+    background-color: white;
+    color: black;
+}
