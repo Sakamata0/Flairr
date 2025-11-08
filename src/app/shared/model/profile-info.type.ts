@@ -1,5 +1,7 @@
 export interface profileInfo {
     username: string;
+    firstName: string;
+    lastName: string;
     profileImageUrl?: string;
     bannerImageUrl?: string;
     bio?: string;

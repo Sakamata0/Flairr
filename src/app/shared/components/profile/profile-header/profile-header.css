@@ -11,24 +11,45 @@
 #banner-image {
     width: 100%;
     height: 300px;
-    object-fit: cover;
-    background-position: center center;
-    border-radius: 25px 25px 0 0;
+}
+
+#banner-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-position: center center;
+  border-radius: 25px 25px 0 0;
 }
 
 #main-section {
     display: flex;
     justify-content: center;
-    gap: 30px;
     position: relative;
     flex-wrap: wrap;
+    gap: 30px;
     padding: 0 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#info-container {
+  max-width: 800px;
+  width: 100%;
+  padding-top: 20px;
 }
 
 #info h3 {
-    font-size: 2.1em;
-    font-weight: 600;
-    letter-spacing: .5px;
+  font-size: 2.1em;
+  font-weight: 600;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  letter-spacing: .5px;
+}
+
+#info h4 {
+  font-weight: 500;
+  letter-spacing: .5px;
 }
 
 #bio {
@@ -48,8 +69,6 @@ hr {
 #name-a-bio-container {
     display: flex;
     justify-content: space-between;
-    max-width: 800px;
-    width: 100%;
 }
 
 #edit-profile-button {
@@ -88,7 +107,6 @@ hr {
     top: -100px;
     object-fit: cover;
     background-color: #fff;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
 #stats-container {
@@ -106,12 +124,22 @@ hr {
     margin-right: 3px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1200px) {
+  #main-section {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+    position: relative;
+  }
+  #profile-image {
+    position: absolute;
+    top: -200px;
+  }
+
   #profile-image {
     width: 120px;
     height: 120px;
-    top: -60px;
-    position: absolute;
+    top: -120px;
   }
 
   #banner-image {
@@ -123,12 +151,60 @@ hr {
   }
 
   #bio {
-    max-width: 100%;
+    max-width: 500px;
   }
 
   #main-section {
     flex-direction: column;
     align-items: center;
+    margin-top: 60px;
+    padding: 0 10px;
+  }
+
+  #info-container {
+    text-align: center;
+  }
+
+  #stats-container {
+    justify-content: center;
+  }
+
+  #edit-profile-button {
+    position: absolute;
+    top: -50px;
+    right: 0;
+  }
+
+  #name-a-bio-container {
+    justify-content: center;
+    position: relative;
+  }
+}
+
+@media (max-width: 700px) {
+  #profile-image {
+    width: 120px;
+    height: 120px;
+    top: -120px;
+  }
+
+  #banner-image {
+    height: 25vh;
+  }
+
+  #info h3 {
+    font-size: 1.5rem;
+  }
+
+  #bio {
+    max-width: 500px;
+  }
+
+  #main-section {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 60px;
+    padding: 0 20px;
   }
 
   #info-container {
@@ -138,5 +214,23 @@ hr {
   #stats-container {
     justify-content: center;
     font-size: .9em;
+  }
+
+  #edit-profile-button {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    font-size: .8em;
+    width: 75px;
+    height: 35px;
+  }
+
+  #edit-profile-button img {
+    width: 15px;
+    height: 15px;
+  }
+
+  #name-a-bio-container {
+    justify-content: center;
   }
 }

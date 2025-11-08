@@ -22,7 +22,7 @@ main {
     align-items: center;
     padding: var(--spacing-between-sections);
     gap: var(--spacing-between-sections);
-    overflow-y: auto;
+    overflow-y: scroll;
     scrollbar-width: thin;
 }
 
@@ -35,10 +35,10 @@ nav, aside {
     flex-direction: column;
     padding: var(--spacing-between-sections);
     gap: var(--spacing-between-sections);
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
-    height: calc(90vh - 10px);
+    height: 100vh;
 }
 
 #sort-selection {
@@ -169,4 +169,3 @@ nav, aside {
     gap: 20px;
   }
 }
->>>>>>> fb689cfc05b9e7d95579c14117399837d6766d6b

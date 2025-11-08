@@ -14,7 +14,9 @@ import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
 
 export class ProfileHeader {
   info = input<profileInfo>({
-    username: 'Ismail Mechkene',
+    username: '@ismail_.mechkene',
+    firstName: 'Ismail',
+    lastName: 'Mechkene',
     followersCount: 1_200_000,
     followingCount: 1_500,
     postsCount: 75,
