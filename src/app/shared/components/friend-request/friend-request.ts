@@ -9,7 +9,7 @@ import { profileInfo } from '../../model/profile-info.type';
 })
 export class FriendRequest {
     info = input.required<profileInfo>();
-
+    var=input.required
 
     getHandle(name: string): string {
         return '@' + name.replace(' ', '_').toLowerCase();
