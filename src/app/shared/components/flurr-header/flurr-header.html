@@ -22,7 +22,8 @@
                 (click)="toggle(item.key, $event)"
                 (keydown)="onKeydown($event, i)"
                 type="button"
-                [attr.title]="item.label">
+                [attr.title]="item.label"
+                [routerLink]="['/',item.key]">
         <span class="icon-bubble" aria-hidden="true">
             <img
             [src]="'/assets/icons/header/' + item.key + '.png'"

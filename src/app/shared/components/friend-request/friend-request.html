@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="https://use.typekit.net/tjl8ldc.css">
+
+<div class="profile-card">
+
+    <div class="banner">
+        <img 
+        [src]="info().bannerImageUrl || 'assets/images/default-banner-image.png'" 
+        alt="Banner" 
+        class="banner-img"
+        />
+        <img 
+        [src]="info().profileImageUrl || 'assets/images/default-profile-picture.png'" 
+        alt="Profile" 
+        class="profile-img"
+        />
+    </div>
+
+    <!-- Info -->
+    <div class="content">
+        <h2 class="name" >{{ info().username }}</h2>
+        <div class="buttons">
+            <button class="Accept" routerLink="/profile">Accept</button>
+            <button class="Delete" routerLink="/profile">Delete</button>
+        </div>
+    </div>
+</div>

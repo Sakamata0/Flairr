@@ -1,10 +1,11 @@
 import { Component, ElementRef, EventEmitter, HostListener, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-flurr-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,RouterModule],
   templateUrl: './flurr-header.html',
   styleUrls: ['./flurr-header.css']
 })
@@ -23,11 +24,13 @@ export class FlurrHeaderComponent {
 
   constructor(private elementRef: ElementRef<HTMLElement>) {}
 
+  
   // Always select clicked key. Keep it active if clicked again.
   toggle(key: string, event?: Event) {
     event?.stopPropagation();
     this.activeKey = key;
   }
+
 
   onSearch(event: Event) {
     const q = (event.target as HTMLInputElement).value;

@@ -97,7 +97,7 @@
         <button class="btn small" (click)="submitComment()" *ngIf="showButton" >Comment</button>
       </div>
 <comment-tree
-  *ngIf="post && post.comments"
+  *ngIf="post && post.comments && post.comments.length!=0"
   [comments]="[post.comments[post.comments.length-1]]"
   [currentUser]="currentUser || { name: '', avatarUrl: null }">
 </comment-tree>
