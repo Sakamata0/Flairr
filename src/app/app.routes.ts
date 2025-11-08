@@ -9,5 +9,18 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
     },
+    {
+        path: 'spaces',
+        loadComponent: () => import('./features/spaces/spaces').then(m => m.Spaces)
+    },
+    // aandek ismail
+    /*{
+        path: 'spaces/:spaceId',
+        loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
+    },*/
+    {
+        path: 'profile-name',
+        loadComponent: () => import('./features/flurr-space-profile/flurr-space-profile').then(m => m.FlurrSpaceProfile)
+    },
     { path: '**', redirectTo: '' }
 ];

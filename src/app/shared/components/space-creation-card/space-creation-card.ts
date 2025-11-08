@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -16,10 +17,10 @@ import { CommonModule } from '@angular/common';
 
 
 @Component({
-  selector: 'app-journey-creation-card',
+  selector: 'app-space-creation-card',
   standalone: true,
-  templateUrl: './journey-creation-card.html',
-  styleUrls: ['./journey-creation-card.css'],
+  templateUrl: './space-creation-card.html',
+  styleUrls: ['./space-creation-card.css'],
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -31,12 +32,12 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class JourneyCreationCard {
+export class SpaceCreationCard {
   readonly dialog = inject(MatDialog);
 
   // method that opens the dialog
-  openJourneyCreationDialog(): void {
-    const dialogRef = this.dialog.open(JourneyCreationCardDialog, {
+  openSpaceCreationDialog(): void {
+    const dialogRef = this.dialog.open(SpaceCreationCardDialog, {
       panelClass: 'custom-flurr-creation-dialog',
     });
 
@@ -49,10 +50,10 @@ export class JourneyCreationCard {
 // Dialog component content
 // Definition of the dialog component
 @Component({
-  selector: 'app-journey-creation-card-dialog',
+  selector: 'app-space-creation-card-dialog',
   standalone: true,
-  templateUrl: './journey-creation-card-dialog.html',
-  styleUrls: ['./journey-creation-card.css'],
+  templateUrl: './space-creation-card-dialog.html',
+  styleUrls: ['./space-creation-card.css'],
   imports: [
     CommonModule,
     MatFormFieldModule,
@@ -68,16 +69,15 @@ export class JourneyCreationCard {
   ],
 })
 // Dialog component class
-export class JourneyCreationCardDialog {
+export class SpaceCreationCardDialog {
   // --- Injected dependencies ---
-  readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
+  readonly dialogRef = inject(MatDialogRef<SpaceCreationCardDialog>);
   
   // --- UI state variables ---
   username: string = 'Ismail Mechkene';
   selectedPrivacy: string = 'public';
-  journeyName: string = ''; 
-  journeyDescription: string = ''; 
-  flurrContent: string = ''; 
+  spaceName: string = ''; 
+  spaceInvitation: string = ''; 
 
   // --- Methods ---
   onNoClick(): void {

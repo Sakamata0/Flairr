@@ -1,0 +1,41 @@
+<app-profile-header></app-profile-header>
+<div class="layout">
+    <nav>
+        <div class="about-card">
+            <h3 class="legend">About</h3>
+            <p class="paragraph">{{info().about}}</p>
+        </div>
+    </nav>
+    <main>
+        <app-flurr-creation-card></app-flurr-creation-card>
+        <div id="sort-selection">
+            <hr>
+            <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
+                <img src="assets/icons/home/arrow-down.png">
+            </span>
+            <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
+                <button 
+                    role="menuitem" 
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
+                    Top
+                </button>
+                <button
+                    role="menuitem"
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
+                    Recent
+                </button>
+            </div>
+        </div>
+        
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+        <app-post></app-post>
+    </main>
+    <aside>
+        <app-card-panel title="Invite Friends" noItemsMessage="You are lonely." [items]="this.invitations"></app-card-panel>
+    </aside>
+</div>
+
