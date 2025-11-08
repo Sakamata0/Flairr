@@ -1,17 +1,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/tjl8ldc.css">
+
 <div class="container">
+  <div class="container-header">
     <span>Friends</span>
-    <div class="spaces-types">
-        <div *ngFor="let friendsOpType of friendsOpTypes"
-            [class.active]="friendsOpType.key === activefriendsOpTypesKey"
-            (click)="setActivefriendsOpTypes(friendsOpType.key)">
-            <div class="icon-wrap" [class.active]="friendsOpType.key === activefriendsOpTypesKey">
-                <img [src]="friendsOpType.key === activefriendsOpTypesKey ? friendsOpType.activeIconUrl : friendsOpType.iconUrl" />
-            </div>
-            <span>{{ friendsOpType.name }}</span>
-        </div>
-    </div>
-
-
+    <img src="/assets/icons/friends/parametre.png" alt="parametre" class="param">
+  </div>
+  <div class="spaces-types">
+    <a *ngFor="let f of friendsOpTypes"
+       [routerLink]="['/', f.name]"
+       routerLinkActive="active"
+       #rla="routerLinkActive"
+       [class.active]="rla.isActive">
+      <div class="icon-wrap" [class.active]="rla.isActive">
+        <img [src]="rla.isActive ? f.activeIconUrl : f.iconUrl" />
+      </div>
+      <span>{{ f.name }}</span>
+    </a>
+  </div>
 </div>
+
