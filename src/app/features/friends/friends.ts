@@ -26,12 +26,12 @@ export class Friends {
   constructor(private elementRef: ElementRef<HTMLElement>) {}
 
   friendRequests: profileInfo[] = [
-    { username: 'Ismail Mechkene', followersCount: 1200, followingCount: 150, postsCount: 15 },
-    { username: 'Skander Boughnimi', followersCount: 4700, followingCount: 320, postsCount: 58 },
-    { username: 'Amine Dev', followersCount: 10900, followingCount: 410, postsCount: 132 },
-    { username: 'Ja3fer', followersCount: 16000, followingCount: 510, postsCount: 201 },
-    { username: 'Noura', followersCount: 2300, followingCount: 120, postsCount: 22 },
-    { username: 'Hana', followersCount: 900, followingCount: 80, postsCount: 9 }
+    { username: 'Ismail Mechkene', firstName: "", lastName:"", followersCount: 1200, followingCount: 150, postsCount: 15 },
+    { username: 'Skander Boughnimi', firstName: "", lastName:"", followersCount: 4700, followingCount: 320, postsCount: 58 },
+    { username: 'Amine Dev', firstName: "", lastName:"", followersCount: 10900, followingCount: 410, postsCount: 132 },
+    { username: 'Ja3fer', firstName: "", lastName:"", followersCount: 16000, followingCount: 510, postsCount: 201 },
+    { username: 'Noura', firstName: "", lastName:"", followersCount: 2300, followingCount: 120, postsCount: 22 },
+    { username: 'Hana', firstName: "", lastName:"", followersCount: 900, followingCount: 80, postsCount: 9 }
   ];
 
   shortcuts = [
