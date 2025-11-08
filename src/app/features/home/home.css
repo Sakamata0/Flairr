@@ -22,7 +22,7 @@ main {
     align-items: center;
     padding: var(--spacing-between-sections);
     gap: var(--spacing-between-sections);
-    overflow-y: scroll;
+    overflow-y: visible;
     scrollbar-width: thin;
 }
 
