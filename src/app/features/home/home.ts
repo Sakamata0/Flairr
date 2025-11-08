@@ -5,6 +5,7 @@ import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-
 import { Post } from '../../shared/components/post-components/post/post';
 import { ItemPanel } from '../../shared/components/item-panel/item-panel';
 import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -20,12 +21,10 @@ import { NgIf } from '@angular/common';
 })
 export class Home {
   
-  constructor(private elementRef: ElementRef<HTMLElement>) {}
-
-
+  constructor(private elementRef: ElementRef<HTMLElement>,private router: Router) {}
 
   shortcuts = [
-      {id: '1', title: 'Web Developers Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+1.5M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } },
+      {id: '1', title: 'Web Developers Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+1.5M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { this.router.navigate(['/profile-name']);} },
       {id: '2', title: 'Angular Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+800k Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } },
       {id: '3', title: 'Artists Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+2M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } }
   ];
