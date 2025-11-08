@@ -32,3 +32,41 @@ img{
     height: 48px;
     width: 48px;
 }
+
+.spaces-types {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: flex-start;
+    user-select: none;
+    width: 100%;
+}
+
+.spaces-types div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 0px;
+}
+
+.spaces-types div:hover {
+    color: #609966;
+}
+
+.spaces-types div.active {
+    color: #609966;
+    font-weight: 600;
+}
+
+.spaces-types span{
+    font-family: "anek-bangla-variable", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    padding: 15px;
+
+}
+.spaces-types span:hover{
+    color: #609966;
+
+}

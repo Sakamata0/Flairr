@@ -2,10 +2,16 @@
 <link rel="stylesheet" href="https://use.typekit.net/tjl8ldc.css">
 <div class="container">
     <span>Friends</span>
-    <ul>
-        <li class="current"><img src="/assets/icons/friends/follow-request.png" alt="Follow Request">Follow Request</li>
-        <li><img src="/assets/icons/friends/suggestions.png" alt="Suggestions">Suggestions</li>
-        <li><img src="/assets/icons/friends/all-followers.png" alt="All Followers">All Followers</li>
-        <li><img src="/assets/icons/friends/all-following.png" alt="All Following">All Following</li>
-    </ul>
+    <div class="spaces-types">
+        <div *ngFor="let friendsOpType of friendsOpTypes"
+            [class.active]="friendsOpType.key === activefriendsOpTypesKey"
+            (click)="setActivefriendsOpTypes(friendsOpType.key)">
+            <div class="icon-wrap" [class.active]="friendsOpType.key === activefriendsOpTypesKey">
+                <img [src]="friendsOpType.key === activefriendsOpTypesKey ? friendsOpType.activeIconUrl : friendsOpType.iconUrl" />
+            </div>
+            <span>{{ friendsOpType.name }}</span>
+        </div>
+    </div>
+
+
 </div>
