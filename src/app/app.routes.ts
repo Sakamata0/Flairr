@@ -26,5 +26,9 @@ export const routes: Routes = [
         path: 'spaces/:spaceId',
         loadComponent: () => import('./features/flurr-space-profile/flurr-space-profile').then(m => m.FlurrSpaceProfile)
     },
+        {
+        path: 'messages',
+        loadComponent: () => import('./features/messages/messages').then(m => m.Messages)
+    },
     { path: '**', redirectTo: '' }
 ];

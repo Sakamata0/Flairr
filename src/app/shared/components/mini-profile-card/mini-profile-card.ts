@@ -10,7 +10,7 @@ import { RouterLink } from "@angular/router";
 })
 export class MiniProfileCard {
     info = input<profileInfo>({
-        username: '@ismail_.mechkene',
+        username: 'ismail_.mechkene',
         firstName: 'Ismail',
         lastName: 'Mechkene',
         followersCount: 1200,
