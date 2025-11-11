@@ -10,7 +10,6 @@ import { Router } from '@angular/router';
   selector: 'app-spaces',
   imports: [
     SpacesCard,
-    FlurrCreationCard,
     CardPanel,
     Post,
     NgIf

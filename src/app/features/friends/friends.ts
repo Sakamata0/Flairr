@@ -47,7 +47,7 @@ export class Friends {
     followersCount: 1200,
     followingCount: 150,
     postsCount: 15,
-    birthday: '1999-03-15',
+    birthdate: '1999-03-15',
     country: 'Tunisia'
   },
   {
@@ -87,7 +87,7 @@ friendsSuggestions: profileInfo[] = [
     followersCount: 10900,
     followingCount: 410,
     postsCount: 132,
-    birthday: '1996-05-21',
+    birthdate: '1996-05-21',
     country: 'Tunisia'
   },
   {
@@ -124,7 +124,7 @@ followers: profileInfo[] = [
     followersCount: 540,
     followingCount: 230,
     postsCount: 9,
-    birthday: '2001-08-10',
+    birthdate: '2001-08-10',
     country: 'Tunisia'
   },
   {
@@ -161,7 +161,7 @@ following: profileInfo[] = [
     followersCount: 2500,
     followingCount: 180,
     postsCount: 45,
-    birthday: '1998-12-01',
+    birthdate: '1998-12-01',
     country: 'Tunisia'
   },
   {
