@@ -11,12 +11,6 @@ export const routes: Routes = [
     },{
         path: 'friends',
         loadComponent: () => import('./features/friends/friends').then(m => m.Friends)
-    },{
-        path: 'Suggestions',
-        loadComponent: () => import('./features/friends-suggestions/friends-suggestions').then(m => m.friendsSuggestions)
-    },{
-        path: 'Follow Request',
-        loadComponent: () => import('./features/friends/friends').then(m => m.Friends)
     },
 
     {

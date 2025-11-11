@@ -1,14 +1,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 <div class="layout">
     <nav>
-        <app-friends-options></app-friends-options>
+        <app-friends-options (selectedOption)="onFriendOptionSelected($event)" ></app-friends-options>
     </nav>
+
     <main>
         <div class="request-container">
-            <span>Follow Requests</span>
+            <span>{{ selectedType }}</span>
             <div class="request-row">
-                <app-friend-request *ngFor="let r of friendRequests"  [info]="r"></app-friend-request>
-
+                <app-friend-request
+                    *ngFor="let r of currentList"
+                    [info]="r"
+                    [variab]="key"
+                    (accept)="onAccept(r, selectedType)"
+                    (follow)="onFollow(r, selectedType)"
+                    (remove)="onRemove(r, selectedType)">
+                </app-friend-request>
             </div>
         </div>
        

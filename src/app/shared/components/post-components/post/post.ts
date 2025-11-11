@@ -112,8 +112,6 @@ export class Post implements OnInit, OnDestroy {
   this.showComments = true;
 }
 
-
-
   onFollow() {
     if (!this.post) return;
     this.post.author.isFollowed = true;
@@ -145,7 +143,6 @@ export class Post implements OnInit, OnDestroy {
 
   closeMenuOutside(event: MouseEvent) {
     if (!this.showMenu) return;
-    // if click happened outside this component, close menu
     const hostEl = this.host.nativeElement;
     if (!hostEl.contains(event.target as Node)) {
       this.showMenu = false;
@@ -171,7 +168,7 @@ export class Post implements OnInit, OnDestroy {
       return;
     }
     this.post.author.isBlocked = true;
-    this.post.isHidden = true; // also hide the post
+    this.post.isHidden = true; 
     this.showMenu = false;
   }
 

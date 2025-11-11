@@ -1,15 +1,15 @@
-import { Component, ElementRef, input} from '@angular/core';
-import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
+import { Component, ElementRef, input } from '@angular/core';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { Post } from '../../shared/components/post-components/post/post';
 import { ProfileHeader } from '../../shared/components/profile/profile-header/profile-header';
 import { NgIf } from '@angular/common';
 import { SpaceInfo, SpaceVisibility } from '../../shared/model/space-info.type';
+import { SpaceFlurrCreationCard } from '../../shared/components/space-flurr-creation-card/space-flurr-creation-card';
 
 @Component({
   selector: 'app-flurr-space-profile',
   imports: [
-    FlurrCreationCard,
+    SpaceFlurrCreationCard,
     CardPanel,
     Post,
     ProfileHeader,

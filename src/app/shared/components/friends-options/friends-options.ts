@@ -1,16 +1,16 @@
 import { NgFor } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-friends-options',
   standalone: true,
-  imports: [NgFor, RouterLink, RouterLinkActive], 
+  imports: [NgFor], 
   templateUrl: './friends-options.html',
   styleUrl: './friends-options.css'
 })
 export class FriendsOptions {
-  constructor() {}
+  @Output() selectedOption = new EventEmitter<{ key: number; name: string }>();
 
   friendsOpTypes = [
     { key: 0, name: 'Follow Request', iconUrl: '/assets/icons/friends/follow-request.png', activeIconUrl: '/assets/icons/friends/follow-request_a.png' },
@@ -20,8 +20,10 @@ export class FriendsOptions {
   ];
 
   activefriendsOpTypesKey = 0;
+
   setActivefriendsOpTypes(key: number) {
     this.activefriendsOpTypesKey = key;
-
+    const selected = this.friendsOpTypes.find(f => f.key === key);
+    if (selected) this.selectedOption.emit(selected);
   }
 }
