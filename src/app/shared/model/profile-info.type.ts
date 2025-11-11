@@ -8,6 +8,7 @@ export interface profileInfo {
     followersCount: number;
     followingCount: number;
     postsCount: number;
-    birthday?: string;
+    birthdate?: string;
     country?: string;
+    email?: string;
 }

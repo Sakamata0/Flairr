@@ -3,38 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CommentPopUp } from '../comment-pop-up/comment-pop-up';
-import { CommentTree,CommentNode } from '../comment-tree/comment-tree';   // ✅ the recursive component
-
-
-
-export interface MediaItem {
-  id?: string;
-  url: string;
-  type: 'image' | 'video';
-  mime?: string;
-  thumbnailUrl?: string;
-  filename?: string;
-}
-
-export interface PostInfo {
-  id: string;
-  title?: string;
-  author: { id: string; name: string; avatarUrl?: string; title?: string; isFollowed?: boolean; isBlocked?: boolean };
-  content?: string;
-  media?: MediaItem[];
-  externalUrl?: string;
-  externalTitle?: string;
-  reactions?: Record<string, number>;
-  commentsCount?: number;
-  viewsCount?: number;
-  createdAt?: string | Date;
-  userHasLiked?: boolean;
-  isHidden?: boolean;
-  isReported?: boolean;
-  comments ?: CommentNode[];
-}
-
-
+import { CommentTree,CommentNode } from '../comment-tree/comment-tree';
+import { PostInfo } from '../../../model/post/post-info.type';
+import { MediaItem } from '../../../model/post/media-item.type';
 
 @Component({
   selector: 'app-post',

@@ -1,11 +1,10 @@
-* {
-    margin: 0;
-    padding: 0;
+:host {
+    display: block;
+    width: 100%;
 }
 
 .container {
     background-color: #fff;
-    max-width: 400px;
     padding: 26px 33px;
     border-radius: 25px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -15,15 +14,22 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 0 10px 0;
 }
 
 header h3 {
-    font-family: 'Pacifico', cursive;
+    font-family: 'Pacifico', cursive; 
     letter-spacing: .7px;
     font-weight: 500;
     font-size: 1.5em;
     margin: 0;
 }
+
+footer {
+    padding: 10px 0 0 0;
+}
+
+
 
 #no-items-message {
     font-size: 1em;
@@ -33,7 +39,35 @@ header h3 {
     text-align: center;
 }
 
-header a {
+#year-selector {
+  font-size: .8em;
+  padding: 5px;
+  border: 2px solid rgb(200, 200, 200);
+  background-color: #F5F5F0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.inputGroup :is(select:focus) {
+  border-color: rgb(150, 150, 200);
+}
+
+#journeys-container ul {
+    list-style-position: inside;
+    padding: 0 10px;
+}
+
+#journeys-container li {
+    margin-top: 7px;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+.selected {
+    color: var(--third-color);
+}
+
+#see-more {
     text-decoration: none;
     color: #666666;
     font-weight: 500;
@@ -45,8 +79,7 @@ header a {
     user-select: none;
 }
 
-header a:hover {
+#see-more:hover {
     color: #000;
     background-color: rgba(0, 0, 0, 0.1);
 }
-

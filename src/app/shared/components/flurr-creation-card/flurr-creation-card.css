@@ -1,8 +1,6 @@
-/* Styles for the Flurr Creation Card Dialog */
-
 .flurr-creation-trigger-card {
-    width: 100vw;
     max-width: 600px;
+    width: calc(100vw - 35px);
     height: 70px;
     border-radius: 25px;
     padding: 5px 20px;
@@ -10,7 +8,7 @@
     background-color: #fff;
     display: flex;
     flex-direction: row;
-    gap: 25px;
+    gap: 20px;
     align-items: center;
     transition: box-shadow 0.3s ease, background-color 0.2s ease;
 }
@@ -26,10 +24,8 @@
     padding:10px 40px 10px 14px;
     border-radius:15px;
     border: none;
-    outline:none;
     background-color: #ECE6F0;
-    font-family: "Inter", "Helvetica Neue", sans-serif;
-    font-size:14px;
+    font-size: .9em;
 }
 
 .flurr-container input:hover{

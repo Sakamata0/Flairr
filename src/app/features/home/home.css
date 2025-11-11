@@ -73,7 +73,7 @@ nav, aside {
 /* optional menu styling */
 .sorting-posts-menu {
     position: absolute;
-    right: 0;
+    right: 7px;
     top: 100%;
     min-width: 160px;
     background: #fff;
@@ -84,6 +84,19 @@ nav, aside {
     flex-direction: column;
     gap: 6px;
     z-index: 40;
+}
+
+.sorting-posts-menu::before {
+  content: '';
+  width: 0;
+  height: 0;
+  position: absolute;
+  right: 0;
+  top: -10px;
+  background: transparent;
+  border-left: 15px solid transparent;
+  border-bottom: 15px solid #fff;
+  display: inline-block;
 }
 
 /* menu links */

@@ -9,6 +9,10 @@
     margin: 0 auto;
 }
 
+header {
+    margin: 20px;
+}
+
 main {
     display: flex;
     flex-direction: column;

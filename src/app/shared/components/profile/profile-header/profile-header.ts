@@ -24,7 +24,8 @@ export class ProfileHeader {
     bannerImageUrl: 'assets/images/banner-test.png',
     bio: "🌐 Developer | 📚 Learner | 🚀 Creator \n Building clean, responsive web apps. Always learning. Always improving. ✨",
     country: 'Tunisia',
-    birthday: '05/11/2004'
+    birthdate: '2004-11-05',
+    email: 'ismail.mechkene@gmail.com'
   });
 
   constructor(private dialogRef: MatDialog) {}
@@ -37,13 +38,13 @@ export class ProfileHeader {
       return (count / 1000).toFixed(1) + 'K';
     }
     return count.toString();
-  }  
+  }
 
   openEditProfileDialog() {
     this.dialogRef.open(EditProfilePopup, 
       {
         width: '100vw',          // 90% of viewport width
-        maxWidth: '800px',      // but no more than 600px
+        maxWidth: '700px',      // but no more than 600px
         height: 'auto',         // adapt height to content
         maxHeight: '90vh',      // max 90% of viewport height
         panelClass: 'edit-profile-dialog',

@@ -1,11 +1,8 @@
 #main-container {
-    /* Just testing*/
-    margin: 20px;
-
-    /* Just testing*/
     background-color: #fff;
-    border-radius: 25px;
+    border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border-radius: 25px;
 }
 
 #banner-image {
@@ -36,6 +33,11 @@
   max-width: 800px;
   width: 100%;
   padding-top: 20px;
+}
+
+#info {
+  display: flex;
+  flex-direction: column;
 }
 
 #info h3 {
@@ -146,6 +148,10 @@ hr {
     height: 25vh;
   }
 
+  #info {
+    align-items: center;
+  }
+
   #info h3 {
     font-size: 1.5rem;
   }
@@ -232,5 +238,13 @@ hr {
 
   #name-a-bio-container {
     justify-content: center;
+  }
+
+  #main-container {
+    border-radius: 10px;
+  }
+
+  #banner-image img {
+    border-radius: 10px 10px 0 0;
   }
 }

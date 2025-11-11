@@ -16,6 +16,20 @@
 body {
   font-family: "anek-bangla-variable", sans-serif;
   background-color: var(--primary-color);
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--third-color);
+  border-radius: 100vh;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .edit-profile-dialog .mat-mdc-dialog-surface {
@@ -91,4 +105,37 @@ hr {
 
 .hashtag:hover {
   text-decoration: underline;
+}
+
+.close-btn {
+  border: none;
+  background-image: url('/assets/icons/general-icons/close-symbol.png');
+  background-size: 80%;
+  background-position: center center;
+  background-color: transparent;
+  border-radius: 10px;
+  width: 35px;
+  height: 35px;
+  font-size: 1.6em;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.3s ease, background-image 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: var(--third-color);
+  background-image: url('/assets/icons/general-icons/close-symbol-hover.png');
+  color: #fff;
+}
+
+::ng-deep .custom-dialog-container {
+  overflow: visible;
+}
+
+::ng-deep .mat-dialog-container {
+  padding: 0;
+  overflow: visible;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
