@@ -12,11 +12,13 @@
         </label>
     </div>
     <div class="sidebar-filter">
-        <button
-            *ngFor="let option of options"
-            [class.active] = "selected === option"
-            (click)= "selected = option"
-            {{ option }}>
-        </button>
+        <button>َAll</button>
+        <button>Unread</button>
+    </div>
+
+    <div>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
     </div>
 </aside>
