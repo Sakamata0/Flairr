@@ -1,5 +1,4 @@
 <div *ngFor="let comment of comments.slice().reverse()" class="comment">
-  <!-- Comment Header -->
   <div class="comment-header">
     <img
       class="avatar"
@@ -9,19 +8,13 @@
     <span class="author-name">{{ comment.author?.name || 'Anonymous' }}</span>
   </div>
 
-  <!-- Comment Text -->
   <label class="comment-text">{{ comment.text }}</label>
 
-  <!-- Actions -->
   <div class="comment-actions">
     <button (click)="openCommentText(comment)" *ngIf="!comment.isOpen">Reply</button>
   </div>
 
-  <!-- Reply Box -->
   <div *ngIf="comment.isOpen" class="reply-box">
-    <button (click)="openCommentText(comment)">Cancel</button>
-
-    <!-- per-comment reply text -->
     <textarea
       [(ngModel)]="comment.replyText"
       cols="60"
@@ -29,11 +22,24 @@
       placeholder="Write your reply..."
     ></textarea>
     <br />
-    <button (click)="addComment(comment)">OK</button>
+    <div class="buttons">
+      <button (click)="addComment(comment)">OK</button>
+      <button class="cancel" (click)="openCommentText(comment)">Cancel</button>
+    </div>
   </div>
 
-  <comment-tree
-    [comments]="comment.anwsers"
-    [currentUser]="currentUser"
-  ></comment-tree>
+  <!-- Show this block only when there is at least one answer -->
+  <div class="answers" *ngIf="comment.anwsers.length>0">
+    
+
+    <comment-tree
+      *ngIf="vplus"
+      [comments]="comment.anwsers"
+      [currentUser]="currentUser"
+    ></comment-tree>
+
+    <button (click)="togglevplus()" class="voir">
+      {{ vplus ? 'Voir moins' : 'Voir plus' }}
+    </button>
+  </div>
 </div>
