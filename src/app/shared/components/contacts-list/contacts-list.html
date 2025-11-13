@@ -1,0 +1,22 @@
+<aside class="sidebar" role="navigation" aria-label="Conversations">
+    <div class="sidebar-header">
+        <div class="sidebar-legend">Messages</div>
+    </div>
+    <div class="search" role="search">
+        <label class="search-wrap" aria-hidden="true">
+            <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <circle cx="11" cy="11" r="5" stroke="currentColor" stroke-width="1.6" fill="none"/>
+            </svg>
+            <input class="search-input" type="search" placeholder="Search conversations"/>
+        </label>
+    </div>
+    <div class="sidebar-filter">
+        <button
+            *ngFor="let option of options"
+            [class.active] = "selected === option"
+            (click)= "selected = option"
+            {{ option }}>
+        </button>
+    </div>
+</aside>
