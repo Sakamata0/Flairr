@@ -7,7 +7,6 @@ export class CommentNode {
   author?: { name: string; avatarUrl: string | null };
   anwsers: CommentNode[] = [];
   isOpen: boolean = false;
-
   replyText?: string;
 
   constructor(text: string, author?: { name: string; avatarUrl: string | null }) {
@@ -18,6 +17,8 @@ export class CommentNode {
   addAnwser(newComment: CommentNode) {
     if (newComment && newComment.text) {
       this.anwsers.push(newComment);
+      // ensure template updates immediately (re-evaluate *ngIf on .length)
+      this.anwsers = [...this.anwsers];
     }
   }
 }
@@ -32,9 +33,14 @@ export class CommentNode {
 export class CommentTree {
   @Input() comments: CommentNode[] = [];
   @Input() currentUser!: { name: string; avatarUrl: string | null };
+  vplus:boolean=false;
 
   openCommentText(comment: CommentNode) {
     comment.isOpen = !comment.isOpen;
+  }
+
+  togglevplus(){
+    this.vplus=!this.vplus;
   }
 
   addComment(comment: CommentNode) {
@@ -47,7 +53,12 @@ export class CommentTree {
     });
 
     comment.addAnwser(reply);
+
+    // close the reply box
     comment.isOpen = false;
     comment.replyText = '';
+
+    // make sure the new answer is visible immediately
+    this.vplus = true;
   }
 }

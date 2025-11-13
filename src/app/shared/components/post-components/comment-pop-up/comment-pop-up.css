@@ -20,6 +20,7 @@
 }
 
 
+
 .popup-container h3 {
   text-align: center;
   margin-bottom: 20px;
@@ -75,8 +76,8 @@
 .close-btn {
   display: block;
   margin: 15px auto 0;
-  background: #9DC08B;
-  color: #40513B;
+  background: #9dc08b;
+  color: #fff;
   border: none;
   border-radius: 8px;
   padding: 6px 14px;
@@ -89,4 +90,11 @@
   background: #609966;
   color: #EDF1D6;
   transform: scale(1.05);
+}
+
+
+h3{
+  font-family: "anek-bangla-variable", sans-serif;
+  font-weight: 500;
+  color: black;
 }

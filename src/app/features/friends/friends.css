@@ -32,7 +32,7 @@ main {
   flex-direction: column;
   width: 100%;
   max-width: 1300px;
-
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   margin: 0 auto;
   padding: 33px;
   box-sizing: border-box;
