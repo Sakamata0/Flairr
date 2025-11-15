@@ -20,10 +20,10 @@ export class ItemPanel {
       if (currentInfo?.buttonText?.includes("Follow")) {
         // update the button text
         currentInfo.buttonText = this.buttonClicked() ? "Follow" : "Followed";
-      }
-      // toggle clicked class
-      this.buttonClicked.set(!this.buttonClicked());
+        // toggle clicked class
+        this.buttonClicked.set(!this.buttonClicked());
       }
     }
+  }
 
 }
