@@ -26,7 +26,7 @@
                 [routerLink]="['/',item.key]">
         <span class="icon-bubble" aria-hidden="true">
             <img
-            [src]="'/assets/icons/header/' + item.key + '.svg'"
+            [src]="'/assets/icons/header/' + item.key + '.png'"
             [attr.alt]="item.label"
             width="35"
             height="35"
@@ -39,10 +39,10 @@
 
     <div class="right">
         <a href="#">
-            <img src="assets/icons/header/notifications.svg" alt="notifications-icon">
+            <img src="assets/icons/header/notifications.png" alt="notifications-icon">
         </a>
         <a [routerLink]="['/messages']" routerLinkActive="active" aria-label="Messages">
-            <img src="assets/icons/header/messages.svg" alt="messages-icon">
+            <img src="assets/icons/header/messages.png" alt="messages-icon">
         </a>
 
         <div class="avatar-wrap" title="Profile">
