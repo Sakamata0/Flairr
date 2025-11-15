@@ -35,15 +35,24 @@ button {
     color: white;
     padding: 8px 16px;
     border-radius: 10px;
-    font-size: .9em;
+    font-size: 0.9em;
     font-weight: 700;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
 button:hover {
     background-color: #4a7c4a;
     cursor: pointer;
 }
+
+/* clicked state */
+button.clicked {
+    background-color: white;
+    color: #609966;
+    border: 1px solid #609966;
+}
+
 
 h3 {
     font-size: .9em;

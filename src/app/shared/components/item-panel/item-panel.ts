@@ -1,6 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { ItemPanelInfo } from '../../model/item-panel.type';
-import {NgIf, NgClass } from '@angular/common';
+import { NgIf, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-item-panel',
@@ -10,5 +10,20 @@ import {NgIf, NgClass } from '@angular/common';
 })
 export class ItemPanel {
   info = input<ItemPanelInfo>();
+  //change of state: when i click visit or follow (i will change lets say color, bg ...)
+  buttonClicked = signal(false);
   
+  toggleButton(): void {
+    // get current info
+    const currentInfo = this.info();
+    if (currentInfo?.buttonAction) {
+      if (currentInfo?.buttonText?.includes("Follow")) {
+        // update the button text
+        currentInfo.buttonText = this.buttonClicked() ? "Follow" : "Followed";
+      }
+      // toggle clicked class
+      this.buttonClicked.set(!this.buttonClicked());
+      }
+    }
+
 }
