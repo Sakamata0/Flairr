@@ -338,6 +338,16 @@
     color: white;
 }
 
+/* style when button is disabled */
+:host ::ng-deep #flurrBtn.mat-button-disabled,
+:host ::ng-deep #flurrBtn:disabled {
+  background-color: #d3d3d3 !important; /* light gray */
+  color: #888 !important;                /* darker gray text */
+  cursor: not-allowed !important;
+  border-color: #d3d3d3 !important;
+  opacity: 1 !important;                 /* override Material dimming */
+}
+
 /* Responsive adjustments */
 /* Medium devices (tablets, etc.) */
 @media (max-width: 768px) {

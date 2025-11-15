@@ -13,6 +13,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
+import { Journey } from '../../model/flurr-creation/journey';
+import { Flurr } from '../../model/flurr-creation/flurr';
 
 
 @Component({
@@ -73,14 +75,31 @@ export class JourneyCreationCardDialog {
   readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
   
   // --- UI state variables ---
-  username: string = 'Ismail Mechkene';
+  /*username: string = 'Ismail Mechkene';
   selectedPrivacy: string = 'public';
   journeyName: string = ''; 
-  journeyDescription: string = ''; 
-  flurrContent: string = ''; 
-
+  journeyDescription: string = '';*/ 
+  flurrContent: string = "";
+  model = new Journey("","Ismail Mechkene","public","","",[]);
+  
   // --- Methods ---
   onNoClick(): void {
     this.dialogRef.close();
   }
+  submitted = false;
+  onSubmit() {
+    const flurr = new Flurr(
+      "",                       // id, generate later if needed
+      this.model.username,
+      this.model.selectedPrivacy,
+      this.model.journeyName,   // associate with journey
+      this.flurrContent          // current textarea content
+    );
+
+    this.model.flurrs.push(flurr);
+    this.submitted = true;
+    console.log("Created journey:", this.model);
+    this.dialogRef.close();
+  }
+
 }

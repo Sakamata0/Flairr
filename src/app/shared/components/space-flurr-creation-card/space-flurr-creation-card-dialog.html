@@ -1,5 +1,5 @@
 <h2 class="header-dialog" mat-dialog-title>Add to the Space</h2>
-
+<form #f="ngForm" action="">
 <mat-dialog-content class="content-dialog">
   <!-- upper section -->
   <div class="flurr-upper">
@@ -10,7 +10,7 @@
     </div>
     <div class="right-part">
       <div class="user-details">
-        <h4>{{ username }}</h4>
+        <h4>{{ model.username }}</h4>
       </div>
       <!--
       <div class="select-divs">
@@ -37,13 +37,15 @@
   <mat-form-field appearance="fill" class="flurr-textarea">
     <mat-label>Share with the other members your Flurrs...</mat-label>
     <textarea
+      required
       matInput
       cdkTextareaAutosize
       #autosize="cdkTextareaAutosize"
       cdkAutosizeMinRows="7"
       cdkAutosizeMaxRows="7"
       placeholder="Write your Flurr here..."
-      [(ngModel)]="flurrContent"
+      [(ngModel)]="model.flurrContent"
+      name="flurrContent"
     ></textarea>
   </mat-form-field>
 
@@ -69,5 +71,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button class="btn" id="flurrBtn" matButton (click)="onNoClick()">Share to the Space!</button>
+  <button class="btn" id="flurrBtn" matButton [disabled]=f.invalid (click)="submit()">Share to the Space!</button>
 </mat-dialog-actions>
+</form>

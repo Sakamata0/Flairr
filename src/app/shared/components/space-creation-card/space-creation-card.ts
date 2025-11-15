@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
+import { Space } from '../../model/flurr-creation/space';
 
 
 @Component({
@@ -74,13 +75,21 @@ export class SpaceCreationCardDialog {
   readonly dialogRef = inject(MatDialogRef<SpaceCreationCardDialog>);
   
   // --- UI state variables ---
-  username: string = 'Ismail Mechkene';
+  /*username: string = 'Ismail Mechkene';
   selectedPrivacy: string = 'public';
   spaceName: string = ''; 
-  spaceInvitation: string = ''; 
+  spaceInvitation: string = '';*/
+  model: Space = new Space("","Ismail Mechkene","public","","");
 
   // --- Methods ---
   onNoClick(): void {
     this.dialogRef.close();
+  }
+
+  submitted: boolean = false;
+  submit(): void {
+    this.submitted = true;
+    this.onNoClick();
+    console.log("space: ",this.model)
   }
 }

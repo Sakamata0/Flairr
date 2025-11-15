@@ -1,5 +1,5 @@
 <h2 class="header-dialog" mat-dialog-title>Create Your Space</h2>
-
+<form #f="ngForm" action="">
 <mat-dialog-content class="content-dialog">
   <!-- upper section -->
   <div class="flurr-upper">
@@ -7,11 +7,11 @@
       <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
     </div>
     <div class="user-details">
-      <h4>{{ username }}</h4>
+      <h4>{{ model.username }}</h4>
       <!-- select -->
       <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
         <!--<mat-label>Choose privacy</mat-label>-->
-        <mat-select placeholder="public" [(ngModel)]="selectedPrivacy" name="privacy">
+        <mat-select placeholder="public" [(ngModel)]="model.selectedPrivacy" name="selectedPrivacy">
           <mat-option value="public">public</mat-option>
           <mat-option value="private">private</mat-option>
           <mat-option value="friends">friends</mat-option>
@@ -21,13 +21,14 @@
   </div>
 
   <!-- form section -->
-  <form class="journey-inputs">
+  <div class="journey-inputs">
     <mat-form-field appearance="fill" class="journey-field">
       <mat-label>Space name</mat-label>
       <input
+        required
         matInput
         placeholder="What do you want to call your Space?"
-        [(ngModel)]="spaceName"
+        [(ngModel)]="model.spaceName"
         name="spaceName"
       />
     </mat-form-field>
@@ -36,14 +37,14 @@
       <input
         matInput
         placeholder="eg: username1, username2, username3..."
-        [(ngModel)]="spaceInvitation"
+        [(ngModel)]="model.spaceInvitations"
         name="spaceInvitation"
       />
     </mat-form-field>
-  </form>
+  </div>
 
   <!-- bottom section -->
-  <div class="flurr-bottom">
+  <!--<div class="flurr-bottom">
     <button class="icon">
       <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
       <span>Image</span>
@@ -60,9 +61,10 @@
       <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
       <span>Location</span>
     </button>
-  </div>
+  </div>-->
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button class="btn" id="flurrBtn" matButton (click)="onNoClick()">Create Space!</button>
+  <button class="btn" id="flurrBtn" matButton [disabled]=f.invalid (click)="submit()">Create Space!</button>
 </mat-dialog-actions>
+</form>

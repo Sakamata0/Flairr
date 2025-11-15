@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
+import { SpaceFlurr } from '../../model/flurr-creation/space-flurr';
 
 
 @Component({
@@ -72,11 +73,19 @@ export class SpaceFlurrCreationCardDialog {
   //private readonly dialog = inject(MatDialog);
 
   // --- UI state variables ---
-  username: string = 'Ismail Mechkene';
-  flurrContent: string = ''; 
+  /*username: string = 'Ismail Mechkene';
+  flurrContent: string = ''; */
+  model: SpaceFlurr = new SpaceFlurr("","Ismail Mechkene","space-1","");
 
   // --- Methods ---
   onNoClick(): void {
     this.dialogRef.close();
+  }
+
+  submitted=false;
+  submit() : void {
+    this.submitted = true;
+    this.onNoClick();
+    console.log("space-fluur",this.model); 
   }
 }
