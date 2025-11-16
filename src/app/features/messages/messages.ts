@@ -5,8 +5,9 @@ import { ChatView } from '../../shared/components/chat-view/chat-view';
 @Component({
   selector: 'app-messages',
   imports: [
-    ContactsList
-  ],
+    ContactsList,
+    ChatView
+],
   templateUrl: './messages.html',
   styleUrl: './messages.css'
 })

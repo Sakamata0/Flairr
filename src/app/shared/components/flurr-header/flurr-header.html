@@ -26,10 +26,10 @@
                 [routerLink]="['/',item.key]">
         <span class="icon-bubble" aria-hidden="true">
             <img
-            [src]="'/assets/icons/header/' + item.key + '.png'"
+            [src]="'/assets/icons/header/' + item.key + '.svg'"
             [attr.alt]="item.label"
-            width="35"
-            height="35"
+            width="30"
+            height="30"
             (error)="onImgError($event, item.key)"
             />
         </span>
@@ -39,10 +39,10 @@
 
     <div class="right">
         <a href="#">
-            <img src="assets/icons/header/notifications.png" alt="notifications-icon">
+            <img src="assets/icons/header/notifications.svg" alt="notifications-icon">
         </a>
         <a [routerLink]="['/messages']" routerLinkActive="active" aria-label="Messages">
-            <img src="assets/icons/header/messages.png" alt="messages-icon">
+            <img src="assets/icons/header/messages.svg" alt="messages-icon">
         </a>
 
         <div class="avatar-wrap" title="Profile">
@@ -59,7 +59,7 @@
                 (keydown.enter)="toggleProfile($event)"
                 (keydown.space)="$event.preventDefault(); toggleProfile($event)"
                 aria-label="Open profile menu">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>

@@ -1,21 +1,21 @@
 <div class="container">
     <div class="left">
         <div class="image">
-            <img [src]="info().avatar" id="photo">
+            <img [src]="info().avatarUrl" id="photo" height="53px">
         </div>
         <div class="info">
             <h4 class="username">{{info().name}}</h4>
             <span class="span">
-                <p class="text">{{info().last}}</p>
-                <p>&ThickSpace;{{info().status}}</p>
+                <p class="text">{{info().lastMsg}}</p>
+                <p>&ThickSpace;{{info().lastMsgDate}}</p>
             </span>
             
         </div>
     </div>
     <div class="right"
-    *ngIf="info().unread != 0">
+    *ngIf="info().unreadMsgs != 0">
         <span class="bubble">
-            {{info().unread! > 9 ? "+ 9" : info().unread}}
+            {{info().unreadMsgs! > 9 ? "+ 9" : info().unreadMsgs}}
         </span>
     </div>
 </div>
