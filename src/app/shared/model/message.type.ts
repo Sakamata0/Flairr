@@ -1,6 +1,7 @@
 export interface Message {
-    id?: string | number;
+    id: number | string;
     from: 'me' | 'them';
     text: string;
-    time?: string;
+    time?: string;     // "10:35PM" or ISO timestamp
+    avatar?: string;  
 }

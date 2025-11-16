@@ -23,6 +23,12 @@
     width: 100%;
 }
 
+.image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #photo {
     border-radius: 999px;
     margin-right: 15px;

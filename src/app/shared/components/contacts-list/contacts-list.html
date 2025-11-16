@@ -12,11 +12,53 @@
         </label>
     </div>
     <div class="sidebar-filter">
-        <button>َAll</button>
-        <button>Unread</button>
+        <button 
+            [ngClass]="{ 'active': selectedFilter === 'All' }"
+            (click)="setFilter('All')">
+            All
+        </button>
+
+        <button 
+            [ngClass]="{ 'active': selectedFilter === 'Unread' }"
+            (click)="setFilter('Unread')">
+            Unread
+        </button>
     </div>
 
-    <div>
+    <div class="message-list">
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
+        <app-message-component></app-message-component>
         <app-message-component></app-message-component>
         <app-message-component></app-message-component>
         <app-message-component></app-message-component>

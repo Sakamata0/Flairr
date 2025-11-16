@@ -14,7 +14,7 @@ import { NgIf } from '@angular/common';
 export class MessageComponent {
 
     info = input<Contact> (
-        {name: "Mohammed Houcine", avatarUrl: "assets/images/skander.png", lastMsg: "ismail azber msdmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmeni", lastMsgDate: "30 min", unreadMsgs: 1}
+        {name: "Ismail Mechkene", avatarUrl: "assets/images/profile-picture-test.jpg", lastMsg: "ismail azber msdmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmeni", lastMsgDate: "30 min", unreadMsgs: 1}
     )
 
 }

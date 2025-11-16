@@ -70,28 +70,34 @@
 }
 
 .sidebar-filter button {
-    all: unset; /* remove all default button styles */
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    width: 80px;
+    width: 96px;
     height: 40px;
 
     border: 2px solid var(--fourth-color); 
-    border-radius: 15px;
+    border-radius: 25px;
     background: transparent;
 
     font-family: "Roboto", sans-serif;
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: 600;
+    letter-spacing: 0.5px;
     color: #000000;
     cursor: pointer;
+    border-color: #609966;
 }
 
-/* active state */
 .sidebar-filter button.active {
-    background-color: #9DC08B;
+    background-color: #609966;
     color: white;
+}
+
+.message-list {
+    flex: 1; /* takes remaining space */
+    overflow-y: overlay; 
+    padding-right: 10px;
 }

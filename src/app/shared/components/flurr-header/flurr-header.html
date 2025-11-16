@@ -28,8 +28,8 @@
             <img
             [src]="'/assets/icons/header/' + item.key + '.svg'"
             [attr.alt]="item.label"
-            width="35"
-            height="35"
+            width="30"
+            height="30"
             (error)="onImgError($event, item.key)"
             />
         </span>
@@ -59,7 +59,7 @@
                 (keydown.enter)="toggleProfile($event)"
                 (keydown.space)="$event.preventDefault(); toggleProfile($event)"
                 aria-label="Open profile menu">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
