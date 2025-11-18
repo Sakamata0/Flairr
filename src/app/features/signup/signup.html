@@ -1,0 +1,101 @@
+<div class="login-page">
+  <div class="login">
+    <div class="login-card">
+      <h1>Sign up to Create Your Journeys</h1>
+      <span>Enter your details to create your account</span>
+
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+        
+        <!-- FULL NAME -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Full name</mat-label>
+          <input
+            required
+            matInput
+            name="fullName"
+            [(ngModel)]="model.fullName"
+            #fullNameRef="ngModel"
+            placeholder="Insert your full name please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="fullNameRef.invalid && (fullNameRef.dirty || fullNameRef.touched)">
+          <span *ngIf="fullNameRef.errors?.['required']">Full name is required.</span>
+        </div>
+
+        <!-- EMAIL -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Email</mat-label>
+          <input
+            required
+            email
+            matInput
+            name="email"
+            [(ngModel)]="model.email"
+            #emailRef="ngModel"
+            placeholder="Insert your email please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="emailRef.invalid && (emailRef.dirty || emailRef.touched)">
+          <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+          <span *ngIf="emailRef.errors?.['email']">Email format is invalid.</span>
+        </div>
+
+        <!-- PASSWORD -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Password</mat-label>
+          <input
+            required
+            minlength="3"
+            matInput
+            type="password"
+            name="password"
+            [(ngModel)]="model.password"
+            #passwordRef="ngModel"
+            placeholder="Insert your password please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="passwordRef.invalid && (passwordRef.dirty || passwordRef.touched)">
+          <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+          <span *ngIf="passwordRef.errors?.['minlength']">
+            Password must be at least 3 characters.
+          </span>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            required
+            matInput
+            type="password"
+            name="c_password"
+            [(ngModel)]="c_password"
+            #c_passwordRef="ngModel"
+            placeholder="Confirm your password please"
+            (ngModelChange)="checkPasswordMatch()"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="(c_passwordRef.dirty || c_passwordRef.touched)">
+          <span *ngIf="c_passwordRef.errors?.['required']">Confirm password is required.</span>
+          <span *ngIf="passwordMismatch">Passwords do not match.</span>
+        </div>
+
+        <!-- Button -->
+        <div class="footer-login">
+          <button [disabled]="!f.valid || passwordMismatch" class="btn" id="flurrBtn" matButton>
+            Login!
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="login-illustration">
+    <img src="assets/images/illustration.png" alt="illustration">
+  </div>
+</div>

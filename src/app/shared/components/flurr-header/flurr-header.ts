@@ -1,6 +1,9 @@
 import { Component, ElementRef, EventEmitter, HostListener, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../auth/auth.service';
+import { LogoutDialog } from '../logout-dialog/logout-dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-flurr-header',
@@ -22,7 +25,13 @@ export class FlurrHeaderComponent {
     { key: 'spaces', label: 'Spaces' }
   ];
 
-  constructor(private elementRef: ElementRef<HTMLElement>) {}
+  constructor(
+    private elementRef: ElementRef<HTMLElement>,
+    private router: Router,
+    private auth: AuthService,
+    private dialog: MatDialog
+  ) {}
+
 
   
   // Always select clicked key. Keep it active if clicked again.
@@ -87,4 +96,20 @@ export class FlurrHeaderComponent {
   onImgError(ev: Event, key: string) {
     console.error('Icon failed to load:', { triedPath: `/assets/icons/header/${key}.png`, event: ev });
   }
+
+  openLogoutDialog() {
+    const dialogRef = this.dialog.open(LogoutDialog, {
+      //width: '320px',
+      disableClose: true,
+      panelClass: 'custom-flurr-creation-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.auth.logout();
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
 }

@@ -12,10 +12,10 @@ import { JourneyCreationCardDialog } from "../journey-creation-card/journey-crea
 import { Flurr } from "../../model/flurr-creation/flurr";
 import { Journey } from "../../model/flurr-creation/journey";
 
-interface Journeys {
+/*interface Journeys {
   id: string;
   journeyName: string;
-}
+}*/
 
 // Definition of the dialog component
 @Component({

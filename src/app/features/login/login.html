@@ -1,0 +1,63 @@
+<div class="login-page">
+  <div class="login">
+    <div class="login-card">
+      <h1>Login to Your Own Journey</h1>
+      <span>Enter your details to sign in your account</span>
+
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+
+        <!-- EMAIL -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Email</mat-label>
+          <input
+            required
+            email
+            matInput
+            name="email"
+            [(ngModel)]="model.email"
+            #emailRef="ngModel"
+            placeholder="Insert your email please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="emailRef.invalid && (emailRef.dirty || emailRef.touched)">
+          <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+          <span *ngIf="emailRef.errors?.['email']">Email format is invalid.</span>
+        </div>
+
+        <!-- PASSWORD -->
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Password</mat-label>
+          <input
+            required
+            matInput
+            type="password"
+            name="password"
+            [(ngModel)]="model.password"
+            #passwordRef="ngModel"
+            placeholder="Insert your password please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="passwordRef.invalid && (passwordRef.dirty || passwordRef.touched)">
+          <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+        </div>
+
+        <!-- Button -->
+        <div class="footer-login">
+          <button [disabled]="!f.valid" class="btn" id="flurrBtn" matButton>
+            Login!
+          </button>
+        </div>
+      </form>
+
+      <span class="no-account">
+        Don't have an account? <a href="/signup">Request Now</a>
+      </span>
+    </div>
+  </div>
+
+  <div class="login-illustration">
+    <img src="assets/images/illustration.png" alt="illustration" />
+  </div>
+</div>
