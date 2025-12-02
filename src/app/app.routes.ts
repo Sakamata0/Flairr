@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { DefaultLayout } from './layouts/default-layout/default-layout';
 import { SimpleLayout } from './layouts/simple-layout/simple-layout';
-import { AuthGuard } from './auth/auth.guard';
-import { NoAuthGuard } from './auth/no-auth.guard';
+import { AuthGuard } from './core/auth/auth.guard';
+import { NoAuthGuard } from './core/auth/no-auth.guard';
 
 export const routes: Routes = [
   {

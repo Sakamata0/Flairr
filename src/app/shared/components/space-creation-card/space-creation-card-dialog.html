@@ -4,10 +4,10 @@
   <!-- upper section -->
   <div class="flurr-upper">
     <div class="user-info">
-      <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
+      <img [src]="user()?.avatarImg" alt="avatar-example" />
     </div>
     <div class="user-details">
-      <h4>{{ model.username }}</h4>
+      <h4>{{ user()?.fullName }}</h4>
       <!-- select -->
       <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
         <!--<mat-label>Choose privacy</mat-label>-->
@@ -33,13 +33,29 @@
       />
     </mat-form-field>
     <mat-form-field appearance="fill" class="journey-field">
-      <mat-label>Invite Friends (optional)</mat-label>
+      <mat-label>Choose Collaborators (optional)</mat-label>
       <input
         matInput
         placeholder="eg: username1, username2, username3..."
-        [(ngModel)]="model.spaceInvitations"
-        name="spaceInvitation"
+        [(ngModel)]="model.collaborators"
+        name="collaborators"
       />
+    </mat-form-field>
+
+    <!-- first Flurr textarea -->
+    <mat-form-field appearance="fill" class="flurr-textarea">
+      <mat-label>Bio</mat-label>
+      <textarea
+        required
+        matInput
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="3"
+        name="spaceBio"
+        [(ngModel)]="model.spaceBio"
+        placeholder="Now, share with us your bio..."
+      ></textarea>
     </mat-form-field>
   </div>
 

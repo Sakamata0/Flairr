@@ -9,8 +9,9 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { JourneyCreationCardDialog } from "../journey-creation-card/journey-creation-card";
-import { Flurr } from "../../model/flurr-creation/flurr";
-import { Journey } from "../../model/flurr-creation/journey";
+import { Journey } from "../../model/classes/journey";
+import { UserService } from "../../../core/services/user.service";
+import { Flurr } from "../../model/classes/flurrs";
 
 /*interface Journeys {
   id: string;
@@ -42,15 +43,40 @@ export class FlurrCreationCardDialog {
   readonly dialogRef = inject(MatDialogRef<FlurrCreationCardDialog>);
   private readonly dialog = inject(MatDialog);
 
-  // --- UI state variables ---
-  model: Flurr = new Flurr("", "Ismail Mechkene", "public", "", "");
+  // inject username 
+  user = inject(UserService).currentUser
+  newFlurr?: Flurr;
 
-  // --- Static data ---
+  // --- Flurr creation form ---
+  model = {
+    selectedPrivacy: "public",
+    selectedJourney: "",
+    flurrContent: ""
+  };
+
   journeys: Journey[] = [
-    new Journey('journey-1', "Ismail Mechkene", "public", "ToDo App"),
-    new Journey('journey-2', "Ismail Mechkene", "public", "Recipe App"),
-    new Journey('journey-3', "Ismail Mechkene", "public", "Flurr Website"),
-  ] 
+    new Journey({
+      journeyID: "journey-" + crypto.randomUUID(),
+      journeyName: "ToDo App",
+      dateCreated: new Date(),
+      ownerID: this.user()?.userID,
+      privacy: "public"
+    }),
+    new Journey({
+      journeyID: "journey-" + crypto.randomUUID(),
+      journeyName: "Recipe App",
+      dateCreated: new Date(),
+      ownerID: this.user()?.userID,
+      privacy: "public"
+    }),
+    new Journey({
+      journeyID: "journey-" + crypto.randomUUID(),
+      journeyName: "Flurr Website",
+      dateCreated: new Date(),
+      ownerID: this.user()?.userID,
+      privacy: "public"
+    }),
+  ]
 
   // --- Methods ---
   onNoClick(): void {
@@ -67,7 +93,18 @@ export class FlurrCreationCardDialog {
   submitted = false;
   onSubmit() {
     this.submitted = true;
+
+    this.newFlurr = new Flurr({
+      flurrID: "flurr-" + crypto.randomUUID(),
+      type: "journey",
+      content: this.model.flurrContent,
+      privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
+      datePosted: new Date(),
+      journeyID: this.model.selectedJourney,
+    });
+
     this.onNoClick();
-    console.log("result: ",this.model);
+    console.log("user: ", this.user());
+    console.log("flurr created: ",this.newFlurr);
   }
 }
