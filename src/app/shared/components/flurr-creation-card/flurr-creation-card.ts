@@ -17,8 +17,7 @@ import { FlurrCreationCardDialog } from './flurr-creation-card-dialog';
     MatInputModule,
     FormsModule,
     MatButtonModule,
-    MatDialogModule,
-    FlurrCreationCardDialog  
+    MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

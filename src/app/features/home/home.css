@@ -27,18 +27,18 @@ main {
 }
 
 nav, aside {
-    position: sticky;
     top: var(--flairr-header-height);
     align-self: start;
-    height: fit-content;
     display: flex;
     flex-direction: column;
     padding: var(--spacing-between-sections);
     gap: var(--spacing-between-sections);
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
-    height: 100vh;
+    overflow: hidden;
+    height: auto;
+}
+
+nav {
+  position: sticky;
 }
 
 #sort-selection {
@@ -127,6 +127,9 @@ nav, aside {
   justify-content: space-between;
   padding: 0 10px;
   color: var(--fourth-color);
+  position: sticky;
+  padding: 10px 0;
+  top: 0;
 }
 
 #credits a {
@@ -184,3 +187,8 @@ nav, aside {
 }
 
 
+@media (max-height: 850px) {
+  nav {
+    display: none;
+  }
+}

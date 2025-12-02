@@ -6,8 +6,7 @@ import { NgFor, NgIf } from '@angular/common';
 @Component({
     selector: 'app-chat-view',
     imports: [
-        NgIf,
-        NgFor
+        NgIf
     ],
     templateUrl: './chat-view.html',
     styleUrl: './chat-view.css'

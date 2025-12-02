@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-signup',
@@ -15,6 +16,7 @@ import { Router } from '@angular/router';
     MatInputModule,
     FormsModule,
     MatButtonModule,
+    NgIf
   ],
   templateUrl: './signup.html',
   styleUrl: './signup.css'

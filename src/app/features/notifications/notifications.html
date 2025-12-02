@@ -1,0 +1,14 @@
+
+<div class="layout">
+    <nav>
+        <app-mini-profile-card></app-mini-profile-card>
+        <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="this.shortcuts"></app-card-panel>
+    </nav>
+    <main>
+        <app-notifications-selector (modeSignal)="onModeChange($event)"></app-notifications-selector>
+        <app-notifications-container [currentFilter]="selectedNotifications"></app-notifications-container>
+    </main>
+    <aside>
+        
+    </aside>
+</div>
