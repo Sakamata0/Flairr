@@ -1,5 +1,0 @@
-├─ core/                      # singletons, app initializers, interceptors
-│  ├─ services/
-│  ├─ guards/
-│  ├─ core.module.ts
-│  └─ index.ts
