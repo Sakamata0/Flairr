@@ -10,6 +10,7 @@ export class Flurr {
   private spaceID?: string;
   private likes: string[];
   private comments: string[];
+  private poster?: string; // f 7alet space 5tr barcha users bch yaaml post fl space adheka f awka toul hattyt moula post (hedha f cas flurr space)
 
   // ---- Constructor with clean object ----
   constructor(params: {
@@ -22,6 +23,7 @@ export class Flurr {
     spaceID?: string;
     likes?: string[]; // kn thbou type number , aadi baddl !!!
     comments?: string[];
+    poster?: string;
   }) {
     this.flurrID = params.flurrID;
     this.type = params.type;
@@ -32,6 +34,7 @@ export class Flurr {
     this.spaceID = params.spaceID;
     this.likes = params.likes ?? [];
     this.comments = params.comments ?? [];
+    this.poster = params.poster ?? "anonymouse"
   }
 
   // ---- Public getters ----
@@ -60,7 +63,8 @@ export class Flurr {
       journeyID: this.journeyID,
       spaceID: this.spaceID,
       likes: [...this.likes],
-      comments: [...this.comments]
+      comments: [...this.comments],
+      poster: this.poster
     };
   }
 }

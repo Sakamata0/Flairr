@@ -5,12 +5,12 @@
   <div class="flurr-upper">
     <div class="left-part">
       <div class="user-info">
-        <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
+        <img [src]="user()?.avatarImg" alt="avatar-example" />
       </div>
     </div>
     <div class="right-part">
       <div class="user-details">
-        <h4>{{ model.username }}</h4>
+        <h4>{{ user()?.fullName }}</h4>
       </div>
       <!--
       <div class="select-divs">
