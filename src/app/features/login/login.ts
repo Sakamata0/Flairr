@@ -5,8 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
-import { NgIf } from '@angular/common';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +15,7 @@ import { NgIf } from '@angular/common';
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
-    MatButtonModule,
-    NgIf
+    MatButtonModule
   ],
   templateUrl: './login.html',
   styleUrl: './login.css'

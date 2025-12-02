@@ -13,8 +13,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-import { Journey } from '../../model/flurr-creation/journey';
-import { Flurr } from '../../model/flurr-creation/flurr';
+import { Journey } from '../../model/classes/journey';
+import { UserService } from '../../../core/services/user.service';
+import { Flurr } from '../../model/classes/flurrs';
 
 
 @Component({
@@ -73,14 +74,17 @@ export class JourneyCreationCard {
 export class JourneyCreationCardDialog {
   // --- Injected dependencies ---
   readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
+  // inject username 
+  user = inject(UserService).currentUser
+  newJourney?: Journey;
   
-  // --- UI state variables ---
-  /*username: string = 'Ismail Mechkene';
-  selectedPrivacy: string = 'public';
-  journeyName: string = ''; 
-  journeyDescription: string = '';*/ 
-  flurrContent: string = "";
-  model = new Journey("","Ismail Mechkene","public","","",[]);
+  // --- Journey creation form ---
+  model = {
+    selectedPrivacy: "public",
+    journeyName: "",
+    journeyDescription: "",
+    flurrContent: ""
+  };
   
   // --- Methods ---
   onNoClick(): void {
@@ -88,17 +92,30 @@ export class JourneyCreationCardDialog {
   }
   submitted = false;
   onSubmit() {
-    const flurr = new Flurr(
-      "",                       // id, generate later if needed
-      this.model.username,
-      this.model.selectedPrivacy,
-      this.model.journeyName,   // associate with journey
-      this.flurrContent          // current textarea content
-    );
+    const newJourneyID = "journey-" + crypto.randomUUID()
 
-    this.model.flurrs.push(flurr);
+    const firstFlurr = new Flurr({
+      flurrID: "flurr-" + crypto.randomUUID(),
+      type: "journey",
+      content: this.model.flurrContent,
+      privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
+      datePosted: new Date(),
+      journeyID: newJourneyID,
+    });
+
+    // journey created
+    this.newJourney = new Journey({
+      journeyID: newJourneyID,
+      journeyName: this.model.journeyName,
+      dateCreated: new Date(),
+      journeyDescription: this.model.journeyDescription,
+      ownerID: this.user()?.userID,
+      privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
+      fluurs: [firstFlurr.getFlurrID()]
+    }),
+
     this.submitted = true;
-    console.log("Created journey:", this.model);
+    console.log("Created journey:", this.newJourney);
     this.dialogRef.close();
   }
 

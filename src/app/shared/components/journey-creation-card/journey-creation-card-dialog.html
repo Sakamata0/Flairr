@@ -6,11 +6,11 @@
     <!-- upper section: user info and privacy -->
     <div class="flurr-upper">
       <div class="user-info">
-        <img src="assets/avatars/avatar-example.jpg" alt="avatar-example" />
+        <img [src]="user()?.avatarImg" alt="avatar-example" />
       </div>
 
       <div class="user-details">
-        <h4>{{ model.username }}</h4>
+        <h4>{{ user()?.fullName }}</h4>
 
         <!-- privacy select -->
         <mat-form-field appearance="outline" class="flurr-select">
@@ -61,7 +61,7 @@
           cdkAutosizeMinRows="3"
           cdkAutosizeMaxRows="3"
           name="flurrContent"
-          [(ngModel)]="flurrContent"
+          [(ngModel)]="model.flurrContent"
           placeholder="Now, share with us your first Flurr..."
         ></textarea>
       </mat-form-field>

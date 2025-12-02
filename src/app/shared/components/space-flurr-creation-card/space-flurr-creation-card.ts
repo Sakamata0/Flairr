@@ -13,7 +13,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-import { SpaceFlurr } from '../../model/flurr-creation/space-flurr';
+import { UserService } from '../../../core/services/user.service';
+import { Flurr } from '../../model/classes/flurrs';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -71,11 +73,22 @@ export class SpaceFlurrCreationCardDialog {
   // --- Injected dependencies ---
   readonly dialogRef = inject(MatDialogRef<SpaceFlurrCreationCardDialog>);
   //private readonly dialog = inject(MatDialog);
+  // inject username 
+  user = inject(UserService).currentUser
+  newSpaceFlurr?: Flurr;
+  private currentSpaceID;
+  private route = inject(ActivatedRoute);
+
+  constructor() {
+    // Read the `id` param from the route
+    const id = this.route.snapshot.paramMap.get('spaceId'); 
+    this.currentSpaceID = id; // combine
+  }
 
   // --- UI state variables ---
-  /*username: string = 'Ismail Mechkene';
-  flurrContent: string = ''; */
-  model: SpaceFlurr = new SpaceFlurr("","Ismail Mechkene","space-1","");
+  model = {
+    flurrContent: ""
+  };
 
   // --- Methods ---
   onNoClick(): void {
@@ -84,8 +97,17 @@ export class SpaceFlurrCreationCardDialog {
 
   submitted=false;
   submit() : void {
+    this.newSpaceFlurr =  new Flurr({
+      flurrID: "flurr-" + crypto.randomUUID(),
+      type: "space",
+      content: this.model.flurrContent,
+      privacy: "public",
+      datePosted: new Date(),
+      spaceID: this.currentSpaceID!,
+      poster: this.user()?.userID
+    });
     this.submitted = true;
     this.onNoClick();
-    console.log("space-fluur",this.model); 
+    console.log("space-fluur",this.newSpaceFlurr); 
   }
 }
