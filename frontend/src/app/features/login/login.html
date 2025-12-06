@@ -50,6 +50,10 @@
           </button>
         </div>
       </form>
+      <!-- GLOBAL LOGIN ERROR -->
+    <div class="error-global" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
 
       <span class="no-account">
         Don't have an account? <a href="/signup">Request Now</a>

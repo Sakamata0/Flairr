@@ -24,7 +24,7 @@ export class UserService {
       journeys: row.journeys ?? [],
       spacesCreated: row.spaces_created ?? [],
       spacesJoined: row.spaces_joined ?? [],
-      // keep placeholders for methods expected by your User class
+
       getUser: function (): User {
         throw new Error('Function not implemented.');
       },
