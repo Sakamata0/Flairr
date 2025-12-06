@@ -6,8 +6,7 @@ import { FlurrHeaderComponent } from './shared/components/flurr-header/flurr-hea
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet,
-    FlurrHeaderComponent
+    RouterOutlet
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'

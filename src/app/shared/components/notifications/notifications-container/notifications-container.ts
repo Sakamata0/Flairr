@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { Notification } from '../../model/notification.type';
+import { Notification } from '../../../model/notification.type';
 import { NgFor } from '@angular/common';
 
 @Component({

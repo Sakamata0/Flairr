@@ -3,7 +3,7 @@ import { MiniProfileCard } from "../../shared/components/mini-profile-card/mini-
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
 import { Router } from '@angular/router';
 import { NotificationsSelector } from "../../shared/components/notifications/notifications-selector/notifications-selector";
-import { NotificationsContainer } from "../../shared/components/notifications-container/notifications-container";
+import { NotificationsContainer } from "../../shared/components/notifications/notifications-container/notifications-container";
 
 @Component({
   selector: 'app-notifications',
