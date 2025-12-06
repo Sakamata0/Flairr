@@ -1,3 +1,4 @@
+// src/app/core/auth/login.ts
 import { Component } from '@angular/core';
 import { User } from '../../shared/model/user/user.type';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -6,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -14,16 +16,12 @@ import { AuthService } from '../../core/auth/auth.service';
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule,
     MatButtonModule
   ],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-
 export class Login {
-  constructor(private auth: AuthService, private router: Router) {}
-
   model: User = {
     id: '',
     fullName: '',
@@ -32,17 +30,57 @@ export class Login {
   };
 
   submitted = false;
+  loading = false;
+  errorMessage = '';
 
-  onSubmit(f: NgForm): void {
+  constructor(
+    private auth: AuthService,
+    private userService: UserService,
+    private router: Router
+  ) {}
+
+  async onSubmit(f: NgForm): Promise<void> {
+    this.errorMessage = '';
     if (f.invalid) return;
 
-    this.auth.login(this.model.email);
+    this.loading = true;
+    try {
+      // call AuthService.login(email, password)
+      const res = await this.auth.login(this.model.email, this.model.password);
 
-    this.submitted = true;
-    console.log("Logged in as:", this.model.email);
+      // handle Supabase error
+      if ((res as any).error) {
+        // supabase-js v2 returns { error } or { error, data } depending
+        const err = (res as any).error;
+        this.errorMessage = err?.message ?? 'Login failed';
+        this.loading = false;
+        return;
+      }
 
-    this.router.navigate(['/']);
+      // if sign-in returns a user object, use it; otherwise try to read from AuthService
+      const uid = (res as any)?.data?.user?.id ?? this.auth.getUserId();
+
+      if (!uid) {
+        // could be email-confirmation flow (no session yet)
+        this.errorMessage = 'Check your email to confirm your account (if confirmation is required).';
+        this.loading = false;
+        return;
+      }
+
+      // load profile from users table into the app state
+      const { data, error } = await this.userService.loadUserById(uid);
+      if (error) {
+        console.warn('Could not load profile after login:', error);
+        // still continue: user may not have a profile if you rely on a trigger or expect manual creation
+      }
+
+      this.submitted = true;
+      this.router.navigate(['/']); // navigate to root (adjust if you want another route)
+    } catch (err: any) {
+      console.error('Unexpected login error', err);
+      this.errorMessage = err?.message ?? 'Unexpected error during login';
+    } finally {
+      this.loading = false;
+    }
   }
 }
-
-
