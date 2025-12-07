@@ -8,6 +8,7 @@ export interface User {
     followers: string[] // IDs
     following: string[] // IDs
     journeys: string[]  // IDs
+    flurrs: any[];
     spacesCreated: string[] // IDs
     spacesJoined: string[] // IDs
     /** Methods */

@@ -19,9 +19,12 @@ export class UserService {
       bio: row.bio ?? '',
       avatarImg: row.avatar_img ?? '',
       coverImg: row.cover_img ?? '',
+
       followers: row.followers ?? [],
       following: row.following ?? [],
       journeys: row.journeys ?? [],
+      flurrs: row.flurrs ?? [],
+
       spacesCreated: row.spaces_created ?? [],
       spacesJoined: row.spaces_joined ?? [],
 
@@ -34,28 +37,84 @@ export class UserService {
     } as User;
   }
 
+  // -------------------------------------------------------------
+  // SAFE VERSION: Load base user, then load counts separately
+  // -------------------------------------------------------------
   async loadUserById(userId: string) {
     try {
-      const { data, error } = await supabase
+      // -------------------------
+      // 1) BASE USER ROW
+      // -------------------------
+      const { data: userRow, error: userErr } = await supabase
         .from('users')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      if (error) {
-        console.error('UserService.loadUserById error', error);
+      if (userErr || !userRow) {
+        console.error('UserService.loadUserById error', userErr);
         this.currentUser.set(null);
-        return { data: null, error };
+        return { data: null, error: userErr };
       }
 
-      const user = this.mapRowToUser(data);
+      // -------------------------
+      // 2) FOLLOWERS
+      // -------------------------
+      const { data: followers } = await supabase
+        .from('friends')
+        .select('follower_id')
+        .eq('followed_id', userId);
+
+      // -------------------------
+      // 3) FOLLOWING
+      // -------------------------
+      const { data: following } = await supabase
+        .from('friends')
+        .select('followed_id')
+        .eq('follower_id', userId);
+
+      // -------------------------
+      // 4) FLURRS / JOURNEYS (your UI uses journeys count)
+      // -------------------------
+      const { data: journeys } = await supabase
+        .from('journeys')
+        .select('journey_id')
+        .eq('user_id', userId);
+
+    // 4) FLURR COUNT — REAL POSTS
+      const { data: flurrs } = await supabase
+      .from('flurrs')
+      .select('flurr_id')
+      .eq('poster_id', userId);
+
+
+
+
+
+    
+      const user = this.mapRowToUser({
+        ...userRow,
+        followers: followers ?? [],
+        following: following ?? [],
+        journeys: journeys ?? [],
+        flurrs: flurrs ?? []
+        
+      });
+
+      console.log("testinit",user.flurrs.length)
+
       this.currentUser.set(user);
+      console.log('testinit',this.currentUser)
       return { data: user, error: null };
+
     } catch (err) {
       console.error('UserService.loadUserById unexpected', err);
-      this.currentUser.set(null);
       return { data: null, error: err as any };
     }
+
+    
+
+    
   }
 
   async loadFromAuthUserId(authUserId: string | null | undefined) {
@@ -89,6 +148,7 @@ export class UserService {
       const user = this.mapRowToUser(data);
       this.currentUser.set(user);
       return { data: user, error: null };
+
     } catch (err) {
       console.error('UserService.createProfile unexpected', err);
       return { data: null, error: err as any };
@@ -117,6 +177,7 @@ export class UserService {
       const user = this.mapRowToUser(data);
       this.currentUser.set(user);
       return { data: user, error: null };
+
     } catch (err) {
       console.error('UserService.updateProfile unexpected', err);
       return { data: null, error: err as any };

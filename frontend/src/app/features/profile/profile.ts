@@ -1,36 +1,151 @@
-import { Component, ElementRef } from '@angular/core';
+// src/app/features/profile/profile.ts
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
 import { FlurrCreationCard } from "../../shared/components/flurr-creation-card/flurr-creation-card";
 import { Post } from "../../shared/components/post-components/post/post";
-import { Router } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
+import { NgIf, NgForOf } from '@angular/common';
 import { JourneysSelector } from "../../shared/components/profile/journeys-selector/journeys-selector";
+
+import { supabase } from '../../core/supabase/supabase.client';
+import { UserService } from '../../core/services/user.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-profile',
-  imports: [ProfileHeader, CardPanel, FlurrCreationCard, Post, NgIf, JourneysSelector],
+  standalone: true,
+  imports: [ProfileHeader, CardPanel, FlurrCreationCard, Post, NgIf, NgForOf, JourneysSelector],
   templateUrl: './profile.html',
-  styleUrl: './profile.css'
+  styleUrls: ['./profile.css']
 })
-export class Profile {
-  constructor(private elementRef: ElementRef<HTMLElement>, private router: Router) {}
+export class Profile implements OnInit {
 
-  FlairrSpaces = [
-      {id: '1', title: 'Web Developers Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+1.5M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => {} },
-      {id: '2', title: 'Angular Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+800k Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } },
-      {id: '3', title: 'Graphic Designers Space', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '+2M Passionates', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Visit', buttonAction: () => { console.log('Button clicked'); } }
-  ];
+  loading = false;
+  error = '';
+
+  profile: any = null;
+  posts: any[] = [];
+  FlairrSpaces: any[] = [];
+
+  isOwnProfile = false;
 
   sortType: string = 'Top';
   sortingPostsMethodOpen: boolean = false;
-  
+
+  constructor(
+    private elementRef: ElementRef<HTMLElement>,
+    private router: Router,
+    private route: ActivatedRoute,
+    private userService: UserService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadProfileFromRoute();
+    supabase.auth.onAuthStateChange(() => this.loadProfileFromRoute());
+  }
+
+  async loadProfileFromRoute() {
+    this.loading = true;
+    this.error = '';
+    this.profile = null;
+    this.posts = [];
+    this.FlairrSpaces = [];
+    this.isOwnProfile = false;
+
+    try {
+      const routeId = this.route.snapshot.paramMap.get('id');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUid = sessionData.session?.user?.id ?? this.authService.getUserId();
+
+      const targetId = routeId ?? currentUid;
+      console.log('[Profile] IDs:', { routeId, currentUid, targetId });
+
+      if (!targetId) {
+        this.error = 'No profile selected and no user logged in.';
+        return;
+      }
+
+      this.isOwnProfile = targetId === currentUid;
+
+      const { data: userRow, error: userErr } = await supabase
+        .from('users')
+        .select('*')
+        .eq('user_id', targetId)
+        .single();
+
+      if (userErr) {
+        console.error('[Profile] userErr', userErr);
+        this.error = userErr.message;
+        return;
+      }
+
+      this.profile = userRow;
+
+      this.userService.setUser({
+        userID: userRow.user_id,
+        fullName: userRow.full_name ?? '',
+        email: userRow.email ?? '',
+        bio: userRow.bio ?? '',
+        avatarImg: userRow.avatar_img ?? '',
+        coverImg: userRow.cover_img ?? '',
+        followers: [],
+        following: [],
+        journeys: [],
+        flurrs:[],
+        spacesCreated: [],
+        spacesJoined: [],
+        getUser() { throw new Error('not implemented'); },
+        editProfile() { throw new Error('not implemented'); }
+      });
+
+      // -------------------------
+      // LOAD POSTS (flurrs)
+      // -------------------------
+      const { data: flurrs, error: flurrsErr } = await supabase
+        .from('flurrs')
+        .select('*')
+        .eq('poster_id', targetId)
+        .order('created_at', { ascending: false });
+
+      console.log('[Profile] flurrs result:', { flurrs, flurrsErr });
+
+      if (flurrsErr) console.warn('[Profile] flurrsErr', flurrsErr);
+      this.posts = flurrs ?? [];
+
+      // -------------------------
+      // LOAD SPACES OWNED
+      // -------------------------
+      const { data: spaces, error: spacesErr } = await supabase
+        .from('spaces')
+        .select('*')
+        .eq('space_owner', targetId);
+
+      if (spacesErr) console.warn('[Profile] spacesErr', spacesErr);
+
+      this.FlairrSpaces = (spaces ?? []).map((s: any) => ({
+        id: s.space_id,
+        title: s.space_name,
+        imageUrl: s.avatar_img || './assets/images/hama.png',
+        withSubtitle: !!s.space_bio,
+        subtitle: s.space_bio ?? '',
+        withButton: true,
+        buttonText: 'Visit',
+        buttonAction: () => this.router.navigate(['/space', s.space_id])
+      }));
+
+    } catch (err: any) {
+      console.error('[Profile] unexpected error', err);
+      this.error = err?.message ?? 'Unexpected error';
+    } finally {
+      this.loading = false;
+      console.log('[Profile] Loaded:', { profile: this.profile, posts: this.posts });
+    }
+  }
+
   toggleSortingMethodMenu(ev?: Event) {
     ev?.stopPropagation();
     this.sortingPostsMethodOpen = !this.sortingPostsMethodOpen;
-    const wrap = this.elementRef.nativeElement.querySelector('.sorting-posts-method-wrap');
-    if (wrap) {
-      wrap.classList.toggle('sorting-posts-method-open', this.sortingPostsMethodOpen);
-    }
   }
 }

@@ -4,7 +4,7 @@ import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/f
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
-import { NgIf, NgForOf, AsyncPipe, NgFor } from '@angular/common';
+import { NgIf, NgForOf } from '@angular/common';
 import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
@@ -19,19 +19,20 @@ import { AuthService } from '../../core/auth/auth.service';
     MiniProfileCard,
     Post,
     NgIf,
-    NgForOf,
-    NgFor  ],
+    NgForOf
+  ],
   templateUrl: './home.html',
-  styleUrl: './home.css'
+  styleUrls: ['./home.css']
 })
 export class Home implements OnInit {
+
   loading = false;
   error = '';
 
-  shortcuts: any[] = [];            
-  notifications: any[] = [];        
-  friendsSuggestions: any[] = [];   
-  posts: any[] = [];                
+  shortcuts: any[] = [];
+  notifications: any[] = [];
+  friendsSuggestions: any[] = [];
+  posts: any[] = [];
 
   sortType: string = 'Top';
   sortingPostsMethodOpen: boolean = false;
@@ -46,8 +47,8 @@ export class Home implements OnInit {
   ngOnInit(): void {
     this.loadAllData();
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      this.loadAllData(); 
+    supabase.auth.onAuthStateChange(() => {
+      this.loadAllData();
     });
   }
 
@@ -56,10 +57,8 @@ export class Home implements OnInit {
     this.error = '';
 
     try {
-
       const { data: sessionData } = await supabase.auth.getSession();
-      const uid = sessionData.session?.user?.id ?? this.authService.getUserId();
-
+      const uid = sessionData.session?.user?.id ?? this.authService.getUserId() ?? null;
 
       if (uid) {
         await this.userService.loadFromAuthUserId(uid);
@@ -67,37 +66,113 @@ export class Home implements OnInit {
         this.userService.clearUser();
       }
 
+      // -------------------------------------------------
+      // 1) GET FRIENDS (people I follow)
+      // -------------------------------------------------
+      let feedAuthorIds: string[] = [];
+      if (uid) {
+        const { data: friends, error: friendsErr } = await supabase
+          .from('friends')
+          .select('followed_id')
+          .eq('follower_id', uid);
 
-      
-      const { data: flurrs, error: flurrsErr } = await supabase
-        .from('flurrs')
-        .select('flurr_id, type, content, date_publish, poster_id, created_at, updated_at, poster:poster_id(user_id, full_name, avatar_img)')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (flurrsErr) {
-        console.warn('flurrsErr', flurrsErr);
-      } else if (flurrs) {
-
-        this.posts = flurrs.map((r: any) => ({
-          id: r.flurr_id,
-          type: r.type,
-          content: r.content,
-          created_at: r.created_at,
-          poster: r.poster ?? { user_id: r.poster_id, full_name: 'Unknown', avatar_img: '' }
-        }));
+        if (friendsErr) {
+          console.warn('friendsErr:', friendsErr);
+        } else if (friends) {
+          const friendIds = friends.map((f: any) => f.followed_id as string);
+          feedAuthorIds = Array.from(new Set(friendIds));
+        }
       }
 
+      // If no logged user or no friends, you can decide:
+      // Option A: show nothing
+      // Option B: show only my own posts (if uid)
+      if (!uid) {
+        this.posts = [];
+      } else if (feedAuthorIds.length === 0) {
+        // fall back: only my posts
+        feedAuthorIds = [uid];
+      }
+      console.log("UID =", uid);
+console.log("FEED AUTHOR IDS =", feedAuthorIds);
 
-      const { data: spaces, error: spacesErr } = await supabase
+
+      // -------------------------------------------------
+      // 2) FLURRS for those authors only
+      // -------------------------------------------------
+      let flurrs: any[] = [];
+
+      if (feedAuthorIds.length > 0) {
+        const { data: flurrsData, error: flurrsErr } = await supabase
+          .from('flurrs')
+          .select(`
+            flurr_id,
+            type,
+            content,
+            date_publish,
+            created_at,
+            poster_id,
+            poster:poster_id(
+              user_id,
+              full_name,
+              avatar_img,
+              email
+            )
+          `)
+          .in('poster_id', feedAuthorIds)   // ⭐ only friends + me
+          .order('created_at', { ascending: false })
+          .limit(100); // a bit larger since we filter
+
+        if (flurrsErr) {
+          console.warn('flurrsErr:', flurrsErr);
+        } else if (flurrsData) {
+          flurrs = flurrsData as any[];
+        }
+      }
+
+      // Map + normalize posts
+      this.posts = flurrs.map((r: any) => {
+        const posterRaw = r.poster;
+        const poster = Array.isArray(posterRaw) ? posterRaw[0] : posterRaw;
+
+        const author = poster
+          ? {
+              id: poster.user_id,
+              name: poster.full_name || (poster.email?.split('@')[0] ?? 'Unknown'),
+              avatarUrl: poster.avatar_img || './assets/images/hama.png',
+              isFollowed: true // if it's in feed, we already follow them
+            }
+          : {
+              id: r.poster_id,
+              name: 'Unknown',
+              avatarUrl: './assets/images/hama.png',
+              isFollowed: false
+            };
+
+        return {
+          ...r,
+          id: r.flurr_id,
+          author,
+          createdAt: new Date(r.created_at),
+          // default stats; can be updated later when you add aggregation
+          reactions: r.reactions ?? { like: 0 },
+          commentsCount: r.commentsCount ?? 0
+        };
+      });
+
+      // Apply ranking (Top or Recent)
+      this.applySorting();
+
+      // -------------------------------------------------
+      // SPACES — SHORTCUTS
+      // -------------------------------------------------
+      const { data: spaces } = await supabase
         .from('spaces')
-        .select('space_id, space_name, space_bio, avatar_img, cover_img, space_owner')
+        .select('space_id, space_name, space_bio, avatar_img')
         .order('created_at', { ascending: false })
         .limit(12);
 
-      if (spacesErr) {
-        console.warn('spacesErr', spacesErr);
-      } else if (spaces) {
+      if (spaces) {
         this.shortcuts = spaces.map((s: any) => ({
           id: s.space_id,
           title: s.space_name,
@@ -106,58 +181,65 @@ export class Home implements OnInit {
           subtitle: s.space_bio ?? '',
           withButton: true,
           buttonText: 'Visit',
-          buttonAction: () => { this.router.navigate(['/space', s.space_id]); }
+          buttonAction: () => this.router.navigate(['/space', s.space_id])
         }));
       }
 
-
+      // -------------------------------------------------
+      // NOTIFICATIONS
+      // -------------------------------------------------
       if (uid) {
-        const { data: notifs, error: notifsErr } = await supabase
+        const { data: notifs } = await supabase
           .from('notifications')
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
           .limit(20);
 
-        if (notifsErr) {
-          console.warn('notifsErr', notifsErr);
-        } else if (notifs) {
+        if (notifs) {
+          this.notifications = await Promise.all(
+            notifs.map(async (n: any) => {
+              let actor = { full_name: 'Someone', avatar_img: './assets/images/hama.png' };
 
-          this.notifications = await Promise.all(notifs.map(async (n: any) => {
+              if (n.actor_id) {
+                const { data: actorRow } = await supabase
+                  .from('users')
+                  .select('full_name, avatar_img')
+                  .eq('user_id', n.actor_id)
+                  .single();
 
-            let actor = { full_name: 'Someone', avatar_img: './assets/images/hama.png' };
-            if (n.actor_id) {
-              const { data: actorRow } = await supabase.from('users').select('user_id, full_name, avatar_img').eq('user_id', n.actor_id).single();
-              if (actorRow) actor = { full_name: actorRow.full_name, avatar_img: actorRow.avatar_img || './assets/images/hama.png' };
-            }
-            return {
-              id: n.notification_id,
-              title: actor.full_name,
-              imageUrl: actor.avatar_img,
-              withSubtitle: true,
-              subtitle: n.content,
-              subtitleOnSameLevel: true,
-              withIcon: true,
-              iconUrl: this.iconForNotificationType(n.type),
-              withButton: false
-            };
-          }));
+                if (actorRow) {
+                  actor.full_name = actorRow.full_name;
+                  actor.avatar_img = actorRow.avatar_img || './assets/images/hama.png';
+                }
+              }
+
+              return {
+                id: n.notification_id,
+                title: actor.full_name,
+                imageUrl: actor.avatar_img,
+                withSubtitle: true,
+                subtitle: n.content,
+                subtitleOnSameLevel: true,
+                withIcon: true,
+                iconUrl: this.iconForNotificationType(n.type)
+              };
+            })
+          );
         }
-      } else {
-        this.notifications = [];
       }
 
-
-      const { data: users, error: usersErr } = await supabase
+      // -------------------------------------------------
+      // FRIENDS SUGGESTIONS (users you don't follow yet)
+      // -------------------------------------------------
+      const { data: users } = await supabase
         .from('users')
         .select('user_id, full_name, avatar_img')
         .neq('user_id', uid ?? '')
         .limit(6);
 
-      if (usersErr) {
-        console.warn('usersErr', usersErr);
-      } else if (users) {
-        this.friendsSuggestions = users.map((u: any) => ({
+      if (users) {
+        this.friendsSuggestions = users.map(u => ({
           id: u.user_id,
           title: u.full_name,
           imageUrl: u.avatar_img || './assets/images/hama.png',
@@ -165,16 +247,48 @@ export class Home implements OnInit {
           subtitle: 'Suggested user',
           withButton: true,
           buttonText: 'Follow',
-          buttonAction: () => { this.followUser(u.user_id); }
+          buttonAction: () => this.followUser(u.user_id)
         }));
       }
 
     } catch (e: any) {
-      console.error('loadAllData error', e);
+      console.error('loadAllData error:', e);
       this.error = e?.message ?? 'Error loading data';
     } finally {
       this.loading = false;
     }
+  }
+
+  // ---------------------------
+  // FEED SORTING / ALGORITHM
+  // ---------------------------
+  private applySorting() {
+    if (!this.posts || this.posts.length === 0) return;
+
+    if (this.sortType === 'Recent') {
+      this.posts.sort((a: any, b: any) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } else if (this.sortType === 'Top') {
+      this.posts.sort((a: any, b: any) =>
+        this.computeScore(b) - this.computeScore(a)
+      );
+    }
+  }
+
+  private computeScore(p: any): number {
+    const now = Date.now();
+    const created = new Date(p.createdAt).getTime();
+    const ageHours = Math.max(1, (now - created) / 3_600_000); // avoid div/0
+
+    const likes = p.reactions?.['like'] ?? 0;
+    const comments = p.commentsCount ?? 0;
+
+    // Simple scoring formula: likes & comments vs age
+    const engagement = likes * 3 + comments * 4;
+    const decay = ageHours * 0.5;
+
+    return engagement - decay;
   }
 
   private iconForNotificationType(type: string) {
@@ -185,32 +299,19 @@ export class Home implements OnInit {
   }
 
   async followUser(userId: string) {
-    try {
-      const { data, error } = await supabase.from('friends').insert([{ follower_id: (await this.getUid()) ?? '', followed_id: userId }]);
-      if (error) {
-        console.warn('follow error', error);
-      } else {
-        console.log('followed', data);
-        // optionally update UI
-        this.friendsSuggestions = this.friendsSuggestions.filter(u => u.id !== userId);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    const uid = await this.getUid();
+    if (!uid) return;
+    await supabase.from('friends').insert([{ follower_id: uid, followed_id: userId }]);
+    this.friendsSuggestions = this.friendsSuggestions.filter(u => u.id !== userId);
   }
 
-
-  private async getUid(): Promise<string | null> {
+  private async getUid() {
     const { data } = await supabase.auth.getSession();
-    return data.session?.user?.id ?? this.authService.getUserId();
+    return data.session?.user?.id ?? null;
   }
 
-  toggleSortingMethodMenu(ev?: Event) {
-    ev?.stopPropagation();
+  toggleSortingMethodMenu(event?: Event) {
+    event?.stopPropagation();
     this.sortingPostsMethodOpen = !this.sortingPostsMethodOpen;
-    const wrap = this.elementRef.nativeElement.querySelector('.sorting-posts-method-wrap');
-    if (wrap) {
-      wrap.classList.toggle('sorting-posts-method-open', this.sortingPostsMethodOpen);
-    }
   }
 }

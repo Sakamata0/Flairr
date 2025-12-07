@@ -7,10 +7,11 @@
 
       <div class="meta">
         <div class="name-row">
-          <span class="name">{{ post?.author?.name }} - </span>
-
+          <span class="name">{{ post?.author?.name }}</span><span *ngIf="show == 0"> - </span>
+          <div  *ngIf="show == 0">
           <button class="follow" *ngIf="!post?.author?.isFollowed" (click)="onFollow()">Follow</button>
           <button class="following" *ngIf="post?.author?.isFollowed" (click)="onUnfollow()">Following</button>
+          </div>
         </div>
 
         <div class="sub">

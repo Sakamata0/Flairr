@@ -1,55 +1,61 @@
-import { Component, input, Input } from '@angular/core';
-import { profileInfo } from '../../../model/profile-info.type';
+// src/app/shared/components/profile/profile-header/profile-header.ts
+import { Component, Input } from '@angular/core';
 import { NgIf } from '@angular/common';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
+import { UserService } from '../../../../core/services/user.service'; // adjust path if needed
 
 @Component({
   selector: 'app-profile-header',
   standalone: true,
-  imports: [MatDialogModule, NgIf],
+  imports: [NgIf],
   templateUrl: './profile-header.html',
   styleUrls: ['./profile-header.css']
 })
-
 export class ProfileHeader {
-  info = input<profileInfo>({
-    username: '@ismail_.mechkene',
-    firstName: 'Ismail',
-    lastName: 'Mechkene',
-    followersCount: 1_200_000,
-    followingCount: 1_500,
-    postsCount: 75,
-    profileImageUrl: 'assets/images/profile-picture-test.jpg',
-    bannerImageUrl: 'assets/images/banner-test.png',
-    bio: "🌐 Developer | 📚 Learner | 🚀 Creator \n Building clean, responsive web apps. Always learning. Always improving. ✨",
-    country: 'Tunisia',
-    birthdate: '2004-11-05',
-    email: 'ismail.mechkene@gmail.com'
-  });
+  @Input() profile: any | null = null;
 
-  constructor(private dialogRef: MatDialog) {}
+  constructor(
+    private dialog: MatDialog,
+    private userService: UserService
+  ) {}
 
-  formatFollowerCount(count: number): string {
-    if (count >= 1000000) {
-      return (count / 1000000).toFixed(1) + 'M';
-    }
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'K';
-    }
-    return count.toString();
+  // return the profile to display: input OR current user from service
+  get effectiveProfile() {
+    return this.profile ?? this.userService.currentUser();
+  }
+
+  // boolean: true if the shown profile matches the logged-in user
+  get isOwnProfile(): boolean {
+    const shown = this.effectiveProfile;
+    const me = this.userService.currentUser();
+    if (!shown || !me) return false;
+
+    // DB user row uses user_id; internal User uses userID — check both
+    const shownId = shown.user_id ?? shown.userID ?? shown.id ?? null;
+    const myId = (me as any).userID ?? (me as any).user_id ?? (me as any).id ?? null;
+    return !!(shownId && myId && shownId === myId);
+  }
+
+  formatFollowerCount(count: number | undefined | null): string {
+    const c = count ?? 0;
+    if (c >= 1_000_000) return (c / 1_000_000).toFixed(1) + 'M';
+    if (c >= 1_000) return (c / 1_000).toFixed(1) + 'K';
+    return String(c);
   }
 
   openEditProfileDialog() {
-    this.dialogRef.open(EditProfilePopup, 
-      {
-        width: '100vw',          // 90% of viewport width
-        maxWidth: '700px',      // but no more than 600px
-        height: 'auto',         // adapt height to content
-        maxHeight: '90vh',      // max 90% of viewport height
-        panelClass: 'edit-profile-dialog',
-        autoFocus: false,
-        data: this.info()
-      });
+    const p = this.effectiveProfile;
+    if (!p) return;
+
+    this.dialog.open(EditProfilePopup, {
+      width: '100vw',
+      maxWidth: '700px',
+      height: 'auto',
+      maxHeight: '90vh',
+      panelClass: 'edit-profile-dialog',
+      autoFocus: false,
+      data: p
+    });
   }
 }
