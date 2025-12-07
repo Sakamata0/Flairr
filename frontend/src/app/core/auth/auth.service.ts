@@ -3,14 +3,15 @@ import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { supabase } from '../supabase/supabase.client';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { Router } from '@angular/router';
+import { Router, RouteReuseStrategy } from '@angular/router';
+import { CustomReuseStrategy } from '../routing/custom-reuse.strategy';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   session = signal<Session | null>(null);
   user = signal<SupabaseUser | null>(null);
 
-  constructor(@Inject(PLATFORM_ID) private platformId: any, private router: Router) {
+  constructor(@Inject(PLATFORM_ID) private platformId: any, private router: Router, private routeReuse: RouteReuseStrategy) {
     if (this.isBrowser()) {
       this.init();
     }
@@ -46,7 +47,9 @@ export class AuthService {
     await supabase.auth.signOut();
     this.session.set(null);
     this.user.set(null);
-    this.router.navigate(['/login']);
+    const reuse = this.routeReuse as CustomReuseStrategy;
+    reuse.clearCache();
+    this.router.navigate(['/signin']);
   }
 
   async isLoggedIn(): Promise<boolean> {

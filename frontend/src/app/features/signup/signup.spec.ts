@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { Signup } from './signup';
 
-describe('Signup', () => {
+describe('SignUp', () => {
   let component: Signup;
   let fixture: ComponentFixture<Signup>;
 

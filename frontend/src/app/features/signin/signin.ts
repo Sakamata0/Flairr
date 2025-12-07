@@ -1,39 +1,36 @@
-// src/app/core/auth/login.ts
 import { Component } from '@angular/core';
-import { User } from '../../shared/model/user/user.type';
+import { userSignIn } from '../../shared/model/user/usersignin.type';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signin',
   standalone: true,
   imports: [
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    NgIf
-  ],
-  templateUrl: './login.html',
-  styleUrl: './login.css'
+    NgIf,
+    RouterLink
+],
+  templateUrl: './signin.html',
+  styleUrl: './signin.css'
 })
-export class Login {
-  model: User = {
-    id: '',
-    fullName: '',
+export class Signin {
+  model: userSignIn = {
     email: '',
     password: '',
     rememberMe: false
   };
 
   showPassword = false;
-  submitted = false;
   errorMessage = '';
 
   constructor(
@@ -75,7 +72,6 @@ export class Login {
         // still continue: user may not have a profile if you rely on a trigger or expect manual creation
       }
 
-      this.submitted = true;
       this.router.navigate(['/']); // navigate to root (adjust if you want another route)
     } catch (err: any) {
       console.error('Unexpected login error', err);

@@ -33,6 +33,10 @@ hr {
     padding-left: 20px;
 }
 
+.image-container {
+  cursor: pointer;
+}
+
 #pictures {
   position: relative;
   height: 200px;

@@ -2,15 +2,17 @@ import { Component, input } from '@angular/core';
 import { ItemPanelInfo } from '../../model/item-panel.type';
 import { NgFor, NgIf } from '@angular/common';
 import { ItemPanel } from '../item-panel/item-panel';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-card-panel',
-  imports: [NgIf, NgFor, ItemPanel],
+  imports: [NgIf, NgFor, ItemPanel, RouterModule],
   templateUrl: './card-panel.html',
   styleUrl: './card-panel.css'
 })
 export class CardPanel {
   title = input("Title");
+  link = input('');
   noItemsMessage = input("No Items to show.");
   items = input<Array<ItemPanelInfo>>([
     {id: '1', title: 'Mohamed Houcine', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: 'liked your Flurr!', subtitleOnSameLevel: true, withIcon: true, iconUrl: 'assets/icons/panel/like.png', withButton: false},

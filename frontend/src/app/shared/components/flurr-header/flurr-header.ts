@@ -105,7 +105,7 @@ export class FlurrHeaderComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.auth.logout();
-        this.router.navigate(['/login']);
+        this.router.navigate(['/signin']);
       }
     });
   }

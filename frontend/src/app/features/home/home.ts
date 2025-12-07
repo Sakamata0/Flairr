@@ -20,7 +20,8 @@ import { AuthService } from '../../core/auth/auth.service';
     Post,
     NgIf,
     NgForOf,
-    NgFor  ],
+    NgFor
+  ],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

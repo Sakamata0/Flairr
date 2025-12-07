@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { User } from '../../shared/model/user/user.type';
+import { userSignUp } from '../../shared/model/user/usersignun.type';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../core/auth/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NgIf } from '@angular/common';
 
 @Component({
@@ -14,9 +14,9 @@ import { NgIf } from '@angular/common';
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule,
     MatButtonModule,
-    NgIf
+    NgIf,
+    RouterLink
   ],
   templateUrl: './signup.html',
   styleUrl: './signup.css'
@@ -25,30 +25,27 @@ import { NgIf } from '@angular/common';
 export class Signup {
   constructor(private auth: AuthService, private router: Router) {}
 
-  model: User = {
-    id: '',
+  model: userSignUp = {
     fullName: '',
     email: '',
     password: '',
-    rememberMe: false
+    confirmPassword: '',
+    country: '',
+    birthdate: ''
   };
-
-  c_password = '';
-  passwordMismatch = false;
-  submitted = false;
-
-  checkPasswordMatch(): void {
-    this.passwordMismatch = this.model.password !== this.c_password;
-  }
+  showPassword = false;
+  showConfirmPassword = false;
+  checkPolicyTerms = false;
+  errorMessage = '';
 
   onSubmit(f: NgForm): void {
-    if (f.invalid || this.passwordMismatch) return;
-
+    if (f.invalid || this.checkPasswordMissmatch() || !this.checkPolicyTerms) return;
+    
     this.auth.signup(this.model.email, "hamma1212");
-
-    this.submitted = true;
-    console.log("Signed up:", this.model);
-
     this.router.navigate(['/']);
+  }
+
+  checkPasswordMissmatch() {
+    return this.model.password.trim() != this.model.confirmPassword.trim();
   }
 }
