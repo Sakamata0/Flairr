@@ -29,7 +29,8 @@ export class Signup {
     id: '',
     fullName: '',
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   };
 
   c_password = '';
@@ -43,7 +44,7 @@ export class Signup {
   onSubmit(f: NgForm): void {
     if (f.invalid || this.passwordMismatch) return;
 
-    this.auth.signup(this.model.email);
+    this.auth.signup(this.model.email, "hamma1212");
 
     this.submitted = true;
     console.log("Signed up:", this.model);

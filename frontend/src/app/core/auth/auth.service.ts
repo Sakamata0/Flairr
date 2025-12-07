@@ -1,41 +1,77 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+// src/app/core/auth/auth.service.ts
+import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { supabase } from '../supabase/supabase.client';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  session = signal<Session | null>(null);
+  user = signal<SupabaseUser | null>(null);
 
-  private TOKEN_KEY = 'auth_token';
-
-  constructor(@Inject(PLATFORM_ID) private platformId: any) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: any, private router: Router) {
+    if (this.isBrowser()) {
+      this.init();
+    }
+  }
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
 
-  login(email: string): void {
-    if (!this.isBrowser()) return;
-    const fakeToken = 'token-' + email + '-' + new Date().getTime();
-    localStorage.setItem(this.TOKEN_KEY, fakeToken);
+  private async init() {
+    const { data } = await supabase.auth.getSession();
+    this.session.set(data.session ?? null);
+    this.user.set(data.session?.user ?? null);
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this.session.set(session ?? null);
+      this.user.set(session?.user ?? null);
+    });
   }
 
-  signup(email: string): void {
-    if (!this.isBrowser()) return;
-    const fakeToken = 'token-' + email + '-' + new Date().getTime();
-    localStorage.setItem(this.TOKEN_KEY, fakeToken);
+  async signup(email: string, password: string) {
+    if (!this.isBrowser()) return { error: { message: 'not-browser' } };
+    return await supabase.auth.signUp({ email, password });
   }
 
-  logout(): void {
-    if (!this.isBrowser()) return;
-    localStorage.removeItem(this.TOKEN_KEY);
+  async login(email: string, password: string) {
+    if (!this.isBrowser()) return { error: { message: 'not-browser' } };
+    return await supabase.auth.signInWithPassword({ email, password });
   }
 
-  isLoggedIn(): boolean {
+  async logout() {
+    if (!this.isBrowser()) return;
+    await supabase.auth.signOut();
+    this.session.set(null);
+    this.user.set(null);
+    this.router.navigate(['/login']);
+  }
+
+  async isLoggedIn(): Promise<boolean> {
     if (!this.isBrowser()) return false;
-    return !!localStorage.getItem(this.TOKEN_KEY);
+    if (this.session()) return true;
+    const { data } = await supabase.auth.getSession();
+    this.session.set(data.session ?? null);
+    this.user.set(data.session?.user ?? null);
+    return !!data.session;
   }
 
-  getToken(): string | null {
-    if (!this.isBrowser()) return null;
-    return localStorage.getItem(this.TOKEN_KEY);
+  async checkAuth(): Promise<boolean> {
+    if (!this.isBrowser()) return false;
+
+    // If we already have a session, return true
+    if (this.session()) return true;
+
+    // Otherwise, fetch session from Supabase
+    const { data } = await supabase.auth.getSession();
+    this.session.set(data.session ?? null);
+    this.user.set(data.session?.user ?? null);
+
+    return !!data.session;
   }
+
+  getUserId(): string | null { return this.user()?.id ?? null; }
+  getAccessToken(): string | null { return this.session()?.access_token ?? null; }
 }

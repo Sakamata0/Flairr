@@ -25,12 +25,14 @@
             </div>
         </div>
         
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
+       <ng-container *ngIf="!loading; else loadingTpl">
+    <app-post *ngFor="let p of posts" [post]="p"></app-post>
+    <div *ngIf="posts.length === 0" class="no-posts">No posts yet.</div>
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <div class="loading">Loading feed…</div>
+  </ng-template>
     </main>
     <aside>
         <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications"></app-card-panel>
@@ -47,3 +49,6 @@
     </aside>
 </div>
 
+<div class="loading-screen" *ngIf="loading">
+  <h2>F</h2>
+</div>

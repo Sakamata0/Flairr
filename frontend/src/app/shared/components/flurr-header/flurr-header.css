@@ -245,9 +245,7 @@
 }
 
 /* menu links */
-.avatar-menu a,
-.avatar-menu button {
-    text-align: left;
+.avatar-menu a{
     padding: 8px 10px;
     border-radius: 6px;
     background: transparent;
@@ -256,9 +254,11 @@
     text-decoration: none;
     font-size: 14px;
     cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: left;
 }
-.avatar-menu a:hover,
-.avatar-menu button:hover {
+.avatar-menu a:hover{
     background: rgba(11,102,209,0.06);
 }
 

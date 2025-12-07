@@ -1,3 +1,18 @@
+<div class="container">
+  <div class="icon">
+    <img src="assets/icons/logout/logout.svg" alt="logout_icon">
+  </div>
+  
+  <h3>Already leaving ?</h3>
+  <h4>We'll keep an eye on your journeys while you're gone.<br> And we will miss you a lot...</h4>
+  <div class="buttons">
+    <button id="yes" [mat-dialog-close]="true">Yes, Log out</button>
+    <button id="no" mat-dialog-close>No, I am staying</button>
+  </div>
+</div>
+
+
+<!--
 <h2 mat-dialog-title>Log out</h2>
 
 <div mat-dialog-content>
@@ -8,3 +23,4 @@
   <button mat-button mat-dialog-close>No</button>
   <button mat-button color="warn" [mat-dialog-close]="true">Yes</button>
 </div>
+-->
