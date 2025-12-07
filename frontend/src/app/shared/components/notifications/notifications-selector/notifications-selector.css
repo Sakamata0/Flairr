@@ -21,6 +21,7 @@
     width: 100px;
     border-radius: 20px;
     height: 40px;
+    cursor: pointer;
 }
 
 .selected {

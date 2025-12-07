@@ -139,3 +139,32 @@ hr {
   display: flex;
   flex-direction: column;
 }
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  z-index: 9999;
+  font-size: 3em;
+  font-family: 'Pacifico', cursive;
+  font-weight: 500;
+}
+
+.loading-screen h2 {
+  animation: pulse 1s alternate infinite;
+}
+
+@keyframes pulse {
+  from {
+    opacity: .3;
+  }
+  to {
+    opacity: 1;
+  }
+}

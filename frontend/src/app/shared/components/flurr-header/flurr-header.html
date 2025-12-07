@@ -68,7 +68,7 @@
         <div class="avatar-menu" *ngIf="profileOpen" role="menu" (click)="$event.stopPropagation()">
             <a role="menuitem" href="/profile">Profile</a>
             <a role="menuitem" href="/settings">Settings</a>
-            <button (click)="openLogoutDialog()" role="menuitem">Log out</button>
+            <a (click)="openLogoutDialog()" role="menuitem">Log out</a>
         </div>
         </div>
     </div>

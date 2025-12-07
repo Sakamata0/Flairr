@@ -25,8 +25,7 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./home.css']
 })
 export class Home implements OnInit {
-
-  loading = false;
+  loading = true;
   error = '';
 
   shortcuts: any[] = [];
@@ -53,7 +52,6 @@ export class Home implements OnInit {
   }
 
   async loadAllData() {
-    this.loading = true;
     this.error = '';
 
     try {

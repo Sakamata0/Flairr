@@ -2,8 +2,8 @@ import { Component, ElementRef, EventEmitter, HostListener, Output } from '@angu
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
-import { LogoutDialog } from '../notifications-container/logout-dialog/logout-dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { LogoutDialog } from '../logout-dialog/logout-dialog';
 
 @Component({
   selector: 'app-flurr-header',
@@ -99,15 +99,13 @@ export class FlurrHeaderComponent {
 
   openLogoutDialog() {
     const dialogRef = this.dialog.open(LogoutDialog, {
-      //width: '320px',
-      disableClose: true,
       panelClass: 'custom-flurr-creation-dialog'
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.auth.logout();
-        this.router.navigate(['/login']);
+        this.router.navigate(['/signin']);
       }
     });
   }

@@ -49,9 +49,9 @@ export const routes: Routes = [
     component: SimpleLayout, // Layout without header
     children: [
       {
-        path: 'login',
+        path: 'signin',
         canActivate: [NoAuthGuard],
-        loadComponent: () => import('./features/login/login').then(m => m.Login)
+        loadComponent: () => import('./features/signin/signin').then(m => m.Signin)
       },
       {
         path: 'signup',

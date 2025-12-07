@@ -1,38 +1,36 @@
-// src/app/core/auth/login.ts
 import { Component } from '@angular/core';
-import { User } from '../../shared/model/user/user.type';
+import { userSignIn } from '../../shared/model/user/usersignin.type';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signin',
   standalone: true,
   imports: [
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    NgIf
-  ],
-  templateUrl: './login.html',
-  styleUrl: './login.css'
+    NgIf,
+    RouterLink
+],
+  templateUrl: './signin.html',
+  styleUrl: './signin.css'
 })
-export class Login {
-  model: User = {
-    id: '',
-    fullName: '',
+export class Signin {
+  model: userSignIn = {
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   };
 
-  submitted = false;
-  loading = false;
+  showPassword = false;
   errorMessage = '';
 
   constructor(
@@ -45,17 +43,16 @@ export class Login {
     this.errorMessage = '';
     if (f.invalid) return;
 
-    this.loading = true;
     try {
       // call AuthService.login(email, password)
       const res = await this.auth.login(this.model.email, this.model.password);
+
 
       // handle Supabase error
       if ((res as any).error) {
         // supabase-js v2 returns { error } or { error, data } depending
         const err = (res as any).error;
         this.errorMessage = err?.message ?? 'Login failed';
-        this.loading = false;
         return;
       }
 
@@ -65,7 +62,6 @@ export class Login {
       if (!uid) {
         // could be email-confirmation flow (no session yet)
         this.errorMessage = 'Check your email to confirm your account (if confirmation is required).';
-        this.loading = false;
         return;
       }
 
@@ -76,13 +72,10 @@ export class Login {
         // still continue: user may not have a profile if you rely on a trigger or expect manual creation
       }
 
-      this.submitted = true;
       this.router.navigate(['/']); // navigate to root (adjust if you want another route)
     } catch (err: any) {
       console.error('Unexpected login error', err);
       this.errorMessage = err?.message ?? 'Unexpected error during login';
-    } finally {
-      this.loading = false;
     }
   }
 }

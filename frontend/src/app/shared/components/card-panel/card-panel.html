@@ -1,7 +1,7 @@
 <div class="container">
     <header>
     <h3>{{ title() }}</h3>
-    <a href="#" title="See all {{ title() }}">See all</a>
+    <a [routerLink]="'/' + link()" title="See all {{ title() }}">See all</a>
     </header>
     <main>
         <h4 *ngIf="items().length == 0" id="no-items-message">
