@@ -1,20 +1,14 @@
-import { Component, input } from '@angular/core';
-import { Contact } from '../../model/contact.type';
-import { NgIf } from '@angular/common';
-
+import { Component, Input } from '@angular/core';
+import { NgIf, DatePipe } from '@angular/common';
+import { Contact } from '../../model/messaging.models';
 
 @Component({
   selector: 'app-message-component',
-  imports: [
-    NgIf
-],
+  standalone: true,
+  imports: [NgIf, DatePipe],
   templateUrl: './message-component.html',
-  styleUrl: './message-component.css'
+  styleUrls: ['./message-component.css']
 })
 export class MessageComponent {
-
-    info = input<Contact> (
-        {name: "Ismail Mechkene", avatarUrl: "assets/images/profile-picture-test.jpg", lastMsg: "ismail azber msdmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmeni", lastMsgDate: "30 min", unreadMsgs: 1}
-    )
-
+  @Input() contact!: Contact; // must be provided by parent
 }

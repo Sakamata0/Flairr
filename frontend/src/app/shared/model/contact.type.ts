@@ -1,7 +1,10 @@
 export interface Contact {
+    id: string; // user_id
+    conversationId?: string; // <-- important
     name: string;
-    avatarUrl?: string;
-    lastMsg: string;
-    lastMsgDate: string;
-    unreadMsgs: number;
+    avatar?: string | null;
+    lastMessage?: string | null;
+    unreadCount?: number;
+    lastAt?: string | Date | null;
+    online?: boolean;
 }

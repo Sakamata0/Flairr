@@ -81,7 +81,7 @@
 /* message row */
 .message-row{
     display:flex;
-    align-items:flex-end;
+    align-items:center;
     gap:10px;
     margin: 8px 6px;
 }
@@ -89,11 +89,12 @@
 
 /* avatar at bubble side */
 .msg-avatar{
-    width:30px;height:30px;border-radius:50%;object-fit:cover;
+    width:40px;height:40px;border-radius:50%;object-fit:cover;
 }
 
 /* bubble wrapper to keep text & time */
-.bubble-wrapper{ display:flex; flex-direction:column; gap:6px; max-width:62%; }
+.bubble-wrapper{ display:flex; justify-content: center; align-items: center; gap:6px; max-width:70%; }
+.bubble-wrapper.me{ display:flex; flex-direction: row-reverse; justify-content: center; align-items: center; gap:6px; max-width:70%; }
 
 /* bubble style */
 .bubble{
@@ -110,14 +111,16 @@
 
 /* right-side (my) bubble */
 .message-row.me .bubble{
-    background: #ffffff; /* keep white or choose green for sent if you prefer */
+    background: #aae0c1; /* keep white or choose green for sent if you prefer */
 }
 
 /* small time label under bubble */
 .bubble-time{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size:11px;
     color:#6a7a5f;
-    align-self:flex-start;
     margin-left:6px;
 }
 
