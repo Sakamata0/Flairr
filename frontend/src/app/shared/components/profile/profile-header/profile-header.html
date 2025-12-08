@@ -1,35 +1,59 @@
-<div id="main-container">
+<!-- profile-header.html -->
+<ng-container *ngIf="effectiveProfile as profile; else emptyTpl">
+  <div id="main-container">
     <div id="banner-image">
-        <img [src]="
-        info().bannerImageUrl || 'assets/images/default-banner-image.png'
-        "
-        alt="Error loading banner image"
-    >
+      <img
+        [src]="profile.cover_img || profile.coverImg || 'assets/images/default-banner-image.png'"
+        alt="Banner"
+      />
     </div>
+
     <div id="main-section">
-        <img id="profile-image" [src]="
-            info().profileImageUrl ||
-            'assets/images/default-profile-picture.png'
-            "
-            alt="Error loading profile picture"
-        >
-        <div id="info-container">
-            <div id="name-a-bio-container">
-                <div id="info">
-                    <h3> {{ info().firstName + ' ' + info().lastName }} </h3>
-                    <h4> {{ info().username }} </h4>
-                    <p id="bio" *ngIf="info().bio">
-                        {{ info().bio }}
-                    </p>
-                </div>
-                <button id="edit-profile-button" (click)="openEditProfileDialog()"><img src="assets/icons/profile/edit.png">Edit</button>
-            </div>
-            <hr>
-            <div id="stats-container">
-                <span><strong>{{ formatFollowerCount(info().followersCount) }}</strong> Followers</span>
-                <span><strong>{{ formatFollowerCount(info().followingCount) }}</strong> Following</span>
-                <span><strong>{{ formatFollowerCount(info().postsCount) }}</strong> Flurrs</span>
-            </div>
+      <img
+        id="profile-image"
+        [src]="profile.avatar_img || profile.avatarImg || 'assets/images/default-profile-picture.png'"
+        alt="Profile picture"
+      />
+
+      <div id="info-container">
+        <div id="name-a-bio-container">
+          <div id="info">
+            <h3>{{ (profile.full_name || profile.fullName) ?? 'Unnamed' }}</h3>
+            <h4>{{ (profile.username) ?? ((profile.email || '').split('@')[0]) ?? 'handle' }}</h4>
+
+            <p id="bio" *ngIf="profile.bio || profile.description">
+              {{ profile.bio || profile.description }}
+            </p>
+          </div>
+
+          <button id="edit-profile-button" *ngIf="isOwnProfile" (click)="openEditProfileDialog()">
+            <img src="assets/icons/profile/edit.png" alt="edit icon" /> Edit
+          </button>
         </div>
+
+        <hr />
+
+        <div id="stats-container">
+          <span>
+            <strong>{{ formatFollowerCount(profile.followersCount ?? profile.followers?.length ?? 0) }}</strong>
+            Followers
+          </span>
+          <span>
+            <strong>{{ formatFollowerCount(profile.followingCount ?? profile.following?.length ?? 0) }}</strong>
+            Following
+          </span>
+          <span>
+            <strong>{{ formatFollowerCount(profile.postsCount ?? profile.journeys?.length ?? 0) }}</strong>
+            Flurrs
+          </span>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+</ng-container>
+
+<ng-template #emptyTpl>
+  <div id="main-container" class="empty">
+    <p>No profile to show</p>
+  </div>
+</ng-template>

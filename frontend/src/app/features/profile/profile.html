@@ -1,39 +1,66 @@
 <header>
-    <app-profile-header></app-profile-header>
+  <app-profile-header [profile]="profile"></app-profile-header>
 </header>
+
 <div class="layout">
-    <nav>
-        <app-journeys-selector></app-journeys-selector>
-    </nav>
-    <main>
-        <app-flurr-creation-card></app-flurr-creation-card>
-        <div id="sort-selection">
-            <hr>
-            <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
-                <img src="assets/icons/home/arrow-down.png">
-            </span>
-            <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
-                <button 
-                    role="menuitem" 
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
-                    Top
-                </button>
-                <button
-                    role="menuitem"
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
-                    Recent
-                </button>
-            </div>
-        </div>
-            
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-    </main>
-    <aside>
-        <app-card-panel title="My Flairr Spaces" noItemsMessage="You still didn't join any Flairr space" [items]="this.FlairrSpaces"></app-card-panel>
-    </aside>
+  <nav>
+    <app-journeys-selector></app-journeys-selector>
+  </nav>
+
+  <main>
+
+    <!-- Only show when viewing your own profile -->
+    <app-flurr-creation-card *ngIf="isOwnProfile"></app-flurr-creation-card>
+
+    <div id="sort-selection">
+      <hr>
+      <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
+        <img src="assets/icons/home/arrow-down.png" />
+      </span>
+
+      <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen">
+        <button (click)="sortType='Top'; toggleSortingMethodMenu($event)">Top</button>
+        <button (click)="sortType='Recent'; toggleSortingMethodMenu($event)">Recent</button>
+      </div>
+
+
+    </div>
+
+    <ng-container *ngIf="!loading; else loadingTpl" >
+
+     
+        <app-post *ngFor="let p of posts"
+          [show]=1
+          [post]="$any({
+            id: p.flurr_id,
+            content: p.content,
+            type: p.type,
+            created_at: p.created_at ?? p.date_publish,
+            poster: {
+              user_id: profile?.user_id,
+              full_name: profile?.full_name,
+              avatar_img: profile?.avatar_img
+            }
+          })">
+        </app-post>
+
+      <ng-template #noPosts *ngIf="posts.length <= 0 ">
+        <p class="no-posts">No posts yet.</p>
+      </ng-template>
+
+    </ng-container>
+
+    <ng-template #loadingTpl>
+      <p class="loading">Loading profile…</p>
+    </ng-template>
+
+  </main>
+
+  <aside>
+    <app-card-panel
+      title="My Flairr Spaces"
+      noItemsMessage="You still didn't join any Flairr space"
+      [items]="FlairrSpaces">
+    </app-card-panel>
+  </aside>
 </div>
