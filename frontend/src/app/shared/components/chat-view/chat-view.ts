@@ -101,6 +101,16 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
       this.loadingOlder = false;
     }
 
+    // Mark conversation as read
+    if (this.convId) {
+      try {
+        await this.messaging.markConversationAsRead(this.convId);
+        console.log('✅ Marked conversation as read');
+      } catch (err) {
+        console.error('❌ Failed to mark as read', err);
+      }
+    }
+
     // Subscribe to realtime updates
     if (this.convId) {
       console.log('🔌 Subscribing to realtime for conversation:', this.convId);
@@ -109,6 +119,13 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
         next: (m) => {
           console.log('🔔 Realtime message received:', m);
           this.handleIncomingMessage(m);
+          
+          // Mark as read when new message arrives (if conversation is open)
+          if (this.convId) {
+            this.messaging.markConversationAsRead(this.convId).catch(err => {
+              console.error('Failed to mark as read:', err);
+            });
+          }
         },
         error: (err) => {
           console.error('❌ Realtime subscription error:', err);

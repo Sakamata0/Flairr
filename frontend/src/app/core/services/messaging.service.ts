@@ -1,7 +1,7 @@
 // src/app/services/messaging.service.ts
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { createClient, SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import {
@@ -16,18 +16,28 @@ export class MessagingService implements OnDestroy {
   private supabase: SupabaseClient;
   private channels = new Map<string, RealtimeChannel>();
   private userCache = new Map<string, DbUserRow | null>();
-  
+
   private subscribeRetryDelay = 2000;
   private channelRetryCount = new Map<string, number>();
   private maxChannelRetries = 3;
   private pendingRetries = new Set<string>();
 
+  // Subject to emit contact updates (new messages, read status changes)
+  private contactUpdates$ = new Subject<{ conversationId: string; update: Partial<Contact> }>();
+
   constructor(private ngZone: NgZone) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
-    
+
     try {
       (window as any).supabase = this.supabase;
-    } catch {}
+    } catch { }
+  }
+
+  /**
+   * Observable to listen for contact updates
+   */
+  get contactUpdates(): Observable<{ conversationId: string; update: Partial<Contact> }> {
+    return this.contactUpdates$.asObservable();
   }
 
   async getCurrentUserId(): Promise<string> {
@@ -71,6 +81,101 @@ export class MessagingService implements OnDestroy {
     }
   }
 
+  /**
+   * Mark a conversation as read by the current user
+   */
+  async markConversationAsRead(conversationId: string): Promise<void> {
+    try {
+      const currentUserId = await this.getCurrentUserId();
+
+      const { data: latestMsg, error: msgErr } = await this.supabase
+        .from('messages')
+        .select('id, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (msgErr && msgErr.code !== 'PGRST116') {
+        console.error('Error fetching latest message:', msgErr);
+      }
+
+      const { error: upsertErr } = await this.supabase
+        .from('conversation_reads')
+        .upsert({
+          user_id: currentUserId,
+          conversation_id: conversationId,
+          last_read_at: new Date().toISOString(),
+          last_read_message_id: latestMsg?.id || null
+        }, {
+          onConflict: 'user_id,conversation_id'
+        });
+
+      if (upsertErr) {
+        console.error('Error marking conversation as read:', upsertErr);
+      } else {
+        console.log('✅ Marked conversation as read:', conversationId);
+      }
+    } catch (err) {
+      console.error('Error in markConversationAsRead:', err);
+    }
+  }
+
+  /**
+   * Get unread message count for a specific conversation
+   */
+  async getUnreadCount(conversationId: string): Promise<number> {
+    try {
+      const currentUserId = await this.getCurrentUserId();
+
+      const { data: readData, error: readErr } = await this.supabase
+        .from('conversation_reads')
+        .select('last_read_at')
+        .eq('user_id', currentUserId)
+        .eq('conversation_id', conversationId)
+        .single();
+
+      if (readErr && readErr.code !== 'PGRST116') {
+        console.error('Error fetching read status:', readErr);
+        return 0;
+      }
+
+      const lastReadAt = readData?.last_read_at;
+
+      if (!lastReadAt) {
+        const { count, error: countErr } = await this.supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('conversation_id', conversationId)
+          .neq('author_id', currentUserId);
+
+        if (countErr) {
+          console.error('Error counting unread messages:', countErr);
+          return 0;
+        }
+
+        return count || 0;
+      }
+
+      const { count, error: countErr } = await this.supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('conversation_id', conversationId)
+        .neq('author_id', currentUserId)
+        .gt('created_at', lastReadAt);
+
+      if (countErr) {
+        console.error('Error counting unread messages:', countErr);
+        return 0;
+      }
+
+      return count || 0;
+    } catch (err) {
+      console.error('Error in getUnreadCount:', err);
+      return 0;
+    }
+  }
+
   async fetchConversations(): Promise<Contact[]> {
     const currentUserId = await this.getCurrentUserId();
 
@@ -86,16 +191,18 @@ export class MessagingService implements OnDestroy {
 
     const contacts: Contact[] = await Promise.all(
       convIds.map(async (convId: string) => {
-        const { data: otherParts, error: otherErr } = await this.supabase
+        const { data: allParticipants, error: allPartsErr } = await this.supabase
           .from('participants')
           .select('user_id')
-          .eq('conversation_id', convId)
-          .neq('user_id', currentUserId)
-          .limit(1);
+          .eq('conversation_id', convId);
 
-        if (otherErr) throw otherErr;
+        if (allPartsErr) throw allPartsErr;
 
-        const otherUserId = otherParts && otherParts.length ? otherParts[0].user_id : currentUserId;
+        const otherUserIds = allParticipants
+          ?.map((p: any) => p.user_id)
+          .filter((uid: string) => uid !== currentUserId) || [];
+
+        const otherUserId = otherUserIds.length > 0 ? otherUserIds[0] : currentUserId;
 
         let otherUser: DbUserRow = { user_id: otherUserId, full_name: null, avatar_img: null };
         try {
@@ -109,8 +216,6 @@ export class MessagingService implements OnDestroy {
           if (!userErr && users) {
             otherUser = users;
             this.userCache.set(otherUserId, users);
-          } else {
-            if (!this.userCache.has(otherUserId)) this.userCache.set(otherUserId, null);
           }
         } catch {
           if (!this.userCache.has(otherUserId)) this.userCache.set(otherUserId, null);
@@ -126,15 +231,16 @@ export class MessagingService implements OnDestroy {
         if (lastErr) throw lastErr;
         const lastMsg = lastMsgRows && lastMsgRows.length ? lastMsgRows[0] : null;
 
+        const unreadCount = await this.getUnreadCount(convId);
+
         const contact: Contact = {
           id: otherUser.user_id,
           name: otherUser.full_name ?? otherUser.user_id,
           avatar: otherUser.avatar_img ?? null,
           lastMessage: lastMsg?.content ?? null,
-          unreadCount: 0,
+          unreadCount: unreadCount,
           lastAt: lastMsg?.created_at ?? null,
           online: false,
-          // @ts-ignore
           conversationId: convId
         };
 
@@ -275,21 +381,20 @@ export class MessagingService implements OnDestroy {
   ) {
     try {
       console.log('🔔 [Realtime] Database change received:', payload);
-      
+
       const { eventType, new: newRecord, old: oldRecord } = payload;
-      
+
       const record = newRecord || oldRecord;
       if (!record) {
         console.warn('⚠️ [Realtime] No record in payload');
         return;
       }
-      
+
       if (String(record.conversation_id) !== String(convId)) {
         console.log('⚠️ [Realtime] Conversation ID mismatch, ignoring');
         return;
       }
 
-      // Only process INSERT and UPDATE events for new messages
       if (eventType !== 'INSERT' && eventType !== 'UPDATE') {
         console.log('ℹ️ [Realtime] Ignoring event type:', eventType);
         return;
@@ -310,12 +415,22 @@ export class MessagingService implements OnDestroy {
       };
 
       console.log('✅ [Realtime] Mapped message:', mapped);
-      console.log('🎯 [Realtime] Calling onMessage callback in NgZone...');
 
       this.ngZone.run(() => {
-        try { 
+        try {
           onMessage(mapped);
           console.log('✅ [Realtime] onMessage callback executed');
+
+          // Emit contact update for the contacts list
+          this.contactUpdates$.next({
+            conversationId: convId,
+            update: {
+              lastMessage: mapped.content,
+              lastAt: mapped.created_at
+            }
+          });
+          console.log('📢 [Realtime] Emitted contact update');
+
         } catch (err) {
           console.error('❌ [Realtime] onMessage callback error', err);
         }
@@ -326,9 +441,9 @@ export class MessagingService implements OnDestroy {
   }
 
   private ensureSubscribed(
-    channel: RealtimeChannel, 
-    key: string, 
-    convId: string, 
+    channel: RealtimeChannel,
+    key: string,
+    convId: string,
     onMessage: (m: Message) => void
   ) {
     channel.subscribe((status, err) => {
@@ -340,13 +455,13 @@ export class MessagingService implements OnDestroy {
 
       if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         console.error(`[Realtime] Channel ${key} failed with status: ${status}`, err);
-        
+
         if (this.pendingRetries.has(key)) {
           return;
         }
 
         const retryCount = this.channelRetryCount.get(key) ?? 0;
-        
+
         if (retryCount >= this.maxChannelRetries) {
           console.error(`[Realtime] Max retries reached for ${key}`);
           this.cleanupChannel(key, channel);
@@ -382,7 +497,7 @@ export class MessagingService implements OnDestroy {
     if (!convId) throw new Error('subscribeToMessages: convId required');
 
     const key = `conversation:${convId}:messages`;
-    
+
     if (this.channels.has(key)) {
       return this.channels.get(key)!;
     }
@@ -394,7 +509,6 @@ export class MessagingService implements OnDestroy {
       throw new Error('subscribeToMessages: user not authenticated');
     }
 
-    // Use postgres_changes to listen to database changes
     const channel = this.supabase
       .channel(key)
       .on(
@@ -422,8 +536,8 @@ export class MessagingService implements OnDestroy {
       (async () => {
         try {
           chan = await this.subscribeToMessages(convId, (msg) => {
-            try { 
-              subscriber.next(msg); 
+            try {
+              subscriber.next(msg);
             } catch (err) {
               console.error('[observeMessages] subscriber error', err);
             }
@@ -441,7 +555,7 @@ export class MessagingService implements OnDestroy {
 
   unsubscribeChannel(channel: RealtimeChannel | null | undefined) {
     if (!channel) return;
-    
+
     try {
       this.supabase.removeChannel(channel);
     } catch (err) {
@@ -449,9 +563,9 @@ export class MessagingService implements OnDestroy {
       try {
         // @ts-ignore
         if (typeof channel.unsubscribe === 'function') channel.unsubscribe();
-      } catch {}
+      } catch { }
     }
-    
+
     try {
       // @ts-ignore
       const topic = channel.topic ?? channel.name ?? null;
@@ -479,12 +593,13 @@ export class MessagingService implements OnDestroy {
 
   ngOnDestroy(): void {
     for (const ch of Array.from(this.channels.values())) {
-      try { 
-        this.supabase.removeChannel(ch); 
-      } catch {}
+      try {
+        this.supabase.removeChannel(ch);
+      } catch { }
     }
     this.channels.clear();
     this.pendingRetries.clear();
     this.channelRetryCount.clear();
+    this.contactUpdates$.complete();
   }
 }
