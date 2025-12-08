@@ -4,27 +4,32 @@ import { createClient, SupabaseClient, RealtimeChannel } from '@supabase/supabas
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-// Local models — adjust import paths if you placed models elsewhere
 import {
   Contact,
   Message,
   DbMessageRow,
   DbUserRow,
-  DbConversationRow
 } from '../../shared/model/messaging.models';
 
 @Injectable({ providedIn: 'root' })
 export class MessagingService implements OnDestroy {
   private supabase: SupabaseClient;
   private channels = new Map<string, RealtimeChannel>();
+  private userCache = new Map<string, DbUserRow | null>();
+  
+  private subscribeRetryDelay = 2000;
+  private channelRetryCount = new Map<string, number>();
+  private maxChannelRetries = 3;
+  private pendingRetries = new Set<string>();
 
   constructor(private ngZone: NgZone) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+    
+    try {
+      (window as any).supabase = this.supabase;
+    } catch {}
   }
 
-  // ----------------------
-  // Auth helper
-  // ----------------------
   async getCurrentUserId(): Promise<string> {
     const { data, error } = await this.supabase.auth.getUser();
     if (error) throw error;
@@ -36,25 +41,39 @@ export class MessagingService implements OnDestroy {
   async getCurrentUser() {
     const { data, error } = await this.supabase.auth.getUser();
     if (error) {
-      console.error("AUTH ERROR:", error);
+      console.error('AUTH ERROR:', error);
       return null;
     }
     return data.user;
   }
 
+  private async fetchUserCached(userId: string): Promise<DbUserRow | null> {
+    if (!userId) return null;
+    if (this.userCache.has(userId)) return this.userCache.get(userId) ?? null;
 
-  // ----------------------
-  // Conversations / Contacts
-  // ----------------------
-  /**
-   * Fetch all conversations for the current user and return Contact[].
-   * Each Contact.id is the other user's user_id (as requested)
-   * and contact.conversationId contains the conversation id to load messages.
-   */
+    try {
+      const { data, error } = await this.supabase
+        .from('users')
+        .select('user_id, full_name, avatar_img')
+        .eq('user_id', userId)
+        .limit(1)
+        .single();
+
+      if (error) {
+        this.userCache.set(userId, null);
+        return null;
+      }
+      this.userCache.set(userId, data);
+      return data;
+    } catch (err) {
+      this.userCache.set(userId, null);
+      return null;
+    }
+  }
+
   async fetchConversations(): Promise<Contact[]> {
     const currentUserId = await this.getCurrentUserId();
 
-    // 1) get all conversation ids where current user participates
     const { data: parts, error: partsErr } = await this.supabase
       .from('participants')
       .select('conversation_id')
@@ -65,10 +84,8 @@ export class MessagingService implements OnDestroy {
 
     const convIds = Array.from(new Set(parts.map((p: any) => p.conversation_id)));
 
-    // 2) For each conversation find the other participant, last message, and other user's row
     const contacts: Contact[] = await Promise.all(
       convIds.map(async (convId: string) => {
-        // find other participant (user_id != currentUserId)
         const { data: otherParts, error: otherErr } = await this.supabase
           .from('participants')
           .select('user_id')
@@ -78,25 +95,27 @@ export class MessagingService implements OnDestroy {
 
         if (otherErr) throw otherErr;
 
-        // If group chats exist (multiple other participants) we pick the first one for preview.
-        // If no other participant (shouldn't happen), fall back to current user as placeholder.
         const otherUserId = otherParts && otherParts.length ? otherParts[0].user_id : currentUserId;
 
-        // fetch other user row
-        const { data: users, error: userErr } = await this.supabase
-          .from('users')
-          .select('user_id, full_name, avatar_img')
-          .eq('user_id', otherUserId)
-          .limit(1)
-          .single();
+        let otherUser: DbUserRow = { user_id: otherUserId, full_name: null, avatar_img: null };
+        try {
+          const { data: users, error: userErr } = await this.supabase
+            .from('users')
+            .select('user_id, full_name, avatar_img')
+            .eq('user_id', otherUserId)
+            .limit(1)
+            .single();
 
-        if (userErr) {
-          // If user not found, create a minimal object
-          // don't throw here to keep UI resilient
+          if (!userErr && users) {
+            otherUser = users;
+            this.userCache.set(otherUserId, users);
+          } else {
+            if (!this.userCache.has(otherUserId)) this.userCache.set(otherUserId, null);
+          }
+        } catch {
+          if (!this.userCache.has(otherUserId)) this.userCache.set(otherUserId, null);
         }
-        const otherUser: DbUserRow = users ?? { user_id: otherUserId, full_name: null, avatar_img: null };
 
-        // fetch last message for that conversation
         const { data: lastMsgRows, error: lastErr } = await this.supabase
           .from('messages')
           .select('id, content, created_at, author_id')
@@ -112,41 +131,29 @@ export class MessagingService implements OnDestroy {
           name: otherUser.full_name ?? otherUser.user_id,
           avatar: otherUser.avatar_img ?? null,
           lastMessage: lastMsg?.content ?? null,
-          unreadCount: 0, // simple default — you can implement read-tracking later
+          unreadCount: 0,
           lastAt: lastMsg?.created_at ?? null,
           online: false,
-          // conversationId is important for loading messages
-          // attach it here so UI can load messages fast
-          // @ts-ignore - we add dynamic property to Contact as agreed
+          // @ts-ignore
           conversationId: convId
         };
-        
+
         return contact;
       })
     );
 
-    // sort contacts by lastAt descending
     contacts.sort((a, b) => {
       const ta = a.lastAt ? new Date(a.lastAt).getTime() : 0;
       const tb = b.lastAt ? new Date(b.lastAt).getTime() : 0;
       return tb - ta;
     });
-    console.log('fetchConversations - convIds', convIds);
+
     return contacts;
   }
 
-  /**
-   * Find an existing conversation between current user and otherUserId, or create one.
-   * Returns conversation id.
-   */
   async findOrCreateConversation(otherUserId: string): Promise<string> {
     const currentUserId = await this.getCurrentUserId();
 
-    if (currentUserId === otherUserId) {
-      // create a one-person conversation (edge case) or throw — we'll create a convo anyway
-    }
-
-    // 1) fetch participants rows for both user ids (client-side grouping)
     const { data: rows, error: pErr } = await this.supabase
       .from('participants')
       .select('conversation_id, user_id')
@@ -154,7 +161,6 @@ export class MessagingService implements OnDestroy {
 
     if (pErr) throw pErr;
 
-    // group by conversation_id and look for conv that has both user ids
     const convMap = new Map<string, Set<string>>();
     (rows ?? []).forEach((r: any) => {
       const set = convMap.get(r.conversation_id) ?? new Set<string>();
@@ -164,14 +170,13 @@ export class MessagingService implements OnDestroy {
 
     for (const [convId, userSet] of convMap.entries()) {
       if (userSet.has(currentUserId) && userSet.has(otherUserId)) {
-        return convId; // existing conversation found
+        return convId;
       }
     }
 
-    // 2) Not found: create a new conversation + participants
     const { data: convData, error: convErr } = await this.supabase
       .from('conversations')
-      .insert({}) // only created_at default is added
+      .insert({})
       .select('id')
       .limit(1)
       .single();
@@ -179,7 +184,6 @@ export class MessagingService implements OnDestroy {
     if (convErr) throw convErr;
     const newConvId: string = convData.id;
 
-    // insert participants (current user and other user)
     const inserts = [
       { conversation_id: newConvId, user_id: currentUserId },
       { conversation_id: newConvId, user_id: otherUserId }
@@ -190,12 +194,7 @@ export class MessagingService implements OnDestroy {
     return newConvId;
   }
 
-  // ----------------------
-  // Messages
-  // ----------------------
-  // fetch messages and attach author info in bulk
   async fetchMessages(convId: string, limit = 100): Promise<Message[]> {
-    // fetch messages
     const { data: rows, error } = await this.supabase
       .from('messages')
       .select('id, conversation_id, author_id, content, created_at')
@@ -206,8 +205,8 @@ export class MessagingService implements OnDestroy {
     if (error) throw error;
     const msgRows: DbMessageRow[] = rows ?? [];
 
-    // collect unique author ids
     const authorIds = Array.from(new Set(msgRows.map(m => m.author_id)));
+    await Promise.all(authorIds.map(id => this.fetchUserCached(id)));
 
     let usersById: Record<string, DbUserRow> = {};
     if (authorIds.length) {
@@ -222,11 +221,8 @@ export class MessagingService implements OnDestroy {
       }
     }
 
-    // map to UI messages
     const currentUserId = await this.getCurrentUserId();
-    const uiMessages: Message[] = msgRows.map(r =>
-    // dynamic import of mapping to avoid circular deps; inline mapping:
-    ({
+    const uiMessages: Message[] = msgRows.map(r => ({
       id: r.id,
       conversation_id: r.conversation_id,
       authorId: r.author_id,
@@ -235,15 +231,11 @@ export class MessagingService implements OnDestroy {
       created_at: r.created_at ?? new Date().toISOString(),
       from: currentUserId ? (r.author_id === currentUserId ? 'me' : 'them') : undefined,
       avatar: usersById[r.author_id]?.avatar_img ?? undefined
-    })
-    );
+    }));
 
     return uiMessages;
   }
 
-  /**
-   * insert a message into DB for a conversation
-   */
   async sendMessage(conversationId: string, content: string): Promise<Message> {
     const currentUserId = await this.getCurrentUserId();
     const { data, error } = await this.supabase
@@ -259,15 +251,7 @@ export class MessagingService implements OnDestroy {
 
     if (error) throw error;
 
-    // fetch author info
-    const { data: userRow } = await this.supabase
-      .from('users')
-      .select('user_id, full_name, avatar_img')
-      .eq('user_id', currentUserId)
-      .limit(1)
-      .single();
-
-
+    const userRow = await this.fetchUserCached(currentUserId);
 
     const ui: Message = {
       id: data.id,
@@ -283,106 +267,224 @@ export class MessagingService implements OnDestroy {
     return ui;
   }
 
-  // ----------------------
-  // Realtime subscriptions
-  // ----------------------
-  subscribeToMessages(convId: string, onMessage: (msg: Message) => void): RealtimeChannel {
-    const key = `messages:conv:${convId}`;
-    if (this.channels.has(key)) return this.channels.get(key)!;
+  private async handleDatabaseChange(
+    payload: any,
+    convId: string,
+    currentUserId: string | null,
+    onMessage: (m: Message) => void
+  ) {
+    try {
+      console.log('🔔 [Realtime] Database change received:', payload);
+      
+      const { eventType, new: newRecord, old: oldRecord } = payload;
+      
+      const record = newRecord || oldRecord;
+      if (!record) {
+        console.warn('⚠️ [Realtime] No record in payload');
+        return;
+      }
+      
+      if (String(record.conversation_id) !== String(convId)) {
+        console.log('⚠️ [Realtime] Conversation ID mismatch, ignoring');
+        return;
+      }
 
-    const filter = `conversation_id=eq.${convId}`;
+      // Only process INSERT and UPDATE events for new messages
+      if (eventType !== 'INSERT' && eventType !== 'UPDATE') {
+        console.log('ℹ️ [Realtime] Ignoring event type:', eventType);
+        return;
+      }
+
+      const author = await this.fetchUserCached(record.author_id);
+      const currentUser = currentUserId || (await this.getCurrentUserId().catch(() => null));
+
+      const mapped: Message = {
+        id: record.id,
+        conversation_id: record.conversation_id,
+        authorId: record.author_id,
+        authorName: author?.full_name ?? undefined,
+        content: record.content,
+        created_at: record.created_at ?? undefined,
+        from: currentUser ? (record.author_id === currentUser ? 'me' : 'them') : undefined,
+        avatar: author?.avatar_img ?? undefined
+      };
+
+      console.log('✅ [Realtime] Mapped message:', mapped);
+      console.log('🎯 [Realtime] Calling onMessage callback in NgZone...');
+
+      this.ngZone.run(() => {
+        try { 
+          onMessage(mapped);
+          console.log('✅ [Realtime] onMessage callback executed');
+        } catch (err) {
+          console.error('❌ [Realtime] onMessage callback error', err);
+        }
+      });
+    } catch (err) {
+      console.error('❌ [Realtime] handler error', err);
+    }
+  }
+
+  private ensureSubscribed(
+    channel: RealtimeChannel, 
+    key: string, 
+    convId: string, 
+    onMessage: (m: Message) => void
+  ) {
+    channel.subscribe((status, err) => {
+      if (status === 'SUBSCRIBED') {
+        this.channelRetryCount.delete(key);
+        this.pendingRetries.delete(key);
+        return;
+      }
+
+      if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.error(`[Realtime] Channel ${key} failed with status: ${status}`, err);
+        
+        if (this.pendingRetries.has(key)) {
+          return;
+        }
+
+        const retryCount = this.channelRetryCount.get(key) ?? 0;
+        
+        if (retryCount >= this.maxChannelRetries) {
+          console.error(`[Realtime] Max retries reached for ${key}`);
+          this.cleanupChannel(key, channel);
+          return;
+        }
+
+        this.pendingRetries.add(key);
+        this.channelRetryCount.set(key, retryCount + 1);
+
+        setTimeout(async () => {
+          try {
+            this.cleanupChannel(key, channel);
+            await this.subscribeToMessages(convId, onMessage);
+          } catch (err) {
+            console.error('[Realtime] Resubscribe failed', err);
+            this.pendingRetries.delete(key);
+          }
+        }, this.subscribeRetryDelay);
+      }
+    });
+  }
+
+  private cleanupChannel(key: string, channel: RealtimeChannel) {
+    try {
+      this.supabase.removeChannel(channel);
+    } catch (err) {
+      console.warn('[cleanupChannel] error', err);
+    }
+    this.channels.delete(key);
+  }
+
+  async subscribeToMessages(convId: string, onMessage: (msg: Message) => void): Promise<RealtimeChannel> {
+    if (!convId) throw new Error('subscribeToMessages: convId required');
+
+    const key = `conversation:${convId}:messages`;
+    
+    if (this.channels.has(key)) {
+      return this.channels.get(key)!;
+    }
+
+    let currentUserId: string | null = null;
+    try {
+      currentUserId = await this.getCurrentUserId();
+    } catch (err) {
+      throw new Error('subscribeToMessages: user not authenticated');
+    }
+
+    // Use postgres_changes to listen to database changes
     const channel = this.supabase
-      .channel(`public:messages:${convId}`)
+      .channel(key)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${convId}`
+        },
         async (payload) => {
-          // payload.new is the raw message row
-          const raw: DbMessageRow = payload.new as DbMessageRow;
-          // fetch author row
-          let author: DbUserRow | null = null;
-          try {
-            const { data: userRow } = await this.supabase
-              .from('users')
-              .select('user_id, full_name, avatar_img')
-              .eq('user_id', raw.author_id)
-              .limit(1)
-              .single();
-            author = userRow ?? null;
-          } catch (err) {
-            // ignore author fetch error
-          }
-
-          this.ngZone.run(() => {
-            try {
-              const currentUserIdPromise = this.getCurrentUserId();
-              // map and call onMessage (we await currentUserId inside)
-              currentUserIdPromise.then(currentUserId => {
-                const mapped: Message = {
-                  id: raw.id,
-                  conversation_id: raw.conversation_id,
-                  authorId: raw.author_id,
-                  authorName: author?.full_name ?? undefined,
-                  content: raw.content,
-                  created_at: raw.created_at ?? undefined,
-                  from: currentUserId ? (raw.author_id === currentUserId ? 'me' : 'them') : undefined,
-                  avatar: author?.avatar_img ?? undefined
-                };
-                onMessage(mapped);
-              });
-            } catch (e) {
-              // swallow to keep subscription alive
-            }
-          });
+          await this.handleDatabaseChange(payload, convId, currentUserId, onMessage);
         }
       );
 
-    channel.subscribe();
     this.channels.set(key, channel);
+    this.ensureSubscribed(channel, key, convId, onMessage);
+
     return channel;
   }
 
   observeMessages(convId: string): Observable<Message> {
     return new Observable<Message>((subscriber) => {
-      const channel = this.subscribeToMessages(convId, (msg) => subscriber.next(msg));
+      let chan: RealtimeChannel | null = null;
+      (async () => {
+        try {
+          chan = await this.subscribeToMessages(convId, (msg) => {
+            try { 
+              subscriber.next(msg); 
+            } catch (err) {
+              console.error('[observeMessages] subscriber error', err);
+            }
+          });
+        } catch (err) {
+          subscriber.error(err);
+        }
+      })();
+
       return () => {
-        this.unsubscribeChannel(channel);
+        if (chan) this.unsubscribeChannel(chan);
       };
     });
   }
 
   unsubscribeChannel(channel: RealtimeChannel | null | undefined) {
     if (!channel) return;
+    
     try {
       this.supabase.removeChannel(channel);
-    } catch {
+    } catch (err) {
+      console.warn('[unsubscribeChannel] error', err);
       try {
         // @ts-ignore
         if (typeof channel.unsubscribe === 'function') channel.unsubscribe();
-      } catch { /* ignore */ }
+      } catch {}
     }
-    // remove from map
+    
     try {
       // @ts-ignore
       const topic = channel.topic ?? channel.name ?? null;
       if (topic) {
         for (const [k, v] of this.channels.entries()) {
-          if (v === channel || k.includes(topic)) this.channels.delete(k);
+          if (v === channel || k.includes(topic)) {
+            this.channels.delete(k);
+            this.pendingRetries.delete(k);
+            this.channelRetryCount.delete(k);
+          }
         }
       } else {
         for (const [k, v] of this.channels.entries()) {
-          if (v === channel) this.channels.delete(k);
+          if (v === channel) {
+            this.channels.delete(k);
+            this.pendingRetries.delete(k);
+            this.channelRetryCount.delete(k);
+          }
         }
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      console.warn('[unsubscribeChannel] cleanup error', err);
+    }
   }
 
   ngOnDestroy(): void {
     for (const ch of Array.from(this.channels.values())) {
-      try { this.supabase.removeChannel(ch); } catch { /* ignore */ }
+      try { 
+        this.supabase.removeChannel(ch); 
+      } catch {}
     }
     this.channels.clear();
+    this.pendingRetries.clear();
+    this.channelRetryCount.clear();
   }
 }
-
-
