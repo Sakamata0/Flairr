@@ -25,7 +25,8 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./home.css']
 })
 export class Home implements OnInit {
-  loading = true;
+
+  loading = false;
   error = '';
 
   shortcuts: any[] = [];

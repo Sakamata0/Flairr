@@ -105,14 +105,15 @@ export class UserService {
 
       this.currentUser.set(user);
       console.log('testinit',this.currentUser)
+      
       return { data: user, error: null };
+
 
     } catch (err) {
       console.error('UserService.loadUserById unexpected', err);
       return { data: null, error: err as any };
     }
 
-    
 
     
   }
