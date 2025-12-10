@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { supabase } from '../supabase/supabase.client';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { Router, RouteReuseStrategy } from '@angular/router';
-import { CustomReuseStrategy } from '../routing/custom-reuse.strategy';
+import { CustomRouteReuseStrategy } from '../routing/custom-reuse.strategy';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -47,7 +47,7 @@ export class AuthService {
     await supabase.auth.signOut();
     this.session.set(null);
     this.user.set(null);
-    const reuse = this.routeReuse as CustomReuseStrategy;
+    const reuse = this.routeReuse as CustomRouteReuseStrategy;
     reuse.clearCache();
     this.router.navigate(['/signin']);
   }

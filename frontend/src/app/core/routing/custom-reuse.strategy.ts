@@ -1,60 +1,44 @@
-import {
-  ActivatedRouteSnapshot,
-  DetachedRouteHandle,
-  RouteReuseStrategy,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, DetachedRouteHandle } from '@angular/router';
+import { BaseRouteReuseStrategy } from './base-route-reuse-strategy.service';
 
-export class CustomReuseStrategy implements RouteReuseStrategy {
+export class CustomRouteReuseStrategy extends BaseRouteReuseStrategy {
   private storedRoutes = new Map<string, DetachedRouteHandle>();
 
-  // ✅ Build FULL stable route path including parents
-  private getFullRoutePath(route: ActivatedRouteSnapshot): string {
-    return route.pathFromRoot
-      .map(r => r.routeConfig?.path)
-      .filter(p => p !== undefined)
-      .join('/');
-  }
+  // ✅ Choose ONLY the pages you want to cache
+  override shouldDetach(route: ActivatedRouteSnapshot): boolean {
+    const path = route.routeConfig?.path;
 
-  // ✅ Choose which routes to cache
-  shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    const fullPath = this.getFullRoutePath(route);
-
-    const cacheableRoutes = [
-      '',
+    const cacheable = [
+      '',                 // home
       'messages',
       'spaces',
       'friends',
       'notifications',
       'profile',
-      'profile/:profileId'
+      'profile/:profileId',
     ];
 
-    return cacheableRoutes.some(r => fullPath.endsWith(r));
+    return cacheable.includes(path ?? '');
   }
 
-  store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
-    const fullPath = this.getFullRoutePath(route);
-    this.storedRoutes.set(fullPath, handle);
+  override store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
+    const path = route.routeConfig?.path;
+    if (path !== undefined) {
+      this.storedRoutes.set(path, handle);
+    }
   }
 
-  shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    const fullPath = this.getFullRoutePath(route);
-    return this.storedRoutes.has(fullPath);
+  override shouldAttach(route: ActivatedRouteSnapshot): boolean {
+    const path = route.routeConfig?.path;
+    return !!path && this.storedRoutes.has(path);
   }
 
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    const fullPath = this.getFullRoutePath(route);
-    return this.storedRoutes.get(fullPath) || null;
+  override retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
+    const path = route.routeConfig?.path;
+    return path ? this.storedRoutes.get(path) || null : null;
   }
 
-  shouldReuseRoute(
-    future: ActivatedRouteSnapshot,
-    curr: ActivatedRouteSnapshot
-  ): boolean {
-    return future.routeConfig === curr.routeConfig;
-  }
-
-  // ✅ FOR LOGOUT FIX
+  // ✅ Logout support
   clearCache() {
     this.storedRoutes.clear();
   }

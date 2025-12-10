@@ -1,42 +1,112 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { MessageComponent } from "../message-component/message-component";
-
-export interface Contact {
-    id: string;
-    name: string;
-    avatar?: string | null;
-    lastMessage?: string | null;
-    unreadCount?: number;
-    lastAt?: string | Date | null;
-    online?: boolean;
-}
+import { MessagingService } from '../../../core/services/messaging.service';
+import { Contact } from '../../model/messaging.models';
 
 @Component({
     selector: 'app-contacts-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, MessageComponent , NgFor,],
+    imports: [CommonModule, FormsModule, MessageComponent, NgFor],
     templateUrl: './contacts-list.html',
     styleUrls: ['./contacts-list.css']
 })
-export class ContactsList implements OnInit {
-    @Input() contacts: Contact[] | null = null; // allow parent to pass data
-    @Output() openThread = new EventEmitter<Contact>(); // emits when a contact is selected
+export class ContactsList implements OnInit, OnDestroy {
+    @Input() contacts: Contact[] | null = null;
+    @Output() openThread = new EventEmitter<Contact>();
 
-    // local state
     selectedFilter = 'All';
     query = '';
     selected: Contact | null = null;
 
-    ngOnInit(): void {
-        // If no contacts were provided by the parent, seed a small mock list for local dev/testing.
-        if (!this.contacts) {
-            this.contacts = this.mockContacts();
+    private contactUpdatesSub: Subscription | null = null;
+    private currentOpenConversationId: string | null = null;
+
+    constructor(
+        private messagingService: MessagingService,
+        private cdr: ChangeDetectorRef
+    ) {}
+
+    async ngOnInit(): Promise<void> {
+        // Load contacts from service
+        await this.loadContacts();
+
+        // Subscribe to real-time contact updates
+        this.subscribeToContactUpdates();
+    }
+
+    async loadContacts(): Promise<void> {
+        try {
+            console.log('📇 Loading contacts...');
+            this.contacts = await this.messagingService.fetchConversations();
+            console.log('✅ Loaded', this.contacts.length, 'contacts');
+        } catch (err) {
+            console.error('❌ Error loading contacts:', err);
+            this.contacts = [];
         }
     }
 
-    setFilter(filter: string) {
+    private subscribeToContactUpdates(): void {
+        this.contactUpdatesSub = this.messagingService.contactUpdates.subscribe({
+            next: async ({ conversationId, update }) => {
+                console.log('📢 Contact update received:', conversationId);
+                await this.handleContactUpdate(conversationId, update);
+            },
+            error: (err) => {
+                console.error('❌ Contact updates subscription error:', err);
+            }
+        });
+    }
+
+    private async handleContactUpdate(conversationId: string, update: Partial<Contact>): Promise<void> {
+        if (!this.contacts) return;
+
+        const contactIndex = this.contacts.findIndex(c => c.conversationId === conversationId);
+
+        if (contactIndex === -1) {
+            // New conversation - reload all contacts
+            console.log('🔄 New conversation detected, reloading all contacts');
+            await this.loadContacts();
+            this.cdr.detectChanges();
+            return;
+        }
+
+        // Create a NEW contact object instead of mutating the existing one
+        // This ensures Angular detects the change
+        const oldContact = this.contacts[contactIndex];
+        const updatedContact: Contact = {
+            ...oldContact,
+            lastMessage: update.lastMessage !== undefined ? update.lastMessage : oldContact.lastMessage,
+            lastAt: update.lastAt !== undefined ? update.lastAt : oldContact.lastAt
+        };
+
+        // Update unread count
+        if (conversationId !== this.currentOpenConversationId) {
+            try {
+                const unreadCount = await this.messagingService.getUnreadCount(conversationId);
+                updatedContact.unreadCount = unreadCount;
+                console.log('📊 Updated unread count for', updatedContact.name, ':', unreadCount);
+            } catch (err) {
+                console.error('❌ Error fetching unread count:', err);
+            }
+        } else {
+            updatedContact.unreadCount = 0;
+        }
+
+        // Remove old contact and add updated one at the top
+        this.contacts.splice(contactIndex, 1);
+        this.contacts.unshift(updatedContact);
+
+        // Create new array reference to trigger change detection
+        this.contacts = [...this.contacts];
+
+        // Manually trigger change detection
+        this.cdr.detectChanges();
+    }
+
+    setFilter(filter: string): void {
         this.selectedFilter = filter;
     }
 
@@ -67,38 +137,49 @@ export class ContactsList implements OnInit {
         });
     }
 
-    selectContact(c: Contact) {
+    selectContact(c: Contact): void {
+        console.log('📱 Selected contact:', c.name);
         this.selected = c;
+        this.currentOpenConversationId = c.conversationId || null;
+
+        // Reset unread count by creating a new contact object
+        if (this.contacts) {
+            const contactIndex = this.contacts.findIndex(contact => contact.id === c.id);
+            if (contactIndex !== -1) {
+                const updatedContact = { ...this.contacts[contactIndex], unreadCount: 0 };
+                this.contacts[contactIndex] = updatedContact;
+                this.contacts = [...this.contacts]; // New array reference
+                this.cdr.detectChanges();
+            }
+        }
+
         this.openThread.emit(c);
     }
 
-    clearSearch() {
+    clearSearch(): void {
         this.query = '';
     }
 
-    trackById(_: number, item: Contact) {
+    trackById(_: number, item: Contact): string {
         return item.id;
     }
 
-    // keyboard helpers for list navigation (basic)
-    focusNext() {
+    // Keyboard helpers for list navigation
+    focusNext(): void {
         const idx = this.selected ? this.filteredContacts.findIndex(s => s.id === this.selected!.id) : -1;
         const next = this.filteredContacts[Math.min(this.filteredContacts.length - 1, idx + 1)];
         if (next) this.selectContact(next);
     }
-    focusPrev() {
+
+    focusPrev(): void {
         const idx = this.selected ? this.filteredContacts.findIndex(s => s.id === this.selected!.id) : this.filteredContacts.length;
         const prev = this.filteredContacts[Math.max(0, idx - 1)];
         if (prev) this.selectContact(prev);
     }
 
-    // tiny mock data for local dev if parent doesn't provide contacts
-    private mockContacts(): Contact[] {
-        return [
-            { id: 'u1', name: 'Amina', lastMessage: 'See you tomorrow!', unreadCount: 2, lastAt: new Date(Date.now() - 1000 * 60 * 5), online: true },
-            { id: 'u2', name: 'Marouane', lastMessage: 'I pushed the changes', unreadCount: 0, lastAt: new Date(Date.now() - 1000 * 60 * 60) },
-            { id: 'u3', name: 'Sana', lastMessage: 'Nice! 🔥', unreadCount: 1, lastAt: new Date(Date.now() - 1000 * 60 * 3), online: true },
-            { id: 'u4', name: 'Support', lastMessage: 'How can I help?', unreadCount: 0, lastAt: new Date(Date.now() - 1000 * 60 * 60 * 24) }
-        ];
+    ngOnDestroy(): void {
+        if (this.contactUpdatesSub) {
+            this.contactUpdatesSub.unsubscribe();
+        }
     }
 }
