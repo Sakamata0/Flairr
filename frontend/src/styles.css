@@ -1,0 +1,170 @@
+:root {
+  --primary-color: #EDF1D6;
+  --secondary-color: #9DC08B;
+  --third-color: #609966;
+  --fourth-color: #40513B;
+  --flairr-header-height: 80px;
+  --spacing-between-sections: 20px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "anek-bangla-variable", sans-serif;
+  background-color: var(--primary-color);
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--third-color);
+  border-radius: 100vh;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.edit-profile-dialog .mat-mdc-dialog-surface {
+  border-radius: 25px !important;
+  max-height: none !important;
+  overflow: auto !important;
+  padding: 0;
+}
+
+.edit-profile-dialog #main-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 25px;
+  background: white;
+  overflow: auto;
+}
+
+.mat-mdc-dialog-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Base styles for your dialogs */
+.custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+.custom-journey-creation-dialog .mat-mdc-dialog-surface {
+  width: 600px !important;
+  height: auto !important;
+  max-width: 90vw !important; /* allow responsiveness even at larger screens */
+  max-height: 90vh !important;
+  padding: 12px 16px !important;
+  background-color: #fff !important;
+  color: #000 !important;
+  font-family: "anek-bangla-variable", sans-serif, "Helvetica Neue", sans-serif;
+  border-radius: 25px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Medium devices (tablets, etc.) */
+@media (max-width: 768px) {
+  .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+  .custom-journey-creation-dialog .mat-mdc-dialog-surface {
+    width: 90vw !important;
+    height: auto !important;
+    border-radius: 20px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* Small devices (phones) */
+@media (max-width: 400px) {
+  .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
+  .custom-journey-creation-dialog .mat-mdc-dialog-surface {
+    width: 95vw !important;
+    height: auto !important;
+    border-radius: 16px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #000;
+}
+
+
+.hashtag {
+  color: #609966;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hashtag:hover {
+  text-decoration: underline;
+}
+
+.close-btn {
+  border: none;
+  background-image: url('/assets/icons/general-icons/close-symbol.png');
+  background-size: 80%;
+  background-position: center center;
+  background-color: transparent;
+  border-radius: 10px;
+  width: 35px;
+  height: 35px;
+  font-size: 1.6em;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.3s ease, background-image 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: var(--third-color);
+  background-image: url('/assets/icons/general-icons/close-symbol-hover.png');
+  color: #fff;
+}
+
+::ng-deep .custom-dialog-container {
+  overflow: visible;
+}
+
+::ng-deep .mat-dialog-container {
+  padding: 0;
+  overflow: visible;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  z-index: 9999;
+  font-size: 3em;
+  font-family: 'Pacifico', cursive;
+  font-weight: 500;
+}
+
+.loading-screen h2 {
+  animation: pulse 1s alternate infinite;
+}
+
+@keyframes pulse {
+  from {
+    opacity: .3;
+  }
+  to {
+    opacity: 1;
+  }
+}

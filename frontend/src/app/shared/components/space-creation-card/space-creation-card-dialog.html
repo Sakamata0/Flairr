@@ -1,0 +1,86 @@
+<h2 class="header-dialog" mat-dialog-title>Create Your Space</h2>
+<form #f="ngForm" action="">
+<mat-dialog-content class="content-dialog">
+  <!-- upper section -->
+  <div class="flurr-upper">
+    <div class="user-info">
+      <img [src]="user()?.avatarImg" alt="avatar-example" />
+    </div>
+    <div class="user-details">
+      <h4>{{ user()?.fullName }}</h4>
+      <!-- select -->
+      <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
+        <!--<mat-label>Choose privacy</mat-label>-->
+        <mat-select placeholder="public" [(ngModel)]="model.selectedPrivacy" name="selectedPrivacy">
+          <mat-option value="public">public</mat-option>
+          <mat-option value="private">private</mat-option>
+          <mat-option value="friends">friends</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- form section -->
+  <div class="journey-inputs">
+    <mat-form-field appearance="fill" class="journey-field">
+      <mat-label>Space name</mat-label>
+      <input
+        required
+        matInput
+        placeholder="What do you want to call your Space?"
+        [(ngModel)]="model.spaceName"
+        name="spaceName"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="journey-field">
+      <mat-label>Choose Collaborators (optional)</mat-label>
+      <input
+        matInput
+        placeholder="eg: username1, username2, username3..."
+        [(ngModel)]="model.collaborators"
+        name="collaborators"
+      />
+    </mat-form-field>
+
+    <!-- first Flurr textarea -->
+    <mat-form-field appearance="fill" class="flurr-textarea">
+      <mat-label>Bio</mat-label>
+      <textarea
+        required
+        matInput
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="3"
+        name="spaceBio"
+        [(ngModel)]="model.spaceBio"
+        placeholder="Now, share with us your bio..."
+      ></textarea>
+    </mat-form-field>
+  </div>
+
+  <!-- bottom section -->
+  <!--<div class="flurr-bottom">
+    <button class="icon">
+      <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
+      <span>Image</span>
+    </button>
+    <button class="icon">
+      <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
+      <span>Video</span>
+    </button>
+    <button class="icon">
+      <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
+      <span>Tags</span>
+    </button>
+    <button class="icon">
+      <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
+      <span>Location</span>
+    </button>
+  </div>-->
+</mat-dialog-content>
+
+<mat-dialog-actions class="footer-dialog">
+  <button class="btn" id="flurrBtn" matButton [disabled]=f.invalid (click)="submit()">Create Space!</button>
+</mat-dialog-actions>
+</form>

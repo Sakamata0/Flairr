@@ -1,0 +1,271 @@
+
+<!-- 
+<div class="login-page">
+  <div class="login">
+    <div class="login-card">
+      <h1>Sign up to Create Your Journeys</h1>
+      <span>Enter your details to create your account</span>
+
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+        
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Full name</mat-label>
+          <input
+            required
+            matInput
+            name="fullName"
+            [(ngModel)]="model.fullName"
+            #fullNameRef="ngModel"
+            placeholder="Insert your full name please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="fullNameRef.invalid && (fullNameRef.dirty || fullNameRef.touched)">
+          <span *ngIf="fullNameRef.errors?.['required']">Full name is required.</span>
+        </div>
+
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Email</mat-label>
+          <input
+            required
+            email
+            matInput
+            name="email"
+            [(ngModel)]="model.email"
+            #emailRef="ngModel"
+            placeholder="Insert your email please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="emailRef.invalid && (emailRef.dirty || emailRef.touched)">
+          <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+          <span *ngIf="emailRef.errors?.['email']">Email format is invalid.</span>
+        </div>
+
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Password</mat-label>
+          <input
+            required
+            minlength="3"
+            matInput
+            type="password"
+            name="password"
+            [(ngModel)]="model.password"
+            #passwordRef="ngModel"
+            placeholder="Insert your password please"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="passwordRef.invalid && (passwordRef.dirty || passwordRef.touched)">
+          <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+          <span *ngIf="passwordRef.errors?.['minlength']">
+            Password must be at least 3 characters.
+          </span>
+        </div>
+
+        <mat-form-field appearance="fill" class="journey-field">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            required
+            matInput
+            type="password"
+            name="c_password"
+            [(ngModel)]="c_password"
+            #c_passwordRef="ngModel"
+            placeholder="Confirm your password please"
+            (ngModelChange)="checkPasswordMatch()"
+          />
+        </mat-form-field>
+
+        <div class="error" *ngIf="(c_passwordRef.dirty || c_passwordRef.touched)">
+          <span *ngIf="c_passwordRef.errors?.['required']">Confirm password is required.</span>
+          <span *ngIf="passwordMismatch">Passwords do not match.</span>
+        </div>
+
+        <div class="footer-login">
+          <button [disabled]="!f.valid || passwordMismatch" class="btn" id="flurrBtn" matButton>
+            Login!
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="login-illustration">
+    <img src="assets/images/illustration.png" alt="illustration">
+  </div>
+</div> -->
+
+
+<div class="layout">
+  <div class="poster">
+    <div class="text">
+      <h3>Create, Learn, Evolve</h3>
+      <h2>Your passion deserves a journey</h2>
+    </div>
+    <img src="assets/images/signin/flairr_example.png" alt="">
+  </div>
+  <div class="main-container">
+    <h1 class="logo">Flairr.</h1>
+    <div class="sign-in-container">
+      
+      <h2>Get Started Now</h2>
+      <h4>Enter your credentials to access your account</h4>
+
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)" novalidate>
+
+        <div class="input-form">
+          <label for="fullName">Full Name</label>
+
+          <div class="input-box"
+              [class.invalid]="fullNameRef.invalid && (fullNameRef.touched || f.submitted) || errorMessage">
+            
+            <img src="assets/icons/signin/user.svg" class="left-icon">
+
+            <input 
+              type="text"
+              placeholder="Enter your full name"
+              id="fullName"
+              name="fullName"
+              [(ngModel)]="model.fullName"
+              #fullNameRef="ngModel"
+              required
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="fullNameRef.invalid && (fullNameRef.touched || f.submitted)">
+            <span *ngIf="fullNameRef.errors?.['required']">Full Name is required.</span>
+          </div>
+        </div>
+
+        <div class="input-form">
+          <label for="email">Email</label>
+
+          <div class="input-box"
+              [class.invalid]="emailRef.invalid && (emailRef.touched || f.submitted) || errorMessage">
+            
+            <img src="assets/icons/signin/user.svg" class="left-icon">
+
+            <input 
+              type="email"
+              placeholder="Enter your email address"
+              id="email"
+              name="email"
+              [(ngModel)]="model.email"
+              #emailRef="ngModel"
+              required
+              email
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="emailRef.invalid && (emailRef.touched || f.submitted)">
+            <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailRef.errors?.['email']">Invalid email format.</span>
+          </div>
+        </div>
+
+        <div class="input-form">
+          <label for="password">Password</label>
+
+          <div class="input-box"
+              [class.invalid]="passwordRef.invalid && (passwordRef.touched || f.submitted) || errorMessage">
+
+            <img src="assets/icons/signin/key.svg" class="left-icon">
+
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              id="password"
+              [(ngModel)]="model.password"
+              #passwordRef="ngModel"
+              placeholder="Password"
+              minlength="6"
+              required
+            >
+
+            <img 
+              [src]="'assets/icons/signin/' + (showPassword ? 'visible.svg' : 'hide.svg')" 
+              class="right-icon" 
+              (click)="showPassword = !showPassword"
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="passwordRef.invalid && (passwordRef.touched || f.submitted)">
+            <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+            <span *ngIf="passwordRef.errors?.['minlength']">Minimum 6 characters.</span>
+          </div>
+        </div>
+
+        <div class="input-form">
+          <label for="confirmPassword">Confirm Password</label>
+
+          <div class="input-box"
+              [class.invalid]="checkPasswordMissmatch() && (confirmPasswordRef.touched || f.submitted) || errorMessage">
+
+            <img src="assets/icons/signin/key.svg" class="left-icon">
+
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              name="confirmPassword"
+              id="confirmPassword"
+              [(ngModel)]="model.confirmPassword"
+              #confirmPasswordRef="ngModel"
+              placeholder="Password"
+              minlength="6"
+              required
+            >
+
+            <img 
+              [src]="'assets/icons/signin/' + (showConfirmPassword ? 'visible.svg' : 'hide.svg')" 
+              class="right-icon" 
+              (click)="showConfirmPassword = !showConfirmPassword"
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="checkPasswordMissmatch() && (confirmPasswordRef.touched || f.submitted)">
+            <span>The confirm password must match the password.</span>
+          </div>
+        </div>
+
+        <span class="error flx-spcbtwn w-100" *ngIf="errorMessage">{{ errorMessage }}</span>
+
+        <div class="flx-spcbtwn">
+          <label for="rememberMe" class="gp-5 flx-spcbtwn pointer">
+            <input type="checkbox" name="rememberMe" id="rememberMe" [(ngModel)]="checkPolicyTerms">
+            I agree to the <a href="" class="footer-link">Terms</a> & <a href="" class="footer-link">Privacy</a>
+          </label>
+          <button id="signin" [disabled]="f.invalid">
+            Sign up
+          </button>
+        </div>
+      </form>
+      <div class="alternative">
+        <div class="title flx-spcbtwn">
+          <div><hr></div>
+          <span>or register with</span>
+          <div><hr></div>
+        </div>
+        <div class="platforms">
+          <div><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
+          <div><img src="assets/icons/signin/google.svg" alt="google"></div>
+          <div><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
+          <div><img src="assets/icons/signin/github.svg" alt="github"></div>
+        </div>
+        <div class="reg-container">
+          <span>Already have an account ?</span>
+          <a routerLink="/signin" class="green-link">Login</a>
+        </div>
+      </div>
+
+    </div>
+    <div class="footer">
+      <h4>By signing in to Flairr you agree to our</h4>
+      <h4><a href="" class="footer-link">Terms of Service</a> and <a href="" class="footer-link">Privacy Policy</a></h4>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+
+.layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1900px;
+    margin: 0 auto;
+    padding: var(--spacing-between-sections);
+}
+
+/* Placeholder (nice right panel when no thread is selected) */
+.chat-placeholder {
+  height: calc(84vh - 40px); /* roughly same height as sidebar area */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  color: #40513b;
+}
+
+.placeholder-card {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  background: transparent;
+  border-radius: 14px;
+  padding: 22px;
+  max-width: 520px;
+  width: 100%;
+  height: 84vh;
+  background-color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+/* illustration */
+.placeholder-illustration {
+  flex: 0 0 96px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* body text */
+.placeholder-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.placeholder-body h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #213723;
+  font-weight: 700;
+}
+.placeholder-body p {
+  margin: 0 0 14px 0;
+  color: #6b7f68;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 440px;
+}
+
+/* actions */
+.placeholder-actions {
+  display:flex;
+  gap: 10px;
+}
+.btn-secondary {
+  background: #609966;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-secondary:hover { background: #4f8654; }
+
+/* small screens: stack vertically */
+@media (max-width: 900px) {
+  .placeholder-card { flex-direction: column; text-align: center; gap: 12px; }
+  .placeholder-illustration { margin-top: 4px; }
+  .placeholder-body h3 { font-size: 18px; }
+}

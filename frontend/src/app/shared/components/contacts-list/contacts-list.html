@@ -1,0 +1,66 @@
+<aside class="sidebar" role="navigation" aria-label="Conversations">
+  <div class="sidebar-header">
+    <div class="sidebar-legend">Messages</div>
+  </div>
+
+  <div class="search" role="search">
+    <label class="search-wrap" aria-hidden="true">
+      <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="11" cy="11" r="5" stroke="currentColor" stroke-width="1.6" fill="none"/>
+      </svg>
+
+      <input
+        class="search-input"
+        type="search"
+        placeholder="Search conversations"
+        [(ngModel)]="query"
+        (keydown.escape)="clearSearch()"
+        aria-label="Search conversations"
+      />
+    </label>
+  </div>
+
+  <div class="sidebar-filter" role="tablist" aria-label="Conversation filters">
+    <button
+      type="button"
+      [ngClass]="{ 'active': selectedFilter === 'All' }"
+      (click)="setFilter('All')"
+      role="tab"
+      aria-selected="{{ selectedFilter === 'All' }}">
+      All
+    </button>
+
+    <button
+      type="button"
+      [ngClass]="{ 'active': selectedFilter === 'Unread' }"
+      (click)="setFilter('Unread')"
+      role="tab"
+      aria-selected="{{ selectedFilter === 'Unread' }}">
+      Unread
+    </button>
+  </div>
+
+  <div class="message-list" role="list" tabindex="0" (keydown.ArrowDown)="focusNext()" (keydown.ArrowUp)="focusPrev()">
+    <ng-container *ngIf="filteredContacts.length; else emptyState">
+      <div
+        *ngFor="let c of filteredContacts; trackBy: trackById; let i = index"
+        class="message-row"
+        role="listitem"
+        [attr.data-index]="i"
+        [class.active]="selected?.id === c.id"
+        (click)="selectContact(c)"
+        (keydown.enter)="selectContact(c)"
+        tabindex="0"
+        aria-label="Open conversation with {{ c.name }}"
+      >
+        <!-- pass contact to child message component; if your component accepts a different input name, change it accordingly -->
+        <app-message-component [contact]="c"></app-message-component>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyState>
+      <div class="empty">No conversations found.</div>
+    </ng-template>
+  </div>
+</aside>

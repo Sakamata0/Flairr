@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="left">
+    <div class="image">
+      <img
+        [src]="contact.avatar || 'assets/images/profile-picture-test.jpg'"
+        id="photo"
+        height="53"
+        alt="{{ contact.name || 'avatar' }}"
+      >
+    </div>
+
+    <div class="info">
+      <h4 class="username">{{ contact.name || 'Unknown' }}</h4>
+
+      <span class="span">
+        <p class="text">{{ contact.lastMessage || '' }}</p>
+        <p>&ThickSpace;
+          {{ contact.lastAt ? (contact.lastAt | date:'shortTime') : '' }}
+        </p>
+      </span>
+    </div>
+  </div>
+
+  <div class="right" *ngIf="contact.unreadCount && contact.unreadCount !== 0">
+    <span class="bubble">
+      {{ (contact.unreadCount > 9) ? '+ 9' : contact.unreadCount }}
+    </span>
+  </div>
+</div>

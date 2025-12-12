@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="https://use.typekit.net/tjl8ldc.css">
+
+<div class="popup-container">
+  <h3>Comments</h3>
+
+  <div *ngIf="comments.length === 0" class="no-comments">
+    <p>No comments yet — be the first to write one!</p>
+  </div>
+
+<comment-tree [comments]="comments" [currentUser]="data.currentUser"></comment-tree>
+
+  <div class="add-comment">
+    <textarea [(ngModel)]="text" cols="60" rows="3" placeholder="Add a new comment..."></textarea>
+    <br>
+    <button (click)="addNewRootComment()">Add Comment</button>
+  </div>
+
+  <button class="close-btn" (click)="closePopup()">Close</button>
+</div>

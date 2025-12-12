@@ -1,0 +1,20 @@
+<div class="container">
+    <div class="buttons">
+        <button
+            [class.selected]="mode === 'all'"
+            (click)="changeMode('all')"
+        >All
+        </button>
+        <button
+            [class.selected]="mode === 'unread'"
+            (click)="changeMode('unread')"
+        >Unread</button>
+        <button
+            [class.selected]="mode === 'read'"
+            (click)="changeMode('read')"
+        >Read</button>
+    </div>
+    <button>
+        <img src="assets/icons/spaces-card/settings.png" alt="Settings_image">
+    </button>
+</div>

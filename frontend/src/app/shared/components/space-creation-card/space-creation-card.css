@@ -1,0 +1,382 @@
+/* Styles for the Flurr Creation Card Dialog */
+.header-dialog {
+    font-size: 1.75rem;
+    font-family: 'Pacifico', cursive;
+    text-align: center;
+}
+
+.content-dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.flurr-upper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 15px;
+    align-items: center;
+}
+
+.user-info {
+    width: 50px;
+    height: 50px;
+    border-radius: 9999px;
+}
+
+.user-info img {
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+}
+
+.user-details p{
+    padding: 0;
+    margin: 0;
+}
+
+.user-details h4{
+    padding: 0;
+    margin: 0;
+    font-weight: 600;
+}
+
+.flurr-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  background-color: #F5F5F0;
+  padding: 10px 0;
+  border-radius: 15px;
+}
+
+.icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  cursor: pointer;
+  gap: 5px;
+  font-size: medium;
+  font-weight: 500;
+  border: none;
+  background-color: transparent;
+  border-radius: 10px;
+  padding: 1px 12px;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.icon:hover {
+  background-color: #E0E0D1;
+  transform: scale(1.03);
+}
+
+
+.icon img {
+    width: 20px;
+    height: 20px;
+}
+
+.flurr-select {
+  font-size: 15px;
+  --mdc-outlined-text-field-container-shape: 15px;
+}
+
+#journey-select {
+  width: 200px;
+}
+
+#privacy-select {
+    width: 120px;
+}
+
+/* Reduce overall component height */
+::ng-deep .flurr-select .mat-mdc-form-field-flex {
+  height: 32px !important;           /* Adjust: smaller height */
+  min-height: 32px !important;
+  align-items: center;
+}
+
+/* Tighten the inner padding */
+::ng-deep .flurr-select .mat-mdc-form-field-infix {
+  padding: 0 8px !important;         /* Reduce vertical space */
+  min-height: 32px !important;
+}
+
+/* Reduce the select trigger height (the clickable area) */
+::ng-deep .flurr-select .mat-mdc-select-trigger {
+  height: 32px !important;
+  line-height: 32px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Reduce label space (if label is present) */
+::ng-deep .flurr-select .mdc-notched-outline__notch {
+  padding: 0 !important;
+}
+
+/* Optional: smaller arrow icon */
+::ng-deep .flurr-select .mat-mdc-select-arrow {
+  transform: scale(0.8);
+}
+
+
+/* Apply background and border adjustments deep inside Material components */
+::ng-deep .flurr-select .mdc-text-field--outlined {
+  background-color: #f5f5f0 !important;
+  border-radius: 15px !important;
+}
+
+/* Outline color */
+::ng-deep .flurr-select .mdc-notched-outline__leading,
+::ng-deep .flurr-select .mdc-notched-outline__trailing {
+  border-color: transparent !important;
+}
+
+/* Focus outline */
+/*::ng-deep .flurr-select.mat-focused .mdc-notched-outline__leading,
+::ng-deep .flurr-select.mat-focused .mdc-notched-outline__trailing {
+  border-color: #a8a8a0 !important;
+  border-radius: 15px;
+}*/
+
+/* Text color and font */
+::ng-deep .flurr-select .mat-mdc-select-value {
+  font-size: 15px !important;
+  color: #333 !important;
+}
+
+/* Remove the bottom extra space */
+::ng-deep .flurr-select .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+/* Style the opened dropdown panel background */
+::ng-deep .mat-mdc-select-panel {
+  background-color: #f5f5f0 !important;
+  border-radius: 12px !important;
+  padding: 4px 0 !important;
+}
+
+/* Each option’s base style */
+::ng-deep .mat-mdc-option {
+  background-color: #f5f5f0 !important;
+  color: #333 !important;
+  font-size: 15px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.15s ease;
+}
+
+/* Hover state */
+::ng-deep .mat-mdc-option:hover {
+  background-color: #E0E0D1 !important;
+}
+
+/* Focused (keyboard focus) */
+::ng-deep .mat-mdc-option.mdc-list-item--selected,
+::ng-deep .mat-mdc-option.mdc-list-item--activated {
+  background-color: #E0E0D1 !important;
+  color: #000 !important;
+  font-weight: 500;
+}
+
+/* Optional: round the top and bottom corners for first/last items */
+::ng-deep .mat-mdc-option:first-child {
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+}
+
+::ng-deep .mat-mdc-option:last-child {
+  border-bottom-left-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+.flurr-form {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.flurr-textarea {
+  width: 100%;
+}
+
+.flurr-textarea ::ng-deep .mat-mdc-text-field-wrapper,
+.flurr-textarea ::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: transparent !important;
+  border-radius: 8px 8px 0 0;
+  padding: 6px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.flurr-textarea ::ng-deep textarea.mat-input-element,
+.flurr-textarea ::ng-deep textarea.mat-mdc-text-field-input {
+  font-size: 16px;
+  padding: 8px;
+  background: transparent; 
+  box-shadow: none;
+  outline: none;
+  resize: vertical;
+}
+
+/* Focus overlay (optional background glow) */
+::ng-deep .flurr-textarea .mat-mdc-form-field-focus-overlay {
+  background-color: rgba(96, 153, 102, 0.08) !important;
+}
+
+/* Label color when focused */
+::ng-deep .flurr-textarea.mat-focused .mdc-floating-label,
+::ng-deep .flurr-textarea .mat-mdc-floating-label.mdc-floating-label--float-above {
+  color: #609966 !important;
+  font-weight: 500 !important;
+}
+
+/* Underline (ripple) color when focused */
+::ng-deep .flurr-textarea.mat-focused .mdc-line-ripple::after {
+  border-bottom-color: #609966 !important;
+}
+
+/* Optional: keep label green if it has a value (after typing) */
+::ng-deep .flurr-textarea.mat-form-field-should-float .mdc-floating-label {
+  color: #609966 !important;
+}
+
+
+/* Container spacing */
+.journey-inputs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Apply same style as .flurr-textarea */
+.journey-field {
+  width: 100%;
+}
+
+.journey-field ::ng-deep .mat-mdc-text-field-wrapper,
+.journey-field ::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: transparent !important;
+  border-radius: 8px 8px 0 0;
+  padding: 6px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Input styling (not textarea now) */
+.journey-field ::ng-deep input.mat-input-element,
+.journey-field ::ng-deep input.mat-mdc-text-field-input {
+  font-size: 16px;
+  padding: 8px;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Focus overlay */
+::ng-deep .journey-field .mat-mdc-form-field-focus-overlay {
+  background-color: rgba(96, 153, 102, 0.08) !important;
+}
+
+/* Label color when focused */
+::ng-deep .journey-field.mat-focused .mdc-floating-label,
+::ng-deep .journey-field .mat-mdc-floating-label.mdc-floating-label--float-above {
+  color: #609966 !important;
+  font-weight: 500 !important;
+}
+
+/* Underline (ripple) color when focused */
+::ng-deep .journey-field.mat-focused .mdc-line-ripple::after {
+  border-bottom-color: #609966 !important;
+}
+
+/* Keep label green when it has a value */
+::ng-deep .journey-field.mat-form-field-should-float .mdc-floating-label {
+  color: #609966 !important;
+}
+
+
+
+.footer-dialog {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+}
+
+.btn {
+    width: 200px;
+    height: 50px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#flurrBtn {
+    background-color: #609966;
+    color: #F5F5F0;
+    transition: all 0.3s ease;
+}
+
+#flurrBtn:hover {
+    background-color: #4a7c52;   
+    color: white;
+}
+
+/* style when button is disabled */
+:host ::ng-deep #flurrBtn.mat-button-disabled,
+:host ::ng-deep #flurrBtn:disabled {
+  background-color: #d3d3d3 !important; /* light gray */
+  color: #888 !important;                /* darker gray text */
+  cursor: not-allowed !important;
+  border-color: #d3d3d3 !important;
+  opacity: 1 !important;                 /* override Material dimming */
+}
+
+/* Responsive adjustments */
+/* Medium devices (tablets, etc.) */
+@media (max-width: 768px) {
+  .footer-dialog {
+      margin-top: 0px;
+  }
+  .btn {
+      width: 100%;
+      height: 40px;
+      font-size: 0.9rem;
+  }
+  #flurrBtn {
+      margin-right: 8px;
+  }
+
+  .icon {
+      font-size: 0.9rem;
+      padding: 0px 8px;
+  }
+  
+  .icon:hover {
+      transform: scale(1);
+  }
+}
+/* Small devices (phones) */
+@media (max-width: 400px) {
+  .btn {
+      width: 100px;
+      height: 45px;
+      font-size: 0.8rem;
+  } 
+}

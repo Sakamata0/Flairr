@@ -1,0 +1,100 @@
+.popup-container {
+  background: #EDF1D6;
+  color: #40513B;
+  border-radius: 16px;
+  padding: 20px;
+  width: 95%;
+  max-width: 800px;
+  max-height: 80vh;
+  margin: 0 auto;
+  overflow-y: auto;
+  overflow-x: show; 
+  box-shadow: 0 4px 20px rgba(64, 81, 59, 0.25);
+  font-family: sans-serif !important;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+
+
+.popup-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #40513B;
+}
+
+.no-comments {
+  text-align: center;
+  color: #609966;
+  margin-bottom: 15px;
+  font-style: italic;
+  word-wrap: break-word;
+}
+
+.add-comment {
+  margin-top: 15px;
+  border-top: 1px solid #9DC08B;
+  padding-top: 10px;
+}
+
+.add-comment textarea {
+  width: 100%;
+  resize: none;
+  background: #F8FAF3;
+  color: #40513B;
+  border: 1px solid #9DC08B;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  word-wrap: break-word;
+}
+
+.add-comment button {
+  background: #609966;
+  font-weight: bold;
+  color: #EDF1D6;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin-top: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.1s;
+}
+
+.add-comment button:hover {
+  background: #40513B;
+}
+
+.close-btn {
+  display: block;
+  margin: 15px auto 0;
+  background: #9dc08b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.1s;
+}
+
+.close-btn:hover {
+  background: #609966;
+  color: #EDF1D6;
+  transform: scale(1.05);
+}
+
+
+h3{
+  font-family: sans-serif;
+  font-weight: 500;
+  color: black;
+}

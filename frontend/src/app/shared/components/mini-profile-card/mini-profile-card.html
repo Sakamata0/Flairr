@@ -1,0 +1,73 @@
+<!-- src/app/shared/components/mini-profile-card/mini-profile-card.html -->
+<ng-container *ngIf="userService.currentUser() as user; else guestTpl">
+  <div class="profile-card">
+    <!-- Banner -->
+    <div class="banner">
+      <img
+        [src]="user.coverImg || 'assets/images/default-banner-image.png'"
+        alt="Banner"
+        class="banner-img"
+      />
+      <img
+        [src]="user.avatarImg || 'assets/images/default-profile-picture.png'"
+        alt="Profile"
+        class="profile-img"
+      />
+    </div>
+
+    <!-- Info -->
+    <div class="content">
+      <h2 class="name">{{ user.fullName || 'Unnamed' }}</h2>
+      <p class="handle">{{ user.email ? (user.email.split('@')[0]) : 'handle' }}</p>
+
+      <div class="stats">
+        <div>
+          <p class="stat-number">{{ formatFollowerCount(user.flurrs.length) }}</p>
+          <p class="stat-label">Flurrs</p>
+        </div>
+        <div>
+          <p class="stat-number">{{ formatFollowerCount(user.followers.length) }}</p>
+          <p class="stat-label">Followers</p>
+        </div>
+        <div>
+          <p class="stat-number">{{ formatFollowerCount(user.following.length) }}</p>
+          <p class="stat-label">Following</p>
+        </div>
+      </div>
+
+      <button class="profile-btn" [routerLink]="['/profile', user.userID]">My Profile</button>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #guestTpl>
+  <div class="profile-card">
+    <!-- Banner -->
+    <div class="banner">
+      <img src="assets/images/default-banner-image.png" alt="Banner" class="banner-img" />
+      <img src="assets/images/default-profile-picture.png" alt="Profile" class="profile-img" />
+    </div>
+
+    <div class="content">
+      <h2 class="name">Guest</h2>
+      <p class="handle">guest</p>
+
+      <div class="stats">
+        <div>
+          <p class="stat-number">0</p>
+          <p class="stat-label">Flurrs</p>
+        </div>
+        <div>
+          <p class="stat-number">0</p>
+          <p class="stat-label">Followers</p>
+        </div>
+        <div>
+          <p class="stat-number">0</p>
+          <p class="stat-label">Following</p>
+        </div>
+      </div>
+
+      <button class="profile-btn" routerLink="/login">Log in</button>
+    </div>
+  </div>
+</ng-template>

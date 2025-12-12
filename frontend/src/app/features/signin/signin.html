@@ -1,0 +1,118 @@
+<div class="layout">
+  <div class="poster">
+    <div class="text">
+      <h3>Create, Learn, Evolve</h3>
+      <h2>Your passion deserves a journey</h2>
+    </div>
+    <img src="assets/images/signin/flairr_example.png" alt="">
+  </div>
+  <div class="main-container">
+    <h1 class="logo">Flairr.</h1>
+    <div class="sign-in-container">
+      
+      <h2>Sign in</h2>
+      <h4>Enter your email and password to continue</h4>
+
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)" novalidate>
+
+        <div class="input-form">
+          <label for="email">Email</label>
+
+          <div class="input-box"
+              [class.invalid]="emailRef.invalid && (emailRef.touched || f.submitted) || errorMessage">
+            
+            <img src="assets/icons/signin/user.svg" class="left-icon">
+
+            <input 
+              type="email"
+              placeholder="Enter your email address"
+              id="email"
+              name="email"
+              [(ngModel)]="model.email"
+              #emailRef="ngModel"
+              required
+              email
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="emailRef.invalid && (emailRef.touched || f.submitted)">
+            <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailRef.errors?.['email']">Invalid email format.</span>
+          </div>
+        </div>
+
+        <div class="input-form">
+          <div class="flx-spcbtwn">
+            <label for="password">Password</label>
+            <a href="#" class="green-link">Forgot password</a>
+          </div>
+
+          <div class="input-box"
+              [class.invalid]="passwordRef.invalid && (passwordRef.touched || f.submitted) || errorMessage">
+
+            <img src="assets/icons/signin/key.svg" class="left-icon">
+
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              id="password"
+              [(ngModel)]="model.password"
+              #passwordRef="ngModel"
+              placeholder="Password"
+              minlength="6"
+              required
+            >
+
+            <img 
+              [src]="'assets/icons/signin/' + (showPassword ? 'visible.svg' : 'hide.svg')" 
+              class="right-icon" 
+              (click)="showPassword = !showPassword"
+            >
+          </div>
+
+          <div class="error"
+              *ngIf="passwordRef.invalid && (passwordRef.touched || f.submitted)">
+            <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+            <span *ngIf="passwordRef.errors?.['minlength']">Minimum 6 characters.</span>
+          </div>
+        </div>
+
+        <span class="error flx-spcbtwn w-100" *ngIf="errorMessage">{{ errorMessage }}</span>
+
+        <div class="flx-spcbtwn">
+          <label for="rememberMe" class="gp-5 flx-spcbtwn pointer">
+            <input type="checkbox" name="rememberMe" id="rememberMe" [(ngModel)]="model.rememberMe">
+            Remember me
+          </label>
+
+          <button id="signin" [disabled]="f.invalid">
+            Sign in
+          </button>
+        </div>
+      </form>
+      <div class="alternative">
+        <div class="title flx-spcbtwn">
+          <div><hr></div>
+          <span>or login with</span>
+          <div><hr></div>
+        </div>
+        <div class="platforms">
+          <div><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
+          <div><img src="assets/icons/signin/google.svg" alt="google"></div>
+          <div><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
+          <div><img src="assets/icons/signin/github.svg" alt="github"></div>
+        </div>
+        <div class="reg-container">
+          <span>Don't have an account ?</span>
+          <a routerLink="/signup" class="green-link">Register</a>
+        </div>
+      </div>
+
+    </div>
+    <div class="footer">
+      <h4>By signing in to Flairr you agree to our</h4>
+      <h4><a href="" class="footer-link">Terms of Service</a> and <a href="" class="footer-link">Privacy Policy</a></h4>
+    </div>
+  </div>
+</div>

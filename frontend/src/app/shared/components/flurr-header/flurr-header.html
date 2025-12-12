@@ -1,0 +1,75 @@
+<header class="site-header" role="banner">
+    <div class="left">
+        <div class="logo">Flairr.</div>
+
+        <div class="search-wrap" aria-hidden="false">
+        <div class="search-container" role="search">
+            <input id="search-input"
+                type="text"
+                placeholder="Search"
+                aria-label="Search"
+                (input)="onSearch($event)" />
+            <i class="fa fa-magnifying-glass" aria-hidden="true"></i>
+        </div>
+        </div>
+    </div>
+
+    <nav class="center" role="navigation" aria-label="Main navigation">
+        <button *ngFor="let item of items; let i = index"
+                class="icon-item"
+                [class.active]="activeKey === item.key"
+                [attr.aria-pressed]="activeKey === item.key"
+                (click)="toggle(item.key, $event)"
+                (keydown)="onKeydown($event, i)"
+                type="button"
+                [attr.title]="item.label"
+                [routerLink]="['/',item.key]">
+        <span class="icon-bubble" aria-hidden="true">
+            <img
+            [src]="'/assets/icons/header/' + item.key + '.svg'"
+            [attr.alt]="item.label"
+            width="30"
+            height="30"
+            (error)="onImgError($event, item.key)"
+            />
+        </span>
+        <span class="icon-label">{{ item.label }}</span>
+        </button>
+    </nav>
+
+    <div class="right">
+        <a routerLink="/notifications">
+            <img src="assets/icons/header/notifications.svg" alt="notifications-icon">
+        </a>
+        <a [routerLink]="['/messages']" routerLinkActive="active" aria-label="Messages">
+            <img src="assets/icons/header/messages.svg" alt="messages-icon">
+        </a>
+
+        <div class="avatar-wrap" title="Profile">
+        <img class="avatar-img"
+            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop&crop=faces"
+            alt="User avatar" />
+
+        <!-- small toggle button overlay -->
+        <button class="avatar-toggle"
+                type="button"
+                aria-haspopup="true"
+                [attr.aria-expanded]="profileOpen"
+                (click)="toggleProfile($event)"
+                (keydown.enter)="toggleProfile($event)"
+                (keydown.space)="$event.preventDefault(); toggleProfile($event)"
+                aria-label="Open profile menu">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <!-- dropdown -->
+        <div class="avatar-menu" *ngIf="profileOpen" role="menu" (click)="$event.stopPropagation()">
+            <a role="menuitem" href="/profile">Profile</a>
+            <a role="menuitem" href="/settings">Settings</a>
+            <a (click)="openLogoutDialog()" role="menuitem">Log out</a>
+        </div>
+        </div>
+    </div>
+</header>

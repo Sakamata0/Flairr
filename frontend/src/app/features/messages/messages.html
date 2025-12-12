@@ -1,0 +1,41 @@
+<div class="layout">
+  <!-- contacts list emits openThread which we handle in the parent -->
+  <app-contacts-list
+    [contacts]="contacts" 
+    (openThread)="openConversation($event)">
+  </app-contacts-list>
+
+  <!-- render chat view only when a thread/contact is selected -->
+  <ng-container *ngIf="selectedThread; else placeholder">
+    <!-- pass the selected thread/contact to ChatView -->
+    <app-chat-view [thread]="selectedThread"></app-chat-view>
+  </ng-container>
+
+  <ng-template #placeholder>
+    <div class="chat-placeholder" role="region" aria-label="No conversation selected">
+      <div class="placeholder-card">
+        <div class="placeholder-illustration" aria-hidden="true">
+          <!-- simple decorative circle + chat icon (no external assets required) -->
+          <svg width="84" height="84" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="ph">
+            <rect x="1" y="1" width="22" height="16" rx="3" fill="#F1F6EB"/>
+            <path d="M4 6h12M4 10h8" stroke="#609966" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18" cy="6" r="3" fill="#609966"/>
+          </svg>
+        </div>
+
+        <div class="placeholder-body">
+          <h3>Start a conversation</h3>
+          <p>Select a conversation on the left to begin chatting — or click the green button to start a new message.</p>
+
+          <div class="placeholder-actions">
+            <button class="btn-secondary" type="button">New message</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>
+
+<div class="loading-screen" *ngIf="loading">
+  <h2>F</h2>
+</div>

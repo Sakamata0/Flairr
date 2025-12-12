@@ -1,0 +1,17 @@
+<div class="container">
+    <header>
+    <h3>{{ title() }}</h3>
+    <a [routerLink]="'/' + link()" title="See all {{ title() }}">See all</a>
+    </header>
+    <main>
+        <h4 *ngIf="items().length == 0" id="no-items-message">
+            {{ noItemsMessage() || 'No items to display.' }}
+        </h4>
+        <div class="items-container">
+            <app-item-panel
+                *ngFor="let item of items()"
+                [info]="item">
+            </app-item-panel>
+        </div>
+    </main>
+</div>

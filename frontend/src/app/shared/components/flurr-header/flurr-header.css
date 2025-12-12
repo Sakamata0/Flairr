@@ -1,0 +1,452 @@
+:host { display:block; }
+
+/* Header layout */
+.site-header{
+    height: var(--flairr-header-height);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 8px 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    gap:18px;
+    background-color: #fff;
+}
+
+/* Left: logo + search */
+.left {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:0;
+    width: 600px;
+}
+
+.logo{
+    font-family: 'Pacifico', cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size:1.9rem;
+    padding: 6px;
+    color:#000;
+    letter-spacing:0.5px;
+    width: 160px;
+}
+
+.search-wrap{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width:400px;
+    height: 56px;
+    min-width:160px;
+}
+
+.search-container{
+    position:relative;
+    margin-left: 20ox;
+    width: 100%;
+}
+.search-container input{
+    width:100%;
+    height: 47px;
+    padding:10px 40px 10px 14px;
+    border-radius:26px;
+    border: none;
+    outline:none;
+    background-color: #EDF1D6;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    font-family: "Inter", "Helvetica Neue", sans-serif;
+    font-size:14px;
+}
+.search-container .fa-magnifying-glass{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+    pointer-events:none;
+}
+
+/* Center icons group */
+.center {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    justify-content:center;
+    flex:1;
+}
+
+/* Icon item base */
+.icon-item{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:transparent;
+    border-radius:999px;
+    cursor:pointer;
+    padding:6px;
+    transition: background .18s ease;
+    user-select:none;
+    color:#000;
+    text-decoration:none;
+    border: none;
+}
+
+/* only the active (selected) item gets the highlighted background */
+.icon-item.active {
+    background-color: #ECE6F0;
+}
+
+.icon-bubble{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:transparent;
+    transition: transform .18s ease;
+    font-size:16px;
+    
+}
+
+.icon-item:hover .icon-bubble { transform:translateY(-1px); }
+
+/* Label box: hidden by default and expands when active */
+.icon-label {
+    display:inline-block;
+    white-space:nowrap;
+    overflow:hidden;
+    max-width:0;
+    opacity:0;
+    transform:translateX(-6px);
+    transition: max-width .28s ease, opacity .18s ease .06s, transform .18s ease .06s;
+    font-size:21px;
+    padding-right:10px;
+    color:#111;
+    font-family: 'Pacifico', cursive;
+}
+
+/* Active state: show label and slightly highlight bubble */
+.icon-item.active .icon-label{
+    max-width:120px;
+    opacity:1;
+    transform:translateX(0);
+}
+.icon-item.active .icon-bubble{
+    transform: none;
+}
+
+/* Right side: notifications and avatar */
+.right {
+    display:flex;
+    align-items:center;
+    justify-content: right;
+    gap:10px;
+    width: 600px;
+}
+
+.right a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.right a img{
+    height: 30px;
+    margin-right: 25px;
+    transition: transform .18s ease;
+}
+
+.right a img:hover {
+    transform: translateY(-1px);
+}
+
+.small-btn{
+    width:38px;
+    height:38px;
+    display:inline-grid;
+    place-items:center;
+    border-radius:50%;
+    cursor:pointer;
+    background:transparent;
+    border:none;
+    transition: background .14s ease;
+}
+.small-btn:hover { background: rgba(0,0,0,0.04); }
+
+/* Wrapper keeps avatar + overlay together */
+.avatar-wrap {
+    position: relative;
+    width: 40px;   /* match your avatar sizing */
+    height: 40px;
+    display: inline-block;
+}
+
+/* avatar image */
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* small circular toggle positioned over bottom-right */
+.avatar-toggle {
+    position: absolute;
+    right: -4px;   /* nudges the button slightly outside avatar circle */
+    bottom: -4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    display: inline-grid;
+    place-items: center;
+    background: #609966;          /* white circle */
+    color: #ffffff;               /* chevron color */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    cursor: pointer;
+    padding: 0;
+    transition: transform .12s ease, background .12s ease;
+    line-height: 0;
+}
+
+/* hover / focus */
+.avatar-toggle:hover,
+.avatar-toggle:focus {
+    transform: translateY(-1px);
+    background: #609966;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(11,102,209,0.12);
+}
+
+/* rotate chevron when open (use .open on wrap or bind style via Angular) */
+.avatar-wrap.profile-open .avatar-toggle svg {
+    transform: rotate(180deg);
+    transition: transform .18s ease;
+}
+
+/* optional menu styling */
+.avatar-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 160px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(11,66,130,0.12);
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 40;
+}
+
+/* menu links */
+.avatar-menu a{
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: #111;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: left;
+}
+.avatar-menu a:hover{
+    background: rgba(11,102,209,0.06);
+}
+
+
+@media (max-width: 1024px) {
+  .left {
+    width: auto;
+    gap: 10px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    width: auto;
+    padding: 4px 8px;
+  }
+
+  .search-wrap {
+    width: auto;
+    min-width: auto;
+  }
+
+  /* Hide search input, show only icon */
+  .search-container input {
+    display: none;
+  }
+
+  .search-container {
+    width: 38px;
+    height: 38px;
+  }
+
+  .search-container .fa-magnifying-glass {
+    position: static;
+    transform: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 10px;
+  }
+
+  .right {
+    width: auto;    
+    gap: 8px;
+  }
+
+  .right a img {
+    margin-right: 15px;
+  }
+
+  .icon-label {
+    display: none;
+  }
+
+  .icon-item.active .icon-label {
+    display: none;
+  }
+}
+
+/* Mobile phone view (under 768px) - Facebook-style compact layout */
+@media (max-width: 768px) {
+  .site-header {
+    height: 56px;
+    padding: 8px 12px;
+    gap: 12px;
+  }
+
+  .left {
+    width: auto;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+    width: auto;
+    padding: 4px 6px;
+    letter-spacing: 0.2px;
+  }
+
+  .search-wrap {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .search-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-container input {
+    display: none;
+  }
+
+  .search-container .fa-magnifying-glass {
+    position: static;
+    transform: none;
+    font-size: 20px;
+    color: #0a66c2;
+  }
+
+  /* Center: Show only key icons, hide some labels */
+  .center {
+    flex: 1;
+    gap: 0;
+    justify-content: flex-start;
+  }
+
+  .icon-item {
+    padding: 4px 8px;
+  }
+
+  .icon-bubble {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .icon-label {
+    display: none !important;
+    max-width: 0;
+    opacity: 0;
+  }
+
+  /* Right side */
+  .right {
+    width: auto;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+
+  .right a img {
+    height: 32px;
+    margin-right: 8px;
+  }
+
+  .small-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .avatar-wrap {
+    width: 36px;
+    height: 36px;
+  }
+
+  .avatar-toggle {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Small phone view (under 480px) - Extra compact */
+@media (max-width: 480px) {
+  .site-header {
+    height: 52px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .search-wrap {
+    width: 32px;
+    height: 32px;
+  }
+
+  .search-container .fa-magnifying-glass {
+    font-size: 18px;
+  }
+
+  .icon-bubble {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .right a img {
+    height: 28px;
+    margin-right: 4px;
+  }
+
+  .avatar-wrap {
+    width: 32px;
+    height: 32px;
+  }
+}

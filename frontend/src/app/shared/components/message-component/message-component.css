@@ -1,0 +1,140 @@
+/* message-component.css */
+
+/* Container (row) */
+.container {
+  width: 100%;
+  height: 80px;
+  background-color: #F5F5F0;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Arial;
+  /* removed transform + transition */
+}
+
+.container:hover,
+.container:focus-within {
+  background-color: #EFEFEA; /* Only color change now */
+}
+
+/* Left area */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Avatar */
+.image {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#photo {
+  width: 53px;
+  height: 53px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: block;
+  border: 2px solid rgba(0,0,0,0.03);
+}
+
+/* Info section */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.username {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #213723;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Preview + time */
+.span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: #6b7f68;
+  font-weight: 500;
+  width: 100%;
+}
+
+.text {
+  display: inline-block;
+  max-width: calc(100% - 64px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #55695a;
+}
+
+/* Time */
+.span p:last-child {
+  margin: 0;
+  font-size: 12px;
+  color: #8a9b81;
+  min-width: 48px;
+  text-align: right;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* Right (unread bubble) */
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-left: 12px;
+}
+
+/* Unread bubble */
+.bubble {
+  background-color: #609966;
+  color: white;
+  border-radius: 999px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: none; /* removed drop shadow */
+}
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .container { 
+    height: 72px; 
+    padding: 10px; 
+    border-radius: 12px;
+  }
+  #photo {
+    width: 46px;
+    height: 46px;
+  }
+  .username { font-size: 14px; }
+  .text { font-size: 13px; max-width: calc(100% - 56px); }
+  .bubble { height: 26px; min-width: 26px; font-size: 11px; padding: 0 6px; }
+}

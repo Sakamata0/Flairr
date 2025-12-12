@@ -1,0 +1,119 @@
+<link rel="stylesheet" href="https://use.typekit.net/tjl8ldc.css">
+
+<article class="post-card" [attr.data-id]="post?.id">
+  <header class="post-header">
+    <div class="author">
+      <img class="avatar" [src]="post?.author?.avatarUrl || defaultAvatar" [alt]="post?.author?.name + ' avatar'">
+
+      <div class="meta">
+        <div class="name-row">
+          <span class="name">{{ post?.author?.name }}</span><span *ngIf="show == 0"> - </span>
+          <div  *ngIf="show == 0">
+          <button class="follow" *ngIf="!post?.author?.isFollowed" (click)="onFollow()">Follow</button>
+          <button class="following" *ngIf="post?.author?.isFollowed" (click)="onUnfollow()">Following</button>
+          </div>
+        </div>
+
+        <div class="sub">
+          <span class="time">{{ post?.createdAt | date:'short' }}</span>
+          <span class="globe"><img src="assets/icons/post/globe.png" alt="globe" class="globe-img"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-wrapper" (click)="$event.stopPropagation()">
+      <img src="assets/icons/post/menu.png"
+           alt="menu"
+           class="menu-icon-trigger"
+           (click)="toggleMenu($event)">
+
+      <div class="menu-container" *ngIf="showMenu" (click)="$event.stopPropagation()">
+        <ul class="menu-list" role="menu" aria-label="Post actions">
+          <li class="menu-item" (click)="hidePost()">
+            <img src="assets/icons/post/hide-icon.png" alt="" class="menu-icon"> Hide post
+          </li>
+          <li class="menu-item" (click)="blockUser()">
+            <img src="assets/icons/post/block-icon.png" alt="" class="menu-icon"> Block user
+          </li>
+          <li class="menu-item" (click)="reportPost()">
+            <img src="assets/icons/post/report-icon.png" alt="" class="menu-icon"> Signal (report) post
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <ng-container *ngIf="!post?.isHidden; else hiddenTpl">
+    <section class="post-content">
+      <div *ngIf="post?.title" class="journey-title">
+        <strong [innerHTML]="formatHashtags(post?.title)"></strong>
+      </div>
+
+      <p class="text" *ngIf="post?.content" [innerHTML]="formatHashtags(post?.content)"></p>
+
+      <div class="media" *ngIf="mediaCount > 0">
+        <ng-container *ngIf="firstMedia?.type === 'video'; else imageTpl">
+          <video class="media-item" controls [poster]="firstMedia?.thumbnailUrl">
+            <source [src]="firstMedia?.url" [type]="firstMedia?.mime">
+          </video>
+        </ng-container>
+
+        <ng-template #imageTpl>
+          <img class="media-item" [src]="firstMedia?.url" [alt]="firstMedia?.filename || 'post image'">
+        </ng-template>
+
+        <div class="media-count" *ngIf="mediaCount > 1">+{{ mediaCount - 1 }}</div>
+      </div>
+    </section>
+
+    <footer class="post-footer">
+      <div class="engagement">
+        <button
+          id="btn_reaction"
+          class="btn reaction"
+          (click)="onReact('like')"
+          [class.liked]="post?.userHasLiked">
+          <img [src]="post?.userHasLiked ? 'assets/icons/post/liked.png' : 'assets/icons/post/like.png'" alt="like">
+          <span class="count">{{ post?.reactions?.['like'] || 0 }}</span>
+        </button>
+
+        <button class="btn" (click)="toggleComments();openCommentPopUp()">
+          <img src="assets/icons/post/comment.png" alt="comment">
+          <span class="count">{{ post?.commentsCount || 0 }}</span>
+        </button>
+
+        <div class="spacer"></div>
+      </div>
+
+      <div class="comment-container" *ngIf="!showComments">
+        <img class="avatar-xs" [src]="currentUser?.avatarUrl || defaultAvatar" alt="me">
+        <div class="comment-pulse">
+          <div class="comment-placeholder" (click)="showComments = true" >Write your comment..</div>
+        </div>
+      </div>
+
+      <div class="comment-box" *ngIf="showComments">
+        <img class="avatar-xs" [src]="currentUser?.avatarUrl || defaultAvatar" alt="me">
+        <input class="comment-input" placeholder="Write your comment.." [(ngModel)]="newComment" (keydown.enter)="submitComment();toggleButton()"     (blur)="onCommentBlur()" autofocus (input)="toggleButton()" >
+        <button class="btn small" (click)="submitComment()" *ngIf="showButton" >Comment</button>
+      </div>
+<comment-tree
+  *ngIf="post && post.comments && post.comments.length!=0"
+  [comments]="[post.comments[post.comments.length-1]]"
+  [currentUser]="currentUser || { name: '', avatarUrl: null }">
+</comment-tree>
+
+
+    </footer>
+  </ng-container>
+
+  <ng-template #hiddenTpl>
+    <div class="hidden-post">
+      <p>This post is hidden.</p>
+      <div class="hidden-actions">
+        <button class="btn small" (click)="restorePost()">Restore</button>
+      </div>
+    </div>
+  </ng-template>
+  
+</article>
