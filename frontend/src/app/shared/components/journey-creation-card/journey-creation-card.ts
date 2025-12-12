@@ -15,7 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { Journey } from '../../model/classes/journey';
 import { UserService } from '../../../core/services/user.service';
-import { Flurr } from '../../model/classes/flurrs';
+import { JourneysService } from '../../../core/services/journeys.service';
 
 
 @Component({
@@ -72,6 +72,9 @@ export class JourneyCreationCard {
 })
 // Dialog component class
 export class JourneyCreationCardDialog {
+
+  constructor(private journeysService: JourneysService) {}
+
   // --- Injected dependencies ---
   readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
   // inject username 
@@ -90,11 +93,29 @@ export class JourneyCreationCardDialog {
   onNoClick(): void {
     this.dialogRef.close();
   }
+
+  
   submitted = false;
   onSubmit() {
-    const newJourneyID = "journey-" + crypto.randomUUID()
+    //const newJourneyID = "journey-" + crypto.randomUUID(); /** not needed */
 
-    const firstFlurr = new Flurr({
+    this.journeysService.insertJourney(this.model.journeyName)
+      .then((data) => {
+        console.log('Journey inserted:', data);
+        this.dialogRef.close();
+      })
+      .catch(err => {
+        console.error('Error inserting journey:', err);
+      });
+
+    this.submitted = true;
+  }
+
+
+}
+
+
+/*const firstFlurr = new Flurr({
       flurrID: "flurr-" + crypto.randomUUID(),
       type: "journey",
       content: this.model.flurrContent,
@@ -112,11 +133,4 @@ export class JourneyCreationCardDialog {
       ownerID: this.user()?.userID,
       privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
       fluurs: [firstFlurr.getFlurrID()]
-    }),
-
-    this.submitted = true;
-    console.log("Created journey:", this.newJourney);
-    this.dialogRef.close();
-  }
-
-}
+    }),*/

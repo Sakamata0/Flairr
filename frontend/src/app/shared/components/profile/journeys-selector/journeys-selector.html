@@ -2,7 +2,7 @@
     <header>
     <h3>Journeys</h3>
     <select name="Year" id="year-selector">
-        <option value="0" disabled>Year</option>
+        <option *NgIf="journeys().length === 0" value="0">Year</option>
         <option *ngFor="let year of years()" [value]="year">{{ year }}</option>
     </select>
     </header>

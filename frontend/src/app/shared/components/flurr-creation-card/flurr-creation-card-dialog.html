@@ -25,11 +25,14 @@
         <mat-form-field appearance="outline" class="flurr-select" id="journey-select">
           <mat-select 
             name="selectedJourney" 
-            [(ngModel)]="model.selectedJourney" 
+            [(ngModel)]="model.selectedJourneyId" 
             placeholder="Select a Journey" 
             required>
-            <mat-option *ngFor="let journey of journeys" [value]="journey.getJourneyID()">
-              {{ journey.getJourneyName() }}
+            <mat-option *NgIf="journeys().length === 0" [disabled]="true" [value]="0">
+              Add a Journey
+            </mat-option>
+            <mat-option *ngFor="let journey of journeys()" [value]="journey.id">
+              {{ journey.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>

@@ -92,7 +92,7 @@ export class Home implements OnInit {
         feedAuthorIds = [uid];
       }
       console.log("UID =", uid);
-console.log("FEED AUTHOR IDS =", feedAuthorIds);
+      console.log("FEED AUTHOR IDS =", feedAuthorIds);
 
 
       // -------------------------------------------------
