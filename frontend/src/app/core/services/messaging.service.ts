@@ -82,6 +82,52 @@ export class MessagingService implements OnDestroy {
   }
 
   /**
+   * Get conversation details including the other participant's information
+   */
+  async getConversationDetails(conversationId: string): Promise<{ otherUser: DbUserRow; conversationId: string } | null> {
+    try {
+      const currentUserId = await this.getCurrentUserId();
+
+      // Get all participants in this conversation
+      const { data: participants, error: participantsErr } = await this.supabase
+        .from('participants')
+        .select('user_id')
+        .eq('conversation_id', conversationId);
+
+      if (participantsErr) throw participantsErr;
+      if (!participants || participants.length === 0) return null;
+
+      // Find the OTHER user (not current user)
+      const otherUserId = participants
+        .map((p: any) => p.user_id)
+        .find((uid: string) => uid !== currentUserId);
+
+      if (!otherUserId) {
+        console.warn('No other user found in conversation');
+        return null;
+      }
+
+      // Fetch the other user's details
+      const { data: otherUser, error: userErr } = await this.supabase
+        .from('users')
+        .select('user_id, full_name, avatar_img')
+        .eq('user_id', otherUserId)
+        .single();
+
+      if (userErr) throw userErr;
+
+      return {
+        otherUser: otherUser,
+        conversationId: conversationId
+      };
+    } catch (err) {
+      console.error('Error getting conversation details:', err);
+      return null;
+    }
+  }
+
+
+  /**
    * Mark a conversation as read by the current user
    */
   async markConversationAsRead(conversationId: string): Promise<void> {

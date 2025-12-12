@@ -10,5 +10,5 @@ import { Contact } from '../../model/messaging.models';
   styleUrls: ['./message-component.css']
 })
 export class MessageComponent {
-  @Input() contact!: Contact; // must be provided by parent
+  @Input() contact!: Contact;
 }

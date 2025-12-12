@@ -30,7 +30,7 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
   constructor(
     private messaging: MessagingService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['thread']) {
@@ -51,7 +51,7 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
         const el = this.scrollContainer.nativeElement;
         el.scrollTop = el.scrollHeight;
       }
-    } catch {}
+    } catch { }
   }
 
   async loadForThread() {
@@ -59,9 +59,9 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
 
     // Cleanup previous subscription
     if (this.sub) {
-      try { 
-        this.sub.unsubscribe(); 
-      } catch {}
+      try {
+        this.sub.unsubscribe();
+      } catch { }
       this.sub = null;
     }
 
@@ -84,6 +84,26 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
         console.error('❌ Failed to find/create conversation', err);
         this.messages = [];
         return;
+      }
+    }
+
+    // 🆕 Fetch the other user's details to ensure correct name/avatar
+    if (this.convId) {
+      try {
+        const details = await this.messaging.getConversationDetails(this.convId);
+        if (details) {
+          // Update the thread with correct user info
+          this.thread = {
+            ...this.thread,
+            id: details.otherUser.user_id,
+            name: details.otherUser.full_name || details.otherUser.user_id,
+            avatar: details.otherUser.avatar_img || this.thread.avatar,
+            conversationId: this.convId
+          };
+          console.log('✅ Updated thread with other user details:', this.thread.name);
+        }
+      } catch (err) {
+        console.error('❌ Failed to get conversation details', err);
       }
     }
 
@@ -114,12 +134,12 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
     // Subscribe to realtime updates
     if (this.convId) {
       console.log('🔌 Subscribing to realtime for conversation:', this.convId);
-      
+
       this.sub = this.messaging.observeMessages(this.convId).subscribe({
         next: (m) => {
           console.log('🔔 Realtime message received:', m);
           this.handleIncomingMessage(m);
-          
+
           // Mark as read when new message arrives (if conversation is open)
           if (this.convId) {
             this.messaging.markConversationAsRead(this.convId).catch(err => {
@@ -137,7 +157,7 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
   private handleIncomingMessage(m: Message) {
     // Check if message already exists by ID
     const existingIndex = this.messages.findIndex(x => x.id === m.id);
-    
+
     if (existingIndex !== -1) {
       console.log('⚠️ Message already exists, updating:', m.id);
       // Update existing message (in case content changed)
@@ -153,7 +173,7 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
       x.from === 'me' &&
       x.content === m.content &&
       // Make sure it's recent (within last 10 seconds)
-      x.created_at && 
+      x.created_at &&
       (new Date().getTime() - new Date(x.created_at).getTime()) < 10000
     );
 
@@ -221,13 +241,13 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
 
       // Note: The realtime listener will also receive this message
       // but handleIncomingMessage will deduplicate it
-      
+
     } catch (err) {
       console.error('❌ Send failed', err);
-      
+
       // Remove optimistic message on error
       this.messages = this.messages.filter(m => m.id !== tempId);
-      
+
       // Restore text so user can retry
       this.text = payload;
       this.cdr.detectChanges();
@@ -236,9 +256,9 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
 
   ngOnDestroy() {
     if (this.sub) {
-      try { 
-        this.sub.unsubscribe(); 
-      } catch {}
+      try {
+        this.sub.unsubscribe();
+      } catch { }
       this.sub = null;
     }
   }
