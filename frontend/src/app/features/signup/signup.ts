@@ -1,51 +1,181 @@
+// signup.ts - Updated to use signupWithProfile
+
 import { Component } from '@angular/core';
-import { userSignUp } from '../../shared/model/user/usersignun.type';
-import { FormsModule, NgForm } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { AuthService } from '../../core/auth/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-signup',
-  imports: [
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    NgIf,
-    RouterLink
-  ],
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './signup.html',
-  styleUrl: './signup.css'
+  styleUrls: ['./signup.css']
 })
-
 export class Signup {
-  constructor(private auth: AuthService, private router: Router) {}
+  // Form fields
+  email = '';
+  password = '';
+  confirmPassword = '';
+  first_name = '';
+  last_name = '';
+  username = '';
+  tel_number?: number;
+  type: 'personal' | 'business' = 'personal';
+  role: 'admin' | 'employee' = 'admin'; // Always admin for public signup
 
-  model: userSignUp = {
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    country: '',
-    birthdate: ''
-  };
+  // UI state
   showPassword = false;
   showConfirmPassword = false;
-  checkPolicyTerms = false;
-  errorMessage = '';
+  agreeTerms = false;
+  error: string | null = null;
+  isLoading = false;
+  successMessage: string | null = null;
 
-  onSubmit(f: NgForm): void {
-    if (f.invalid || this.checkPasswordMissmatch() || !this.checkPolicyTerms) return;
-    
-    this.auth.signup(this.model.email, "hamma1212");
-    this.router.navigate(['/']);
+  constructor(
+    private auth: AuthService, 
+    private router: Router
+  ) {}
+
+  checkPasswordMismatch(): boolean {
+    return this.password !== '' && 
+           this.confirmPassword !== '' && 
+           this.password !== this.confirmPassword;
   }
 
-  checkPasswordMissmatch() {
-    return this.model.password.trim() != this.model.confirmPassword.trim();
+  validateForm(): string | null {
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      return 'Please enter a valid email address';
+    }
+
+    // Password strength validation
+    if (this.password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
+    // Password match validation
+    if (this.password !== this.confirmPassword) {
+      return 'Passwords do not match';
+    }
+
+    // Name validation
+    if (this.first_name.trim().length < 2) {
+      return 'First name must be at least 2 characters';
+    }
+
+    if (this.last_name.trim().length < 2) {
+      return 'Last name must be at least 2 characters';
+    }
+
+    // Username validation
+    if (this.username.trim().length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+
+    // Terms acceptance
+    if (!this.agreeTerms) {
+      return 'You must accept the Terms of Service and Privacy Policy';
+    }
+
+    return null;
+  }
+
+  async onSubmit(f: any) {
+    // Reset messages
+    this.error = null;
+    this.successMessage = null;
+
+    // Basic form validation
+    if (f.invalid) {
+      this.error = 'Please fill all required fields correctly';
+      return;
+    }
+
+    // Custom validation
+    const validationError = this.validateForm();
+    if (validationError) {
+      this.error = validationError;
+      return;
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+
+      console.log('📝 Submitting signup with data:', {
+        email: this.email,
+        first_name: this.first_name,
+        last_name: this.last_name,
+        username: this.username,
+        type: this.type,
+        role: this.role
+      });
+
+      // ✅ Use signupWithProfile instead of signup
+      const { data, error } = await this.auth.signupWithProfile({
+        email: this.email.trim(),
+        password: this.password,
+        first_name: this.first_name.trim(),
+        last_name: this.last_name.trim(),
+        username: this.username.trim(),
+        tel_number: this.tel_number,
+        type: this.type,
+        role: this.role
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Show success message
+      this.successMessage = 'Account created successfully! Redirecting to login...';
+      console.log('✅ Signup successful!', data);
+
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        this.router.navigate(['/signin']);
+      }, 2000);
+      
+    } catch (err: any) {
+      console.error('❌ Signup error:', err);
+      
+      // Handle specific error types
+      if (err.message?.includes('already registered') || err.message?.includes('User already registered')) {
+        this.error = 'This email is already registered. Please login instead.';
+      } else if (err.message?.includes('Invalid email')) {
+        this.error = 'Please enter a valid email address';
+      } else if (err.message?.includes('Password')) {
+        this.error = 'Password must be at least 6 characters';
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        this.error = 'Network error. Please check your connection and try again.';
+      } else {
+        this.error = err.message || 'Signup failed. Please try again.';
+      }
+      
+      this.isLoading = false;
+    }
+  }
+
+  // Helper method to get password strength
+  getPasswordStrength(): 'weak' | 'medium' | 'strong' {
+    if (this.password.length === 0) return 'weak';
+    if (this.password.length < 6) return 'weak';
+    if (this.password.length < 10) return 'medium';
+    
+    // Check for complexity
+    const hasUpperCase = /[A-Z]/.test(this.password);
+    const hasLowerCase = /[a-z]/.test(this.password);
+    const hasNumbers = /\d/.test(this.password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(this.password);
+    
+    const complexityScore = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar]
+      .filter(Boolean).length;
+    
+    if (complexityScore >= 3) return 'strong';
+    if (complexityScore >= 2) return 'medium';
+    return 'weak';
   }
 }
