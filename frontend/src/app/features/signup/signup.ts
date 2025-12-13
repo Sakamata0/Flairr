@@ -9,7 +9,7 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './signup.html',
   styleUrls: ['./signup.css']
 })

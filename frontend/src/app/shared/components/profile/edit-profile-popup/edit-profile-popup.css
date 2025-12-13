@@ -1,21 +1,25 @@
+/* Keeping your original beautiful styles */
 #main-container {
-    width: 100%;
-    overflow-y: auto;
-    height: 90vh;
-    scrollbar-width: thin;
+  width: 100%;
+  overflow-y: auto;
+  height: 90vh;
+  max-height: 90vh;
+  scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
 }
 
-
 #main-container header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 10px 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 5px 10px;
+  flex-shrink: 0;
 }
 
 #main-container main {
-  max-height: calc(100% - 68px - 60px);
-  overflow: scroll;
+  flex: 1;
+  overflow-y: auto;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -23,14 +27,44 @@
 }
 
 hr {
-  border-top: .5px solid rgb(166, 166, 166);
+  border-top: 0.5px solid rgb(166, 166, 166);
 }
 
 .title {
-    font-size: 1.8em;
-    font-weight: normal;
-    font-family: 'pacifico', cursive;
-    padding-left: 20px;
+  font-size: 1.8em;
+  font-weight: normal;
+  font-family: 'pacifico', cursive;
+  padding-left: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.close-btn:hover:not(:disabled) {
+  color: #000;
+}
+
+.close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 10px 20px;
+  font-size: 14px;
 }
 
 .image-container {
@@ -40,6 +74,7 @@ hr {
 #pictures {
   position: relative;
   height: 200px;
+  margin-bottom: 10px;
 }
 
 #banner-image {
@@ -101,17 +136,12 @@ hr {
   border-radius: 20px;
 }
 
-#infos-form {
-  margin-top: 75px;
-  padding: 20px;
-}
-
 .profile-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
   color: #222;
-  margin-top: 100px;
+  margin-top: 90px;
   padding: 20px;
 }
 
@@ -142,6 +172,9 @@ footer {
   height: 60px;
   gap: 10px;
   padding: 10px 20px;
+  flex-shrink: 0;
+  border-top: 1px solid #e5e5e5;
+  background: white;
 }
 
 .btn {
@@ -203,13 +236,18 @@ footer {
 }
 
 .save {
-  background-color: var(--third-color);
+  background-color: var(--third-color, #3b82f6);
   color: #fff;
-  border: 1px solid var(--fourth-color);
+  border: 1px solid var(--fourth-color, #2563eb);
 }
 
 .save:hover {
-  background-color: var(--fourth-color);
+  background-color: var(--fourth-color, #2563eb);
+}
+
+.save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .inputGroup {
@@ -243,7 +281,7 @@ footer {
   color: rgb(100, 100, 100);
 }
 
-.inputGroup :is(input:focus, input:valid, textarea:focus, textarea:valid, select:focus, select:valid) ~ label {
+.inputGroup :is(input:focus, input:valid, textarea:focus, textarea:valid) ~ label {
   transform: translateY(-50%) scale(0.9);
   margin: 0;
   margin-left: 0.8em;
@@ -255,66 +293,36 @@ footer {
   border-color: rgb(150, 150, 200);
 }
 
-.inputGroup select {
-  font-size: 100%;
-  padding: 1em;
-  outline: none;
-  border: 2px solid rgb(200, 200, 200);
-  background-color: transparent;
-  border-radius: 10px;
-  width: 100%;
-  appearance: none;
-  cursor: pointer;
-}
-
-.inputGroup :is(select:focus) {
-  border-color: rgb(150, 150, 200);
-}
-
-.inputGroup input[type="date"] {
-  font-size: 100%;
-  padding: 0.8em;
-  outline: none;
-  border: 2px solid rgb(200, 200, 200);
-  background-color: transparent;
-  border-radius: 10px;
-  width: 100%;
-  font-family: inherit;
-  color: #222;
-  box-sizing: border-box;
-}
-
-.inputGroup input[type="date"] + label {
-  transform: translateY(-50%) scale(0.9);
-  margin: 0;
-  margin-left: 0.8em;
-  padding: 0 0.5em;
-  background-color: #fff;
-}
-
-
-::ng-deep .mat-mdc-dialog-container.responsive-dialog {
-  width: 90vw !important;
-  max-width: 700px !important;
-  height: auto !important;
-  max-height: 90vh !important;
-  border-radius: 15px !important;
-  overflow: hidden !important;
-  display: flex;
-  flex-direction: column;
-}
-
-::ng-deep .mat-mdc-dialog-surface {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  max-height: 90vh !important;
-  box-sizing: border-box;
+.inputGroup input:disabled,
+.inputGroup textarea:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
 }
 
 textarea {
   resize: none;
+}
+
+/* Scrollbar styles */
+#main-container::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  width: 8px;
+}
+
+#main-container::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+#main-container::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+#main-container::-webkit-scrollbar-thumb:hover,
+main::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 @media (max-width: 700px) {
@@ -327,12 +335,11 @@ textarea {
 }
 
 @media (max-width: 450px) {
-  
   header .title {
     font-size: 1.5em;
   }
   .close-btn {
-    width: 30px; 
+    width: 30px;
     height: 30px;
   }
 }
