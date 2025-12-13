@@ -3,12 +3,13 @@ import { DefaultLayout } from './layouts/default-layout/default-layout';
 import { SimpleLayout } from './layouts/simple-layout/simple-layout';
 import { AuthGuard } from './core/auth/auth.guard';
 import { NoAuthGuard } from './core/auth/no-auth.guard';
+import { FlurrDetailComponent } from './features/flurr-detail/flurr-detail';
 
 export const routes: Routes = [
   {
     path: '',
     component: DefaultLayout, // Layout with header
-    canActivate: [AuthGuard],   // <----- PROTECT EVERYTHING
+    canActivate: [AuthGuard],
     children: [
       {
         path: '',
@@ -31,6 +32,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/spaces/spaces').then(m => m.Spaces)
       },
       {
+        path: 'explore',
+        loadComponent: () => import('./features/explore/explore').then(m => m.Explore)
+      },
+      {
         path: 'spaces/:spaceId',
         loadComponent: () => import('./features/flurr-space-profile/flurr-space-profile').then(m => m.FlurrSpaceProfile)
       },
@@ -41,7 +46,12 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications').then(m => m.Notifications)
-      }
+      },
+      {
+        path: 'flurr/:id',
+        component: FlurrDetailComponent,
+        title: 'Post - Flairr'
+      },
     ]
   },
   {

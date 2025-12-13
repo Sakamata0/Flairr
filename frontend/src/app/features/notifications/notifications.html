@@ -1,14 +1,44 @@
-
 <div class="layout">
     <nav>
         <app-mini-profile-card></app-mini-profile-card>
-        <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="this.shortcuts"></app-card-panel>
+        <app-card-panel 
+            title="Shortcuts" 
+            noItemsMessage="You have no shortcuts yet." 
+            [items]="this.shortcuts">
+        </app-card-panel>
     </nav>
     <main>
-        <app-notifications-selector (modeSignal)="onModeChange($event)"></app-notifications-selector>
-        <app-notifications-container [currentFilter]="selectedNotifications"></app-notifications-container>
+        <app-notifications-selector 
+            (modeSignal)="onModeChange($event)">
+        </app-notifications-selector>
+        
+        <!-- Add Mark All as Read button (styled to match your design) -->
+        <div class="mark-all-container" *ngIf="!loading && hasUnreadNotifications()">
+            <button class="mark-all-btn" (click)="markAllAsRead()">
+                Mark all as read
+            </button>
+        </div>
+
+        <!-- Loading state -->
+        <div class="loading-container" *ngIf="loading">
+            <div class="spinner"></div>
+            <p>Loading notifications...</p>
+        </div>
+
+        <!-- Notifications container -->
+        <app-notifications-container 
+            *ngIf="!loading && notifications.length > 0"
+            [currentFilter]="selectedNotifications"
+            [Notifications]="notifications">
+        </app-notifications-container>
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="!loading && notifications.length === 0">
+            <img src="assets/icons/notifications/empty-bell.png" alt="no notifications">
+            <p>No notifications yet</p>
+        </div>
     </main>
     <aside>
-        
+        <!-- You can add notification stats here if needed -->
     </aside>
 </div>

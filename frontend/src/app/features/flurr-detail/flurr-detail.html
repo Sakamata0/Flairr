@@ -1,0 +1,24 @@
+<div class="flurr-detail-container">
+    <div class="back-button" (click)="goBack()">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M12 4l-8 8 8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+    </svg>
+    Back
+    </div>
+    
+    <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading post...</p>
+    </div>
+    
+    <app-post 
+        *ngIf="!loading && post" 
+        [post]="post" 
+        [show]="1"
+        [currentUser]="currentUser">
+    </app-post>
+    
+    <div *ngIf="!loading && !post" class="error">
+    <p>Post not found</p>
+    </div>
+</div>

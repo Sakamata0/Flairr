@@ -94,3 +94,111 @@ nav {
     display: none;
   }
 }
+
+.mark-all-container {
+    width: 660px;
+}
+
+.mark-all-btn {
+    background-color: #609966;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.mark-all-btn:hover {
+    background-color: #4a7a4e;
+}
+
+/* Loading state */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #65676b;
+    background-color: #fff;
+    border-radius: 25px;
+    width: 660px;
+    min-height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #609966;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 25px;
+    width: 660px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.empty-state img {
+    width: 80px;
+    height: 80px;
+    opacity: 0.4;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 16px;
+    color: #65676b;
+    margin: 0;
+}
+
+/* Empty filtered state (inside container) */
+.empty-filtered-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #65676b;
+    font-size: 14px;
+}
+
+/* Add hover effect for clickable notifications */
+.notif-container {
+    transition: transform 0.1s ease;
+}
+
+.notif-container:hover {
+    transform: translateX(2px);
+}
+
+/* Make the menu icon more visible on hover */
+.notif-right-container img:hover {
+    opacity: 0.7;
+}
+
+/* Responsive adjustments to match your existing breakpoints */
+@media (max-width: 1000px) {
+    .container,
+    .mark-all-container,
+    .loading-container,
+    .empty-state {
+        width: 100%;
+        max-width: 660px;
+    }
+}

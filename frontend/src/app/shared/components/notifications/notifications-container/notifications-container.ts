@@ -1,6 +1,8 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Notification } from '../../../model/notification.type';
-import { NgFor } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { NotificationsService } from '../../../../core/services/notifications.service';
 
 @Component({
   selector: 'app-notifications-container',
@@ -8,19 +10,33 @@ import { NgFor } from '@angular/common';
   templateUrl: './notifications-container.html',
   styleUrl: './notifications-container.css'
 })
-
-export class NotificationsContainer {
+export class NotificationsContainer implements OnInit, OnDestroy {
   currentFilter = input<string>('all');
+  
+  // This will now come from the service instead of hardcoded
+  Notifications = input<Notification[]>([]);
+  
+  private subscription?: Subscription;
 
-  Notifications = input<Notification[]>([
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T19:00:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"}
-  ]);
+  constructor(
+    private notificationsService: NotificationsService,
+    private router: Router
+  ) {}
+
+  async ngOnInit() {
+    // Subscribe to notifications from service
+    this.subscription = this.notificationsService.notifications$.subscribe(
+      notifications => {
+        // Update the component's notifications
+        // Note: Since Notifications is an input signal, 
+        // we'll handle this in the parent component instead
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
+  }
 
   filteredNotifications = computed(() => {
     const allNotifs = this.Notifications();
@@ -32,6 +48,26 @@ export class NotificationsContainer {
 
     return allNotifs.filter(n => n.status === filter);
   });
+
+  async onNotificationClick(notification: Notification) {
+    // Mark as read if unread
+    if (notification.status === 'unread') {
+      await this.notificationsService.markAsRead(notification.id);
+    }
+
+    // Navigate to the flurr if it exists
+    if (notification.flurrId) {
+      this.router.navigate(['/flurr', notification.flurrId]);
+    } else if (notification.type === 'follow' && notification.actorId) {
+      // Navigate to the actor's profile for follow notifications
+      this.router.navigate(['/profile', notification.actorId]);
+    }
+  }
+
+  async deleteNotification(event: Event, notificationId: string) {
+    event.stopPropagation(); // Prevent navigation when deleting
+    await this.notificationsService.deleteNotification(notificationId);
+  }
 
   getTimeAgo(date: string | Date): string {
     const now = new Date();

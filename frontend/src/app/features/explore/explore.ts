@@ -1,30 +1,26 @@
-// src/app/features/home/home.ts
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
-import { NgIf, NgForOf, NgFor } from '@angular/common';
-import { Router } from '@angular/router';
-import { supabase } from '../../core/supabase/supabase.client';
+import { NgFor, NgIf } from '@angular/common';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { supabase } from '../../core/supabase/supabase.client';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
+  selector: 'app-explore',
   imports: [
-    FlurrCreationCard,
     CardPanel,
     MiniProfileCard,
     Post,
     NgIf,
     NgFor
   ],
-  templateUrl: './home.html',
-  styleUrls: ['./home.css']
+  templateUrl: './explore.html',
+  styleUrl: './explore.css'
 })
-export class Home implements OnInit {
+export class Explore implements OnInit {
   loading = true;
   error = '';
 

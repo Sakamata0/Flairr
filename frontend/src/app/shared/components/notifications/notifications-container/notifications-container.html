@@ -1,22 +1,48 @@
 <div class="container">
-    @for (notif of filteredNotifications(); track $index) {
-        <div class="notif-container" [class]="notif.status">
+    @for (notif of filteredNotifications(); track notif.id) {
+        <div 
+            class="notif-container" 
+            [class.unread]="notif.status === 'unread'"
+            [class.read]="notif.status === 'read'"
+            (click)="onNotificationClick(notif)"
+            style="cursor: pointer;">
             <div class="left">
                 <div class="dot-status"></div>
                 <div class="image-section">
-                    <img class="profile-img" [src]="notif.profileUrl || 'assets/images/default-profile-picture.png'" alt="profile_image">
-                    <img class="icon-img" [src]="notif.iconUrl" alt="icon_img">
+                    <img 
+                        class="profile-img" 
+                        [src]="notif.profileUrl || 'assets/images/default-profile-picture.png'" 
+                        alt="profile_image">
+                    <img 
+                        class="icon-img" 
+                        [src]="notif.iconUrl" 
+                        alt="icon_img">
                 </div>
             </div>
             <div class="right">
-                <span><span class="Name">{{notif.name}} </span><span>{{notif.action}}</span></span>
+                <span>
+                    <span class="Name">{{notif.name}} </span>
+                    <span>{{notif.action}}</span>
+                </span>
                 <span>
                     <span class="notif-right-container">
                         <span>{{getTimeAgo(notif.date)}}</span>
-                        <img src="assets/icons/general-icons/three-dots-menu.svg" alt="menu_icon">
+                        <img 
+                            src="assets/icons/general-icons/three-dots-menu.svg" 
+                            alt="menu_icon"
+                            (click)="deleteNotification($event, notif.id)"
+                            style="cursor: pointer;"
+                            title="Delete notification">
                     </span>
                 </span>
             </div>
+        </div>
+    }
+    
+    <!-- Empty state for filtered view (matches your design) -->
+    @if (filteredNotifications().length === 0) {
+        <div class="empty-filtered-state">
+            <p>No {{ currentFilter() }} notifications</p>
         </div>
     }
 </div>

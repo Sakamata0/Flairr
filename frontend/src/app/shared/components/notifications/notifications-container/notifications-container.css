@@ -96,3 +96,32 @@
 .Name {
     font-weight: 600;
 }
+
+.notif-container {
+    display: flex;
+    align-items: center;
+    height: 100px;
+    transition: transform 0.1s ease;  /* Add smooth hover effect */
+    cursor: pointer;  /* Show it's clickable */
+}
+
+.notif-container:hover {
+    transform: translateX(2px);
+}
+
+.notif-right-container img {
+    width: 20px;
+    cursor: pointer;  /* Show menu icon is clickable */
+    transition: opacity 0.2s;
+}
+
+.notif-right-container img:hover {
+    opacity: 0.7;
+}
+
+.empty-filtered-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #65676b;
+    font-size: 14px;
+}
