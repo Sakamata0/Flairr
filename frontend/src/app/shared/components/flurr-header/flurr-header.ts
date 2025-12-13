@@ -1,113 +1,193 @@
-import { Component, ElementRef, EventEmitter, HostListener, Output } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
 import { MatDialog } from '@angular/material/dialog';
+
+import { AuthService } from '../../../core/auth/auth.service';
+import { supabase } from '../../../core/supabase/supabase.client';
 import { LogoutDialog } from '../logout-dialog/logout-dialog';
 
 @Component({
-  selector: 'app-flurr-header',
-  standalone: true,
-  imports: [CommonModule,RouterModule],
-  templateUrl: './flurr-header.html',
-  styleUrls: ['./flurr-header.css']
+    selector: 'app-flurr-header',
+    standalone: true,
+    imports: [CommonModule, RouterModule],
+    templateUrl: './flurr-header.html',
+    styleUrls: ['./flurr-header.css']
 })
 export class FlurrHeaderComponent {
-  @Output() searchChange = new EventEmitter<string>();
 
-  activeKey: string | null = null;
-  profileOpen = false;
+    @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
-  items = [
-    { key: 'home', label: 'Home' },
-    { key: 'explore', label: 'Explore' },
-    { key: 'friends', label: 'Friends' },
-    { key: 'spaces', label: 'Spaces' }
-  ];
+    activeKey: string | null = null;
+    profileOpen = false;
 
-  constructor(
-    private elementRef: ElementRef<HTMLElement>,
-    private router: Router,
-    private auth: AuthService,
-    private dialog: MatDialog
-  ) {}
+    searchOpen = false;
+    loading = false;
 
+    users: any[] = [];
+    spaces: any[] = [];
 
-  
-  // Always select clicked key. Keep it active if clicked again.
-  toggle(key: string, event?: Event) {
-    event?.stopPropagation();
-    this.activeKey = key;
-  }
+    defaultAvatar = '/assets/default-user.png';
+    defaultSpace = '/assets/default-space.png';
 
+    items = [
+        { key: 'home', label: 'Home' },
+        { key: 'explore', label: 'Explore' },
+        { key: 'friends', label: 'Friends' },
+        { key: 'spaces', label: 'Spaces' }
+    ];
 
-  onSearch(event: Event) {
-    const q = (event.target as HTMLInputElement).value;
-    this.searchChange.emit(q);
-  }
+    constructor(
+        private elementRef: ElementRef<HTMLElement>,
+        private router: Router,
+        private auth: AuthService,
+        private dialog: MatDialog
+    ) { }
 
-  onKeydown(e: KeyboardEvent, index: number) {
-    const key = e.key;
-    if (key === 'Enter' || key === ' ') {
-      e.preventDefault();
-      const item = this.items[index];
-      this.toggle(item.key);
-      return;
+    /* ================= SEARCH ================= */
+
+    openSearch() {
+        this.searchOpen = true;
     }
-    if (key === 'ArrowRight' || key === 'ArrowLeft') {
-      e.preventDefault();
-      const dir = key === 'ArrowRight' ? 1 : -1;
-      const len = this.items.length;
-      const nextIndex = (index + dir + len) % len;
-      const nav = this.elementRef.nativeElement.querySelector('.center');
-      if (!nav) return;
-      const buttons = Array.from(nav.querySelectorAll<HTMLElement>('.icon-item'));
-      buttons[nextIndex]?.focus();
+
+    async onSearch(event: Event) {
+        const q = (event.target as HTMLInputElement).value.trim();
+
+        if (!q) {
+            this.users = [];
+            this.spaces = [];
+            return;
+        }
+
+        this.loading = true;
+
+        await Promise.all([
+            this.searchUsers(q),
+            this.searchSpaces(q)
+        ]);
+
+        this.loading = false;
     }
-  }
 
-  // Document click handler: DO NOT clear activeKey here.
-  // Keep handling for avatar menu only.
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(ev: MouseEvent) {
-    const target = ev.target as Node;
+    async searchUsers(query: string) {
+        const { data, error } = await supabase
+            .from('users')
+            .select('user_id, full_name, avatar_img')
+            .ilike('full_name', `%${query}%`)
+            .limit(5);
 
-    // DO NOT clear activeKey — keep nav selection until another icon click.
-    // If you want an explicit way to clear it, use Escape key or a UI control.
+        if (error) {
+            console.error('searchUsers error', error);
+            this.users = [];
+            return;
+        }
 
-    // Close profile if clicking outside avatar
-    const wrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
-    if (wrap && !wrap.contains(target as Node)) {
-      this.profileOpen = false;
-      wrap.classList.remove('profile-open');
+        this.users = data || [];
     }
-  }
 
-  toggleProfile(ev?: Event) {
-    ev?.stopPropagation();
-    this.profileOpen = !this.profileOpen;
-    console.log('toggleProfile called, profileOpen=', this.profileOpen);
-    const wrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
-    if (wrap) {
-      wrap.classList.toggle('profile-open', this.profileOpen);
+    async searchSpaces(query: string) {
+        const { data, error } = await supabase
+            .from('spaces')
+            .select('space_id, space_name, avatar_img')
+            .ilike('space_name', `%${query}%`)
+            .limit(5);
+
+        if (error) {
+            console.error('searchSpaces error', error);
+            this.spaces = [];
+            return;
+        }
+
+        this.spaces = data || [];
     }
-  }
 
-  onImgError(ev: Event, key: string) {
-    console.error('Icon failed to load:', { triedPath: `/assets/icons/header/${key}.png`, event: ev });
-  }
+    goToUser(userId: string) {
+        this.resetSearch();
+        this.router.navigate(['/profile', userId]);
+    }
 
-  openLogoutDialog() {
-    const dialogRef = this.dialog.open(LogoutDialog, {
-      panelClass: 'custom-flurr-creation-dialog'
-    });
+    goToSpace(spaceId: string) {
+        this.resetSearch();
+        this.router.navigate(['/spaces', spaceId]);
+    }
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.auth.logout();
-        this.router.navigate(['/signin']);
-      }
-    });
-  }
+    private resetSearch() {
+        this.searchOpen = false;
+        this.users = [];
+        this.spaces = [];
 
+        if (this.searchInput) {
+            this.searchInput.nativeElement.value = '';
+        }
+    }
+
+
+    /* ================= NAV ================= */
+
+    toggle(key: string, event?: Event) {
+        event?.stopPropagation();
+        this.activeKey = key;
+    }
+
+    onKeydown(e: KeyboardEvent, index: number) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.toggle(this.items[index].key);
+            return;
+        }
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const dir = e.key === 'ArrowRight' ? 1 : -1;
+            const len = this.items.length;
+            const nextIndex = (index + dir + len) % len;
+
+            const nav = this.elementRef.nativeElement.querySelector('.center');
+            const buttons = nav?.querySelectorAll<HTMLElement>('.icon-item');
+            buttons?.[nextIndex]?.focus();
+        }
+    }
+
+    /* ================= PROFILE ================= */
+
+    toggleProfile(ev?: Event) {
+        ev?.stopPropagation();
+        this.profileOpen = !this.profileOpen;
+
+        const wrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
+        wrap?.classList.toggle('profile-open', this.profileOpen);
+    }
+
+    /* ================= GLOBAL CLICK ================= */
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(ev: MouseEvent) {
+        const target = ev.target as Node;
+
+        const search = this.elementRef.nativeElement.querySelector('.search-wrap');
+        if (search && !search.contains(target)) {
+            this.searchOpen = false;
+        }
+
+        const avatar = this.elementRef.nativeElement.querySelector('.avatar-wrap');
+        if (avatar && !avatar.contains(target)) {
+            this.profileOpen = false;
+            avatar.classList.remove('profile-open');
+        }
+    }
+
+    /* ================= LOGOUT ================= */
+
+    openLogoutDialog() {
+        const dialogRef = this.dialog.open(LogoutDialog, {
+            panelClass: 'custom-flurr-creation-dialog'
+        });
+
+        dialogRef.afterClosed().subscribe(ok => {
+            if (ok) {
+                this.auth.logout();
+                this.router.navigate(['/signin']);
+            }
+        });
+    }
 }
