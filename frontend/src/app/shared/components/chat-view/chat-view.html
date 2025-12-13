@@ -1,15 +1,26 @@
 <div class="container">
   <header class="chat-header" role="banner" aria-label="Conversation header">
     <div class="header-left">
-      <img
-        class="avatar"
-        [src]="thread?.avatar || 'assets/images/profile-picture-test.jpg'"
-        alt="avatar"
-      />
-      <div class="person">
-        <div class="name">{{ thread?.name || 'Conversation' }}</div>
-      </div>
+      <!-- Show loading skeleton or blank state while fetching user details -->
+      <ng-container *ngIf="loadingThreadHeader; else showThread">
+        <div class="avatar skeleton-avatar"></div>
+        <div class="person">
+          <div class="name skeleton-text"></div>
+        </div>
+      </ng-container>
+
+      <ng-template #showThread>
+        <img
+          class="avatar"
+          [src]="displayThread?.avatar || 'assets/images/profile-picture-test.jpg'"
+          alt="avatar"
+        />
+        <div class="person">
+          <div class="name">{{ displayThread?.name || 'Conversation' }}</div>
+        </div>
+      </ng-template>
     </div>
+
     <div class="header-right">
       <button class="icon-btn" aria-label="notifications">
         <img src="assets/icons/header/notifications.svg" alt="" />
@@ -32,9 +43,7 @@
           [class.me]="m.from === 'me'"
         >
           <img *ngIf="m.from === 'them'" class="msg-avatar" [src]="m.avatar" alt="" />
-          <div class="bubble-wrapper"
-          [class.me]="m.from === 'me'"
-          >
+          <div class="bubble-wrapper" [class.me]="m.from === 'me'">
             <div class="bubble">{{ m.content }}</div>
             <div class="bubble-time">{{ m.created_at | date : 'shortTime' }}</div>
           </div>

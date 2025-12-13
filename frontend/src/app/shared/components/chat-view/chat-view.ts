@@ -1,11 +1,13 @@
 // chat-view.ts
-import { Component, Input, OnChanges, SimpleChanges, OnDestroy, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, OnDestroy, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { MessagingService } from '../../../core/services/messaging.service';
 import { Contact, Message } from '../../model/messaging.models';
+
+
 
 @Component({
   selector: 'app-chat-view',
@@ -17,9 +19,13 @@ import { Contact, Message } from '../../model/messaging.models';
 export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
   @Input() thread: Contact | null = null;
 
+  // Display model - this is what the template uses
+  displayThread: Contact | null = null;
   messages: Message[] = [];
   loadingOlder = false;
   text = '';
+
+  loadingThreadHeader = true;
 
   private convId: string | undefined;
   private sub: Subscription | null = null;
@@ -57,6 +63,10 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
   async loadForThread() {
     console.log('🔄 Loading thread:', this.thread);
 
+    // Show loading immediately
+    this.loadingThreadHeader = true;
+    this.displayThread = null;
+
     // Cleanup previous subscription
     if (this.sub) {
       try {
@@ -68,6 +78,8 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
     if (!this.thread) {
       this.messages = [];
       this.convId = undefined;
+      this.displayThread = null;
+      this.loadingThreadHeader = false;
       return;
     }
 
@@ -83,28 +95,48 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
       } catch (err) {
         console.error('❌ Failed to find/create conversation', err);
         this.messages = [];
+        this.loadingThreadHeader = false;
         return;
       }
     }
 
-    // 🆕 Fetch the other user's details to ensure correct name/avatar
+    // 🆕 Fetch the other user's details FIRST before showing anything
     if (this.convId) {
       try {
         const details = await this.messaging.getConversationDetails(this.convId);
-        if (details) {
-          // Update the thread with correct user info
-          this.thread = {
-            ...this.thread,
-            id: details.otherUser.user_id,
-            name: details.otherUser.full_name || details.otherUser.user_id,
-            avatar: details.otherUser.avatar_img || this.thread.avatar,
-            conversationId: this.convId
-          };
-          console.log('✅ Updated thread with other user details:', this.thread.name);
+
+        if (!details) {
+          console.warn('No conversation details found for', this.convId);
+          this.loadingThreadHeader = false;
+          return;
         }
+
+        const { otherUser } = details;
+
+        // Update display thread with correct user info
+        this.displayThread = {
+          ...this.thread,
+          id: otherUser.user_id,
+          name: otherUser.full_name || otherUser.user_id,
+          avatar: otherUser.avatar_img || this.thread.avatar,
+          conversationId: this.convId
+        };
+
+        // Also update the input thread for consistency
+        this.thread = this.displayThread;
+
+        this.loadingThreadHeader = false;
+        console.log('✅ Updated thread with other user details:', this.displayThread.name);
       } catch (err) {
         console.error('❌ Failed to get conversation details', err);
+        // Fallback to original thread if fetch fails
+        this.displayThread = this.thread;
+        this.loadingThreadHeader = false;
       }
+    } else {
+      // No convId yet, use original thread
+      this.displayThread = this.thread;
+      this.loadingThreadHeader = false;
     }
 
     // Load message history
@@ -197,7 +229,7 @@ export class ChatView implements OnChanges, OnDestroy, AfterViewChecked {
 
   async send() {
     const payload = this.text?.trim();
-    if (!payload || !this.thread) return;
+    if (!this.thread) return;
 
     console.log('📤 Sending message:', payload);
 
