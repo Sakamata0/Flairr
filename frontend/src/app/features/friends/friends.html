@@ -1,13 +1,11 @@
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
 
 <div class="layout">
-  <nav style="width: fit-content;">
-    <app-friends-options
-      (selectedOption)="onFriendOptionSelected($event)">
-    </app-friends-options>
+  <nav style="width: fit-content">
+    <app-friends-options (selectedOption)="onFriendOptionSelected($event)"> </app-friends-options>
   </nav>
 
-  <main style="width: fit-content;">
+  <main style="width: fit-content">
     <div class="request-container">
       <span>{{ selectedType }}</span>
 
@@ -15,10 +13,21 @@
         <app-friend-request
           *ngFor="let r of list$()"
           [info]="r"
-          [variab]="key">
+          [variab]="key"
+          (follow)="onFollow(r.id)"
+          (remove)="onDelete(r.id)"
+        >
         </app-friend-request>
       </div>
-
     </div>
   </main>
 </div>
+
+
+<app-confirm-dialog
+  [open]="confirmOpen"
+  title="Remove suggestion"
+  message="Are you sure you want to remove this user from your suggestions?"
+  (confirm)="onConfirmDelete()"
+  (cancel)="onCancelDelete()">
+</app-confirm-dialog>
