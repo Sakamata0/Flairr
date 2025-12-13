@@ -5,6 +5,7 @@ import { FriendRequest } from '../../shared/components/friend-request/friend-req
 import { NgFor, NgIf } from '@angular/common';
 import { FriendsService } from '../../core/services/friends.service';
 import { MessagingService } from '../../core/services/messaging.service';
+import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
 
 @Component({
     selector: 'app-friends',
@@ -12,7 +13,8 @@ import { MessagingService } from '../../core/services/messaging.service';
     imports: [
         FriendRequest,
         FriendsOptions,
-        NgFor
+        NgFor,
+        ConfirmDialog,
     ],
     templateUrl: './friends.html',
     styleUrl: './friends.css'
@@ -21,6 +23,10 @@ export class Friends implements OnInit {
 
     private friendsService = inject(FriendsService);
     private messagingService = inject(MessagingService);
+    private currentUserId!: string;
+
+    confirmOpen = false;
+    userToDelete: string | null = null;
 
     selectedType = 'Follow Request';
     key = 0;
@@ -33,6 +39,7 @@ export class Friends implements OnInit {
         const user = await this.messagingService.getCurrentUser();
         if (!user) return;
 
+        this.currentUserId = user.id;
         await this.friendsService.loadSuggestions(user.id);
     }
 
@@ -55,5 +62,31 @@ export class Friends implements OnInit {
                 break;
         }
     }
+
+    async onFollow(userId: string) {
+        const user = await this.messagingService.getCurrentUser();
+        if (!user) return;
+
+        await this.friendsService.sendFollowRequest(userId, user.id);
+    }
+
+    onDelete(userId: string) {
+        this.userToDelete = userId;
+        this.confirmOpen = true;
+    }
+
+    onConfirmDelete() {
+        if (!this.userToDelete) return;
+
+        this.friendsService.removeFromSuggestions(this.userToDelete);
+        this.userToDelete = null;
+        this.confirmOpen = false;
+    }
+
+    onCancelDelete() {
+        this.userToDelete = null;
+        this.confirmOpen = false;
+    }
+
 
 }
