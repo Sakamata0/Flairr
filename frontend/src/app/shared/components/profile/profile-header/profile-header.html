@@ -34,19 +34,22 @@
         <hr />
 
         <div id="stats-container">
-          <span>
-            <strong>{{ formatFollowerCount(profile.followersCount ?? profile.followers?.length ?? 0) }}</strong>
-            Followers
-          </span>
-          <span>
-            <strong>{{ formatFollowerCount(profile.followingCount ?? profile.following?.length ?? 0) }}</strong>
-            Following
-          </span>
-          <span>
-            <strong>{{ formatFollowerCount(profile.postsCount ?? profile.journeys?.length ?? 0) }}</strong>
-            Flurrs
-          </span>
-        </div>
+        <span>
+          <strong>{{ formatFollowerCount(profile.followers?.length ?? 0) }}</strong>
+          Followers
+        </span>
+
+        <span>
+          <strong>{{ formatFollowerCount(profile.following?.length ?? 0) }}</strong>
+          Following
+        </span>
+
+        <span>
+          <strong>{{ formatFollowerCount(profile.flurrs?.length ?? 0) }}</strong>
+          Flurrs
+        </span>
+      </div>
+
       </div>
     </div>
   </div>
