@@ -29,6 +29,51 @@ export class FlurrsService {
         return data;
     }*/
 
+    async uploadFlurrFile(flurrId: string, file: File) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${flurrId}/${fileName}`;
+
+        const { error: uploadError } = await this.supabase.storage
+            .from('flurr-files')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = this.supabase.storage
+            .from('flurr-files')
+            .getPublicUrl(filePath);
+
+        const mediaType = file.type.startsWith('image')
+            ? 'image'
+            : file.type.startsWith('video')
+            ? 'video'
+            : 'unknown';
+
+        return {
+            url: data.publicUrl,
+            type: mediaType
+        };
+    }
+
+    async insertFlurrFileRecord(
+        flurrId: string,
+        linkUrl: string,
+        type?: string
+        ) {
+        const { error } = await this.supabase
+            .from('flurr_files')
+            .insert({
+            flurr_id: flurrId,
+            link_url: linkUrl,
+            type
+            });
+
+        if (error) throw error;
+    }
+
+
+
     async insertFlurr(type: string, content: string, journeyID?: string, spaceID?: string) {
         // get the logged in user
         const { data: { user }, error: userError } = await this.supabase.auth.getUser();
@@ -37,14 +82,17 @@ export class FlurrsService {
         if (!user) return;
 
         const { data, error } = await this.supabase
-            .from('flurrs')
-            .insert([{
-                type: type,
-                content: content,
-                journey_id: type === "flurr" ? journeyID : null,
-                space_id: type === "space" ? spaceID : null,
-                poster_id: user.id
-        }]);
+        .from('flurrs')
+        .insert([{
+            type,
+            content,
+            journey_id: type === 'flurr' ? journeyID : null,
+            space_id: type === 'space' ? spaceID : null,
+            poster_id: user.id
+        }])
+        .select()
+        .single();
+
 
         if (error) throw error;
 

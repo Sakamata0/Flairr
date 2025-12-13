@@ -8,21 +8,33 @@ import { PostInfo } from '../../../model/post/post-info.type';
 import { MediaItem } from '../../../model/post/media-item.type';
 import { supabase } from '../../../../core/supabase/supabase.client'; // adjust path if needed
 import { UserService } from '../../../../core/services/user.service'; // adjust path if needed
+import { GalleriaModule } from 'primeng/galleria';
 
 @Component({
   selector: 'app-post',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, CommentTree, NgIf],
+  imports: [CommonModule, FormsModule, MatDialogModule, CommentTree, NgIf, GalleriaModule],
   templateUrl: './post.html',
   styleUrls: ['./post.css']
 })
 export class Post implements OnInit, OnDestroy {
+  responsiveOptions = [
+    { breakpoint: '1024px', numVisible: 5 },
+    { breakpoint: '768px', numVisible: 3 },
+    { breakpoint: '560px', numVisible: 1 }
+  ];
+
   @Input() post: PostInfo | null = {
     id: 'p1',
     title: 'Flairr Journey: #Building_my_first_full-stack_app',
     author: { id: 'u1', name: 'Catharina', avatarUrl: 'assets/icons/post/avatar2-img.avif', title: '', isFollowed: false },
     content: "🚀 Just finished connecting my Angular frontend #hhahaa to my Node.js API!",
-    media: [{ url: 'assets/icons/post/post-img.png', type: 'image', filename: 'screenshot.png' }],
+    media: [
+      { url: 'assets/post-examples/hero_slide1.jpg', type: 'image', filename: 'screenshot.png' },
+      { url: 'assets/post-examples/hero_slide2.jpg', type: 'image', filename: 'screenshot.png' }, 
+      { url: 'assets/post-examples/killbill.mp4', type: 'video', filename: 'screenshot.png' },
+      { url: 'assets/post-examples/hero_slide3.jpg', type: 'image', filename: 'screenshot.png' },    
+    ],
     reactions: { like: 232 },
     commentsCount: 120,
     viewsCount: 1500,
@@ -48,6 +60,36 @@ export class Post implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private userService: UserService
   ) {}
+
+  // fetch helper that will load flurr media files
+  private async loadPostMedia(): Promise<void> {
+    if (!this.post) return;
+
+    try {
+      const flurrId = this.post.id ?? (this.post as any).flurr_id;
+      const { data: files, error } = await supabase
+        .from('flurr_files')
+        .select('link_url, type')
+        .eq('flurr_id', flurrId);
+
+      if (error) {
+        console.warn('Failed to fetch flurr_files:', error);
+        return;
+      }
+
+      if (files && files.length > 0) {
+        // map to your MediaItem shape
+        this.post.media = files.map((f: any) => ({
+          url: f.link_url,
+          type: f.type,
+          filename: f.link_url.split('/').pop() || ''
+        }));
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching media:', err);
+    }
+  }
+
 
   // ----------------------------
   // Utility helpers
@@ -212,6 +254,9 @@ export class Post implements OnInit, OnDestroy {
     await this.ensureAuthorLoaded();
     await this.refreshFollowState();
     await this.refreshLikeState();
+
+    // Load attached media
+    await this.loadPostMedia();
   }
 
   ngOnDestroy(): void {

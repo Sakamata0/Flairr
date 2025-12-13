@@ -19,7 +19,6 @@
     <div class="content">
       <h2 class="name">{{ user.fullName || 'Unnamed' }}</h2>
       <p class="handle">{{ user.email ? (user.email.split('@')[0]) : 'handle' }}</p>
-
       <div class="stats">
         <div>
           <p class="stat-number">{{ formatFollowerCount(user.flurrs.length) }}</p>
@@ -34,7 +33,6 @@
           <p class="stat-label">Following</p>
         </div>
       </div>
-
       <button class="profile-btn" [routerLink]="['/profile', user.userID]">My Profile</button>
     </div>
   </div>

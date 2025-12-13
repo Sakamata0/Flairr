@@ -56,25 +56,25 @@
     ></textarea>
   </mat-form-field>
 
+
   <!-- bottom section -->
   <div class="flurr-bottom">
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
-      <span>Image</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
-      <span>Video</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
-      <span>Tags</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
-      <span>Location</span>
-    </button>
+    <!-- File Upload -->
+
+    <p-fileUpload
+      name="files"
+      [customUpload]="true"
+      [multiple]="true"
+      accept="image/*,video/*"
+      maxFileSize="1000000000"
+      (onSelect)="onFileSelect($event)"
+    >
+      <ng-template #empty>
+        <div>Drag and drop files here</div>
+      </ng-template>
+    </p-fileUpload>
   </div>
+
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
