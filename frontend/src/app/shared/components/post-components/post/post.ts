@@ -1,3 +1,4 @@
+// post.ts - FIXED VERSION with proper Supabase integration
 import { Component, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,8 +7,8 @@ import { CommentPopUp } from '../comment-pop-up/comment-pop-up';
 import { CommentTree, CommentNode } from '../comment-tree/comment-tree';
 import { PostInfo } from '../../../model/post/post-info.type';
 import { MediaItem } from '../../../model/post/media-item.type';
-import { supabase } from '../../../../core/supabase/supabase.client'; // adjust path if needed
-import { UserService } from '../../../../core/services/user.service'; // adjust path if needed
+import { supabase } from '../../../../core/supabase/supabase.client';
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-post',
@@ -17,22 +18,9 @@ import { UserService } from '../../../../core/services/user.service'; // adjust 
   styleUrls: ['./post.css']
 })
 export class Post implements OnInit, OnDestroy {
-  @Input() post: PostInfo | null = {
-    id: 'p1',
-    title: 'Flairr Journey: #Building_my_first_full-stack_app',
-    author: { id: 'u1', name: 'Catharina', avatarUrl: 'assets/icons/post/avatar2-img.avif', title: '', isFollowed: false },
-    content: "🚀 Just finished connecting my Angular frontend #hhahaa to my Node.js API!",
-    media: [{ url: 'assets/icons/post/post-img.png', type: 'image', filename: 'screenshot.png' }],
-    reactions: { like: 232 },
-    commentsCount: 120,
-    viewsCount: 1500,
-    createdAt: new Date()
-  };
+  @Input() post: PostInfo | null = null;
   @Input() show: number = 0;
-  @Input() currentUser: { name: string; avatarUrl: string | null } | null = {
-    name: 'Mohamed Houcine',
-    avatarUrl: 'assets/icons/post/avatar-img.avif'
-  };
+  @Input() currentUser: { name: string; avatarUrl: string | null } | null = null;
 
   defaultAvatar = 'assets/icons/post/avatar-img.avif';
   CommentPopUp = CommentPopUp;
@@ -49,9 +37,6 @@ export class Post implements OnInit, OnDestroy {
     private userService: UserService
   ) {}
 
-  // ----------------------------
-  // Utility helpers
-  // ----------------------------
   private async getCurrentUid(): Promise<string | null> {
     try {
       const u = this.userService.currentUser?.();
@@ -62,31 +47,21 @@ export class Post implements OnInit, OnDestroy {
       const { data } = await supabase.auth.getSession();
       return data.session?.user?.id ?? null;
     } catch (err) {
-      console.warn('getCurrentUid supabase.auth.getSession error', err);
+      console.warn('getCurrentUid error', err);
       return null;
     }
   }
 
-  /**
-   * Normalize incoming post payload so the template can always use `post.author.name`
-   * Works for shapes:
-   *  - post.author.{name, avatarUrl}
-   *  - post.poster (object returned by select join) { user_id, full_name, avatar_img }
-   *  - post.poster_id (scalar)
-   */
   private normalizeAuthorFromPayload(): void {
     if (!this.post) return;
 
-    // if author already present with a name, nothing to do
     const a = (this.post as any).author;
     if (a && (a.name || a.full_name || a.user_id)) {
-      // if there is a full_name, map it to name for template convenience
       if (!a.name && a.full_name) a.name = a.full_name;
       if (!a.avatarUrl && a.avatar_img) a.avatarUrl = a.avatar_img;
       return;
     }
 
-    // 1) If backend returned nested poster object (poster: { user_id, full_name, avatar_img })
     const posterObj = (this.post as any).poster;
     if (posterObj && (posterObj.user_id || posterObj.full_name)) {
       const name = posterObj.full_name ?? (posterObj.email ? posterObj.email.split('@')[0] : 'Unknown');
@@ -99,37 +74,47 @@ export class Post implements OnInit, OnDestroy {
       return;
     }
 
-    // 2) If backend returned poster_id scalar
     const posterId = (this.post as any).poster_id ?? (this.post as any).posterId;
     if (posterId) {
       (this.post as any).author = {
         id: posterId,
-        name: 'Unknown', // will be filled by ensureAuthorLoaded()
+        name: 'Unknown',
         avatarUrl: this.defaultAvatar,
         isFollowed: false
       };
       return;
     }
 
-    // 3) fallback: ensure author object exists
-    (this.post as any).author = (this.post as any).author || { id: null, name: 'Unknown', avatarUrl: this.defaultAvatar, isFollowed: false };
+    (this.post as any).author = (this.post as any).author || { 
+      id: null, 
+      name: 'Unknown', 
+      avatarUrl: this.defaultAvatar, 
+      isFollowed: false 
+    };
   }
 
-  // If the author object is missing details, fetch from users table
   private async ensureAuthorLoaded(): Promise<void> {
     if (!this.post) return;
     const author = (this.post as any).author;
     if (author && (author.name && author.name !== 'Unknown')) return;
 
-    const posterId = (this.post as any).poster?.user_id ?? (this.post as any).poster_id ?? (this.post as any).author?.id;
+    const posterId = (this.post as any).poster?.user_id ?? 
+                     (this.post as any).poster_id ?? 
+                     (this.post as any).author?.id;
     if (!posterId) return;
 
     try {
-      const { data, error } = await supabase.from('users').select('user_id, full_name, avatar_img, email').eq('user_id', posterId).single();
+      const { data, error } = await supabase
+        .from('users')
+        .select('user_id, full_name, avatar_img, email')
+        .eq('user_id', posterId)
+        .single();
+
       if (error) {
-        console.warn('ensureAuthorLoaded: users.select error', error);
+        console.warn('ensureAuthorLoaded error', error);
         return;
       }
+
       const name = data.full_name ?? (data.email ? data.email.split('@')[0] : 'Unknown');
       (this.post as any).author = {
         id: data.user_id,
@@ -142,10 +127,11 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  // check if the current user follows the post author
   private async refreshFollowState(): Promise<void> {
     if (!this.post) return;
-    const posterId = (this.post as any).poster?.user_id ?? (this.post as any).poster_id ?? this.post.author?.id;
+    const posterId = (this.post as any).poster?.user_id ?? 
+                     (this.post as any).poster_id ?? 
+                     this.post.author?.id;
     if (!posterId) return;
     const uid = await this.getCurrentUid();
     if (!uid) return;
@@ -159,7 +145,7 @@ export class Post implements OnInit, OnDestroy {
         .limit(1);
 
       if (error) {
-        console.warn('refreshFollowState friends select error', error);
+        console.warn('refreshFollowState error', error);
         return;
       }
 
@@ -170,7 +156,6 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  // check if the current user liked the post
   private async refreshLikeState(): Promise<void> {
     if (!this.post) return;
     const uid = await this.getCurrentUid();
@@ -178,15 +163,17 @@ export class Post implements OnInit, OnDestroy {
     const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
 
     try {
+      // FIXED: Use flurr_action table instead of likes
       const { data, error } = await supabase
-        .from('likes')
-        .select('user_id, flurr_id')
+        .from('flurr_action')
+        .select('user_id, flurr_id, is_liked')
         .eq('user_id', uid)
         .eq('flurr_id', flurrId)
+        .eq('is_liked', true)
         .limit(1);
 
       if (error) {
-        console.warn('refreshLikeState likes select error', error);
+        console.warn('refreshLikeState error', error);
         return;
       }
 
@@ -196,22 +183,127 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  // ----------------------------
-  // Lifecycle
-  // ----------------------------
+  // NEW: Load actual like count from database
+  private async loadLikeCount(): Promise<void> {
+    if (!this.post) return;
+    const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
+
+    try {
+      const { count, error } = await supabase
+        .from('flurr_action')
+        .select('*', { count: 'exact', head: true })
+        .eq('flurr_id', flurrId)
+        .eq('is_liked', true);
+
+      if (error) {
+        console.warn('loadLikeCount error', error);
+        return;
+      }
+
+      this.post.reactions = this.post.reactions || {};
+      this.post.reactions['like'] = count ?? 0;
+    } catch (err) {
+      console.error('loadLikeCount unexpected', err);
+    }
+  }
+
+  // NEW: Load comments from database
+  private async loadComments(): Promise<void> {
+    if (!this.post) return;
+    const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
+
+    try {
+      // Get comment IDs linked to this flurr
+      const { data: actions, error: actionsErr } = await supabase
+        .from('flurr_action')
+        .select('comment_id')
+        .eq('flurr_id', flurrId)
+        .not('comment_id', 'is', null);
+
+      if (actionsErr) {
+        console.warn('loadComments actions error', actionsErr);
+        return;
+      }
+
+      if (!actions || actions.length === 0) {
+        this.post.comments = [];
+        this.post.commentsCount = 0;
+        return;
+      }
+
+      const commentIds = actions.map(a => a.comment_id).filter(Boolean);
+
+      // Get actual comments with user info
+      const { data: comments, error: commentsErr } = await supabase
+        .from('comments')
+        .select(`
+          comment_id,
+          content,
+          suprerior_comment_id,
+          created_at,
+          user:user_id (
+            user_id,
+            full_name,
+            avatar_img,
+            email
+          )
+        `)
+        .in('comment_id', commentIds)
+        .order('created_at', { ascending: true });
+
+      if (commentsErr) {
+        console.warn('loadComments error', commentsErr);
+        return;
+      }
+
+      // Build comment tree
+      const commentMap = new Map<string, CommentNode>();
+      const rootComments: CommentNode[] = [];
+
+      for (const c of comments || []) {
+        const user = Array.isArray(c.user) ? c.user[0] : c.user;
+        const authorName = user?.full_name ?? (user?.email ? user.email.split('@')[0] : 'Anonymous');
+        const authorAvatar = user?.avatar_img || this.defaultAvatar;
+
+        const node = new CommentNode(c.content, {
+          name: authorName,
+          avatarUrl: authorAvatar
+        });
+        (node as any).id = c.comment_id;
+
+        commentMap.set(c.comment_id, node);
+
+        if (c.suprerior_comment_id) {
+          const parent = commentMap.get(c.suprerior_comment_id);
+          if (parent) {
+            parent.addAnwser(node);
+          } else {
+            rootComments.push(node);
+          }
+        } else {
+          rootComments.push(node);
+        }
+      }
+
+      this.post.comments = rootComments;
+      this.post.commentsCount = comments?.length ?? 0;
+    } catch (err) {
+      console.error('loadComments unexpected', err);
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     if (typeof document !== 'undefined') {
       this._outsideClickListener = this.closeMenuOutside.bind(this);
       document.addEventListener('click', this._outsideClickListener);
     }
 
-    // normalize incoming payload so template can rely on post.author.name
     this.normalizeAuthorFromPayload();
-
-    // then try to fill missing author details and refresh states
     await this.ensureAuthorLoaded();
     await this.refreshFollowState();
     await this.refreshLikeState();
+    await this.loadLikeCount(); // NEW
+    await this.loadComments();  // NEW
   }
 
   ngOnDestroy(): void {
@@ -221,7 +313,6 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  // media helpers
   get firstMedia(): MediaItem | undefined {
     return this.post?.media && this.post.media.length > 0 ? this.post.media[0] : undefined;
   }
@@ -230,21 +321,22 @@ export class Post implements OnInit, OnDestroy {
     return this.post?.media?.length ?? 0;
   }
 
-  // Open comment popup (uses MatDialog)
   openCommentPopUp() {
     const dialogRef = this.dialog.open(CommentPopUp, {
       data: { post: this.post, currentUser: this.currentUser }
     });
 
-    dialogRef.afterClosed().subscribe((updatedComments) => {
+    dialogRef.afterClosed().subscribe(async (updatedComments) => {
       if (updatedComments && this.post) {
         this.post.comments = updatedComments;
         this.post.commentsCount = this.post.comments?.length ?? this.post.commentsCount;
       }
+      // Reload comments from database to ensure sync
+      await this.loadComments();
     });
   }
 
-  // Like/unlike with optimistic UI and Supabase writes
+  // FIXED: Proper like/unlike with flurr_action table
   async onReact(type: string) {
     if (!this.post) return;
     if (type !== 'like') return;
@@ -260,7 +352,7 @@ export class Post implements OnInit, OnDestroy {
     const currentLikes = this.post.reactions['like'] ?? 0;
     const userHasLiked = !!this.post.userHasLiked;
 
-    // optimistic update
+    // Optimistic update
     if (userHasLiked) {
       this.post.reactions['like'] = Math.max(currentLikes - 1, 0);
       this.post.userHasLiked = false;
@@ -271,10 +363,11 @@ export class Post implements OnInit, OnDestroy {
 
     try {
       if (userHasLiked) {
+        // Unlike: delete the flurr_action record
         const { error } = await supabase
-          .from('likes')
+          .from('flurr_action')
           .delete()
-          .match({ user_id: uid, flurr_id: flurrId });
+          .match({ user_id: uid, flurr_id: flurrId, is_liked: true });
 
         if (error) {
           console.warn('onReact unlike error', error);
@@ -282,9 +375,17 @@ export class Post implements OnInit, OnDestroy {
           this.post.userHasLiked = true;
         }
       } else {
+        // Like: insert or update flurr_action
         const { error } = await supabase
-          .from('likes')
-          .insert([{ user_id: uid, flurr_id: flurrId }]);
+          .from('flurr_action')
+          .upsert([{ 
+            user_id: uid, 
+            flurr_id: flurrId, 
+            is_liked: true,
+            acted_at: new Date().toISOString()
+          }], { 
+            onConflict: 'user_id,flurr_id'
+          });
 
         if (error) {
           console.warn('onReact like error', error);
@@ -292,6 +393,9 @@ export class Post implements OnInit, OnDestroy {
           this.post.userHasLiked = false;
         }
       }
+
+      // Reload actual count from database
+      await this.loadLikeCount();
     } catch (err) {
       console.error('onReact unexpected', err);
       this.post.reactions['like'] = currentLikes;
@@ -299,10 +403,11 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  // Follow author (writes to friends)
   async onFollow() {
     if (!this.post) return;
-    const posterId = (this.post as any).poster?.user_id ?? (this.post as any).poster_id ?? this.post.author?.id;
+    const posterId = (this.post as any).poster?.user_id ?? 
+                     (this.post as any).poster_id ?? 
+                     this.post.author?.id;
     const uid = await this.getCurrentUid();
     if (!uid) {
       alert('You must be logged in to follow users.');
@@ -318,7 +423,7 @@ export class Post implements OnInit, OnDestroy {
         .from('friends')
         .insert([{ follower_id: uid, followed_id: posterId }]);
       if (error) {
-        console.warn('onFollow insert error', error);
+        console.warn('onFollow error', error);
         (this.post as any).author.isFollowed = false;
       }
     } catch (err) {
@@ -329,7 +434,9 @@ export class Post implements OnInit, OnDestroy {
 
   async onUnfollow() {
     if (!this.post) return;
-    const posterId = (this.post as any).poster?.user_id ?? (this.post as any).poster_id ?? this.post.author?.id;
+    const posterId = (this.post as any).poster?.user_id ?? 
+                     (this.post as any).poster_id ?? 
+                     this.post.author?.id;
     const uid = await this.getCurrentUid();
     if (!uid) {
       alert('You must be logged in to unfollow users.');
@@ -346,7 +453,7 @@ export class Post implements OnInit, OnDestroy {
         .delete()
         .match({ follower_id: uid, followed_id: posterId });
       if (error) {
-        console.warn('onUnfollow delete error', error);
+        console.warn('onUnfollow error', error);
         (this.post as any).author.isFollowed = true;
       }
     } catch (err) {
@@ -355,6 +462,7 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
+  // FIXED: Proper comment submission with flurr_action link
   async submitComment() {
     if (!this.newComment.trim() || !this.post) return;
     const uid = await this.getCurrentUid();
@@ -364,42 +472,48 @@ export class Post implements OnInit, OnDestroy {
     }
     const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
 
-    const newLocalComment = new CommentNode(this.newComment.trim(), {
-      name: this.currentUser?.name ?? 'Me',
-      avatarUrl: this.currentUser?.avatarUrl ?? this.defaultAvatar
-    });
-    if (!this.post.comments) this.post.comments = [];
-    this.post.comments.push(newLocalComment);
-    this.post.commentsCount = (this.post.commentsCount ?? 0) + 1;
-
     const commentContent = this.newComment.trim();
     this.newComment = '';
     this.showButton = false;
     this.showComments = true;
 
     try {
+      // 1. Insert comment
       const { data: commentRow, error: insertErr } = await supabase
         .from('comments')
-        .insert([{ content: commentContent, user_id: uid }])
+        .insert([{ 
+          content: commentContent, 
+          user_id: uid,
+          created_at: new Date().toISOString()
+        }])
         .select()
         .single();
 
       if (insertErr) {
-        console.warn('submitComment insert comment error', insertErr);
+        console.warn('submitComment error', insertErr);
         return;
       }
 
       const commentId = commentRow.comment_id;
 
+      // 2. Link comment to flurr via flurr_action
       const { error: linkErr } = await supabase
-        .from('comment_actions')
-        .insert([{ user_id: uid, flurr_id: flurrId, comment_id: commentId, action_type: 'comment' }]);
+        .from('flurr_action')
+        .insert([{ 
+          user_id: uid, 
+          flurr_id: flurrId, 
+          comment_id: commentId,
+          is_liked: false,
+          acted_at: new Date().toISOString()
+        }]);
 
       if (linkErr) {
-        console.warn('submitComment link comment_actions error', linkErr);
+        console.warn('submitComment link error', linkErr);
       }
 
-      (this.post.comments[this.post.comments.length - 1] as any).id = commentId;
+      // 3. Reload comments from database
+      await this.loadComments();
+
     } catch (err) {
       console.error('submitComment unexpected', err);
     }
@@ -418,7 +532,7 @@ export class Post implements OnInit, OnDestroy {
 
   blockUser() {
     if (!this.post) return;
-    const confirmed = confirm(`Block user ${this.post.author?.name ?? 'user'}? You won't see their posts anymore.`);
+    const confirmed = confirm(`Block user ${this.post.author?.name ?? 'user'}?`);
     if (!confirmed) {
       this.showMenu = false;
       return;
@@ -448,15 +562,12 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
- 
   formatHashtags(text?: string): string {
     if (!text) return '';
-
     const escaped = text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-
     return escaped.replace(/(#[\w_-]+)/g, '<a class="hashtag" href="#">$1</a>');
   }
 

@@ -1,4 +1,4 @@
-// src/app/features/home/home.ts
+// home.ts - FIXED VERSION with proper likes and comments aggregation
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
@@ -25,7 +25,8 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./home.css']
 })
 export class Home implements OnInit {
-  loading = true;
+
+  loading = false;
   error = '';
 
   shortcuts: any[] = [];
@@ -52,51 +53,56 @@ export class Home implements OnInit {
   }
 
   async loadAllData() {
+    this.loading = true;
     this.error = '';
 
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user?.id ?? this.authService.getUserId() ?? null;
 
+      console.log('Home - Loading data for user:', uid);
+
       if (uid) {
-        await this.userService.loadFromAuthUserId(uid);
+        // ⭐ IMPORTANT: Wait for user data to load completely
+        const result = await this.userService.loadFromAuthUserId(uid);
+        console.log('Home - User loaded:', result.data);
       } else {
         this.userService.clearUser();
       }
 
       // -------------------------------------------------
-      // 1) GET FRIENDS (people I follow)
+      // 1) GET FRIENDS (people I follow) - ONLY FRIENDS, NOT ME
       // -------------------------------------------------
       let feedAuthorIds: string[] = [];
       if (uid) {
         const { data: friends, error: friendsErr } = await supabase
           .from('friends')
           .select('followed_id')
-          .eq('follower_id', uid);
+          .eq('follower_id', uid)
+          .neq('followed_id', uid);  // ⭐ EXCLUDE yourself from friends list
 
         if (friendsErr) {
           console.warn('friendsErr:', friendsErr);
-        } else if (friends) {
+        } else if (friends && friends.length > 0) {
           const friendIds = friends.map((f: any) => f.followed_id as string);
-          feedAuthorIds = Array.from(new Set(friendIds));
+          // Extra safety: filter out your own ID just in case
+          feedAuthorIds = Array.from(new Set(friendIds)).filter(id => id !== uid);
         }
       }
 
-      // If no logged user or no friends, you can decide:
-      // Option A: show nothing
-      // Option B: show only my own posts (if uid)
-      if (!uid) {
-        this.posts = [];
-      } else if (feedAuthorIds.length === 0) {
-        // fall back: only my posts
-        feedAuthorIds = [uid];
-      }
       console.log("UID =", uid);
-console.log("FEED AUTHOR IDS =", feedAuthorIds);
+      console.log("FRIENDS (feed authors) =", feedAuthorIds);
+      console.log("Number of friends:", feedAuthorIds.length);
 
+      // If no logged user or no friends, show empty feed
+      if (!uid || feedAuthorIds.length === 0) {
+        this.posts = [];
+        console.log("No friends to show posts from - feed will be empty");
+        // Continue to load other data (shortcuts, notifications, etc.)
+      }
 
       // -------------------------------------------------
-      // 2) FLURRS for those authors only
+      // 2) FLURRS from friends ONLY (not your own posts)
       // -------------------------------------------------
       let flurrs: any[] = [];
 
@@ -117,18 +123,74 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
               email
             )
           `)
-          .in('poster_id', feedAuthorIds)   // ⭐ only friends + me
+          .in('poster_id', feedAuthorIds)  // ⭐ Only friends' posts
+          .neq('poster_id', uid)            // ⭐ DOUBLE CHECK: exclude your own posts
           .order('created_at', { ascending: false })
-          .limit(100); // a bit larger since we filter
+          .limit(100);
 
         if (flurrsErr) {
           console.warn('flurrsErr:', flurrsErr);
         } else if (flurrsData) {
           flurrs = flurrsData as any[];
+          console.log(`Loaded ${flurrs.length} posts from ${feedAuthorIds.length} friends`);
+          
+          // Debug: Log poster IDs to verify
+          if (flurrs.length > 0) {
+            const posterIds = flurrs.map(f => f.poster_id);
+            console.log("Poster IDs in feed:", posterIds);
+            console.log("Your ID:", uid);
+            
+            // Extra safety check: filter out any posts from yourself
+            flurrs = flurrs.filter(f => f.poster_id !== uid);
+            console.log(`After filtering: ${flurrs.length} posts`);
+          }
+        }
+      } else {
+        console.log("No friends followed - feed will be empty");
+      }
+
+      // -------------------------------------------------
+      // 3) LOAD LIKES AND COMMENTS COUNTS (NEW)
+      // -------------------------------------------------
+      const flurrIds = flurrs.map(f => f.flurr_id);
+      
+      // Get likes counts
+      const likesMap = new Map<string, number>();
+      if (flurrIds.length > 0) {
+        const { data: likesData } = await supabase
+          .from('flurr_action')
+          .select('flurr_id')
+          .in('flurr_id', flurrIds)
+          .eq('is_liked', true);
+
+        if (likesData) {
+          for (const like of likesData) {
+            const count = likesMap.get(like.flurr_id) || 0;
+            likesMap.set(like.flurr_id, count + 1);
+          }
         }
       }
 
-      // Map + normalize posts
+      // Get comments counts
+      const commentsMap = new Map<string, number>();
+      if (flurrIds.length > 0) {
+        const { data: commentsData } = await supabase
+          .from('flurr_action')
+          .select('flurr_id, comment_id')
+          .in('flurr_id', flurrIds)
+          .not('comment_id', 'is', null);
+
+        if (commentsData) {
+          for (const comment of commentsData) {
+            const count = commentsMap.get(comment.flurr_id) || 0;
+            commentsMap.set(comment.flurr_id, count + 1);
+          }
+        }
+      }
+
+      // -------------------------------------------------
+      // 4) MAP POSTS WITH PROPER COUNTS
+      // -------------------------------------------------
       this.posts = flurrs.map((r: any) => {
         const posterRaw = r.poster;
         const poster = Array.isArray(posterRaw) ? posterRaw[0] : posterRaw;
@@ -138,7 +200,7 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
               id: poster.user_id,
               name: poster.full_name || (poster.email?.split('@')[0] ?? 'Unknown'),
               avatarUrl: poster.avatar_img || './assets/images/hama.png',
-              isFollowed: true // if it's in feed, we already follow them
+              isFollowed: true
             }
           : {
               id: r.poster_id,
@@ -152,13 +214,14 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
           id: r.flurr_id,
           author,
           createdAt: new Date(r.created_at),
-          // default stats; can be updated later when you add aggregation
-          reactions: r.reactions ?? { like: 0 },
-          commentsCount: r.commentsCount ?? 0
+          reactions: { 
+            like: likesMap.get(r.flurr_id) || 0 
+          },
+          commentsCount: commentsMap.get(r.flurr_id) || 0
         };
       });
 
-      // Apply ranking (Top or Recent)
+      // Apply ranking
       this.applySorting();
 
       // -------------------------------------------------
@@ -228,7 +291,7 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
       }
 
       // -------------------------------------------------
-      // FRIENDS SUGGESTIONS (users you don't follow yet)
+      // FRIENDS SUGGESTIONS
       // -------------------------------------------------
       const { data: users } = await supabase
         .from('users')
@@ -257,9 +320,6 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
     }
   }
 
-  // ---------------------------
-  // FEED SORTING / ALGORITHM
-  // ---------------------------
   private applySorting() {
     if (!this.posts || this.posts.length === 0) return;
 
@@ -277,12 +337,11 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
   private computeScore(p: any): number {
     const now = Date.now();
     const created = new Date(p.createdAt).getTime();
-    const ageHours = Math.max(1, (now - created) / 3_600_000); // avoid div/0
+    const ageHours = Math.max(1, (now - created) / 3_600_000);
 
     const likes = p.reactions?.['like'] ?? 0;
     const comments = p.commentsCount ?? 0;
 
-    // Simple scoring formula: likes & comments vs age
     const engagement = likes * 3 + comments * 4;
     const decay = ageHours * 0.5;
 
