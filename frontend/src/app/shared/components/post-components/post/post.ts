@@ -30,10 +30,9 @@ export class Post implements OnInit, OnDestroy {
     author: { id: 'u1', name: 'Catharina', avatarUrl: 'assets/icons/post/avatar2-img.avif', title: '', isFollowed: false },
     content: "🚀 Just finished connecting my Angular frontend #hhahaa to my Node.js API!",
     media: [
-      { url: 'assets/post-examples/hero_slide1.jpg', type: 'image', filename: 'screenshot.png' },
-      { url: 'assets/post-examples/hero_slide2.jpg', type: 'image', filename: 'screenshot.png' }, 
-      { url: 'assets/post-examples/killbill.mp4', type: 'video', filename: 'screenshot.png' },
-      { url: 'assets/post-examples/hero_slide3.jpg', type: 'image', filename: 'screenshot.png' },    
+      { url: 'assets/post-tests/hero_slide1.jpg', type: 'image', filename: 'screenshot.png' },
+      { url: 'assets/post-tests/hero_slide2.jpg', type: 'image', filename: 'screenshot.png' }, 
+      { url: 'assets/post-tests/hero_slide3.jpg', type: 'image', filename: 'screenshot.png' },    
     ],
     reactions: { like: 232 },
     commentsCount: 120,

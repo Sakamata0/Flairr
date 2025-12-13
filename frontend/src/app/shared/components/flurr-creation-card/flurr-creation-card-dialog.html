@@ -64,23 +64,49 @@
     <p-fileUpload
       name="files"
       [customUpload]="true"
+      [auto]="false"
       [multiple]="true"
       accept="image/*,video/*"
-      maxFileSize="1000000000"
+      [maxFileSize]="50 * 1024 * 1024"
+      [showUploadButton]="false"
       (onSelect)="onFileSelect($event)"
     >
       <ng-template #empty>
         <div>Drag and drop files here</div>
       </ng-template>
     </p-fileUpload>
+
   </div>
 
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button [disabled]=!f.valid class="btn" id="flurrBtn" matButton (click)="onSubmit()">Flurr it!</button>
-  <button class="btn" id="createBtn" matButton cdkFocusInitial (click)="openJourneyCreationDialog()">
-    Create a new Journey
+  <button
+    [disabled]="!f.valid || isSubmitting"
+    class="btn"
+    id="flurrBtn"
+    matButton
+    (click)="onSubmit()">
+    <ng-container *ngIf="!isSubmitting; else loadingTpl">
+      Flurr it!
+    </ng-container>
+    <ng-template #loadingTpl>
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    </ng-template>
+  </button>
+
+  <button
+    class="btn"
+    id="createBtn"
+    matButton
+    [disabled]="isSubmitting"
+    cdkFocusInitial
+    (click)="!isSubmitting && openJourneyCreationDialog()">
+
+    <ng-container>
+      Create a new Journey
+    </ng-container>
   </button>
 </mat-dialog-actions>
+
 </form>

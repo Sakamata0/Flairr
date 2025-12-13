@@ -11,6 +11,7 @@ import { JourneysSelector } from "../../shared/components/profile/journeys-selec
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { FlurrsService } from '../../core/services/flurrs.service';
 
 @Component({
   selector: 'app-profile',
@@ -38,13 +39,29 @@ export class Profile implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private flurrsService: FlurrsService 
   ) {}
+
 
   ngOnInit(): void {
     this.loadProfileFromRoute();
     supabase.auth.onAuthStateChange(() => this.loadProfileFromRoute());
   }
+
+  selectedJourneyId: string | null = null;
+  selectedYear: string | null = null;
+
+  async onJourneySelectionChange(event: {
+    journeyId: string | null;
+    year: string | null;
+  }) {
+    this.selectedJourneyId = event.journeyId;
+    this.selectedYear = event.year;
+
+    await this.loadProfileFromRoute();
+  }
+
 
   async loadProfileFromRoute() {
     this.loading = true;
@@ -103,16 +120,17 @@ export class Profile implements OnInit {
       // -------------------------
       // LOAD POSTS (flurrs)
       // -------------------------
-      const { data: flurrs, error: flurrsErr } = await supabase
-        .from('flurrs')
-        .select('*')
-        .eq('poster_id', targetId)
-        .order('created_at', { ascending: false });
+      try {
+        this.posts = await this.flurrsService.getUserFlurrs(
+          currentUid!,
+          this.selectedJourneyId,
+          this.selectedYear
+        );
+      } catch (err) {
+        console.warn('[Profile] flurrsErr', err);
+        this.posts = [];
+      }
 
-      console.log('[Profile] flurrs result:', { flurrs, flurrsErr });
-
-      if (flurrsErr) console.warn('[Profile] flurrsErr', flurrsErr);
-      this.posts = flurrs ?? [];
 
       // -------------------------
       // LOAD SPACES OWNED

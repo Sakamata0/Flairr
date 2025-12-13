@@ -357,6 +357,13 @@
     transition: all 0.3s ease;
 }
 
+#createBtn i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 #createBtn:hover {
     background-color: #609966;   
     color: #F5F5F0;

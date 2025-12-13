@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, Output, EventEmitter } from '@angular/core';
 import { JourneysService } from '../../../../core/services/journeys.service';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 
@@ -10,56 +10,62 @@ import { CommonModule, NgFor, NgIf } from '@angular/common';
   standalone: true
 })
 export class JourneysSelector implements OnInit {
-  // mock data
-  /*journeys = input<string[]>([
-    'Blog App - Flairr.',
-    'E-Commerce Store',
-    'Weather App',
-    'To-Do List App',
-    'Personal Portfolio Website',
-    'Blog App - Flairr.',
-    'E-Commerce Store',
-    'Weather App',
-    'To-Do List App',
-    'Personal Portfolio Website',
-    'Blog App - Flairr.',
-    'E-Commerce Store',
-    'Weather App',
-    'To-Do List App',
-    'Personal Portfolio Website'
-  ]);*/
+
+  @Output() selectionChange = new EventEmitter<{
+    journeyId: string | null;
+    year: string | null;
+  }>();
 
   years = signal<string[]>([]);
+  journeys = signal<{ id: string; name: string }[]>([]);
+  lastJourneys = signal<{ id: string; name: string }[]>([]);
 
-  journeys = signal<string[]>([]);
-  lastJourneys = signal<string[]>([]);
   expandedList = false;
-  selectedJourney = 0;
+  selectedJourney: string | null = null;
+  selectedYear: string | null = null;
 
   constructor(private journeysService: JourneysService) {}
 
   async ngOnInit() {
     const journeyList = await this.journeysService.getCurrentUserJourneys();
 
-    // Map the names
-    const names = journeyList.map(j => j.journey_name);
+    const names = journeyList.map(j => ({
+      id: j.journey_id,
+      name: j.journey_name
+    }));
 
-    // Map the years
     const yearsList = journeyList.map(j => {
-      const date = new Date(j.date_creation); // convert string → Date
-      return date.getFullYear().toString();    // get year as string
+      const date = new Date(j.date_creation);
+      return date.getFullYear().toString();
     });
 
-    // Remove duplicates if you want unique years
     const uniqueYears = Array.from(new Set(yearsList));
 
     this.journeys.set(names);
-    this.years.set(uniqueYears);
     this.lastJourneys.set(names.slice(0, 5));
-    
+    this.years.set(uniqueYears);
+
+    // auto-select first journey
+    if (names.length > 0) {
+      this.selectedJourney = names[0].id;
+      this.emitSelection();
+    }
   }
 
-  selectJourney(i: number) {
-    this.selectedJourney = i;
+  selectJourney(id: string) {
+    this.selectedJourney = id;
+    this.emitSelection();
+  }
+
+  selectYear(year: string) {
+    this.selectedYear = year;
+    this.emitSelection();
+  }
+
+  private emitSelection() {
+    this.selectionChange.emit({
+      journeyId: this.selectedJourney,
+      year: this.selectedYear
+    });
   }
 }

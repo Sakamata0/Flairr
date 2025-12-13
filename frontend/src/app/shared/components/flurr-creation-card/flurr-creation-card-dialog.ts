@@ -100,7 +100,12 @@ export class FlurrCreationCardDialog {
   }
 
   // Submit Flurr
+  isSubmitting = false;
   async onSubmit() {
+    // startoooo 
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     if (!this.model.flurrContent) return;
 
     try {
@@ -142,6 +147,8 @@ export class FlurrCreationCardDialog {
         summary: 'Error',
         detail: 'Failed to create flurr'
       });
+    } finally {
+      this.isSubmitting = false
     }
   }
 

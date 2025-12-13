@@ -9,25 +9,34 @@ export class FlurrsService {
         environment.supabaseAnonKey
     );
 
-    /*async getCurrentUserFlurrs() {
-        // get the logged in user
-        const { data: { user }, error: userError } =
-        await this.supabase.auth.getUser();
+    async getUserFlurrs(
+        posterId: string,
+        journeyId?: string | null,
+        year?: string | null
+        ) {
+        let query = this.supabase
+            .from('flurrs')
+            .select('*')
+            .eq('poster_id', posterId)
+            .order('created_at', { ascending: false });
 
-        if (userError) throw userError;
-        if (!user) return [];
+        if (journeyId) {
+            query = query.eq('journey_id', journeyId);
+        }
 
-        // query journeys belonging to this user
-        const { data, error } = await this.supabase
-        .from('journeys')
-        .select('journey_id, journey_name, date_creation')
-        .eq('user_id', user.id)
-        .order('date_creation', { ascending: false });
+        if (year) {
+            const start = `${year}-01-01`;
+            const end = `${year}-12-31`;
+            query = query.gte('created_at', start).lte('created_at', end);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
-        return data;
-    }*/
+        return data ?? [];
+    }
+
 
     async uploadFlurrFile(flurrId: string, file: File) {
         const fileExt = file.name.split('.').pop();
