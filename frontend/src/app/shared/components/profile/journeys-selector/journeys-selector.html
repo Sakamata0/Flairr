@@ -1,17 +1,10 @@
 <div class="container">
     <header>
     <h3>Journeys</h3>
-    <select
-        name="Year"
-        id="year-selector"
-        (change)="selectYear($any($event.target).value)"
-    >
-        <option value="">Year</option>
-        <option *ngFor="let year of years()" [value]="year">
-            {{ year }}
-        </option>
+    <select name="Year" id="year-selector">
+        <option value="0" disabled>Year</option>
+        <option *ngFor="let year of years()" [value]="year">{{ year }}</option>
     </select>
-
     </header>
     <main>
         <h4 *ngIf="journeys().length == 0" id="no-items-message">
@@ -21,15 +14,15 @@
             <ul *ngIf="!expandedList">
                 <li 
                     *ngFor="let journey of lastJourneys(); let i = index"
-                    (click)="selectJourney(journey.id)"
-                    [class.selected]="selectedJourney === journey.id">{{ journey.name }}
+                    (click)="selectJourney(i)"
+                    [class.selected]="selectedJourney === i">{{ journey }}
                 </li>
             </ul>
             <ul *ngIf="expandedList">
                 <li 
                     *ngFor="let journey of journeys(); let i = index"
-                    (click)="selectJourney(journey.id)"
-                    [class.selected]="selectedJourney === journey.id">{{ journey.name }}
+                    (click)="selectJourney(i)"
+                    [class.selected]="selectedJourney === i">{{ journey }}
                 </li>
             </ul>
         </div>

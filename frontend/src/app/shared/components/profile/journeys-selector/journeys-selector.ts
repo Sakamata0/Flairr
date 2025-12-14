@@ -1,72 +1,91 @@
-import { Component, signal, OnInit, Output, EventEmitter } from '@angular/core';
-import { JourneysService } from '../../../../core/services/journeys.service';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+// journeys-selector.ts - FIXED VERSION with real data loading
+import { Component, Input, OnInit, signal, computed } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { supabase } from '../../../../core/supabase/supabase.client';
 
 @Component({
   selector: 'app-journeys-selector',
-  imports: [NgIf, NgFor, CommonModule],
+  imports: [NgFor, NgIf],
   templateUrl: './journeys-selector.html',
-  styleUrl: './journeys-selector.css',
-  standalone: true
+  styleUrl: './journeys-selector.css'
 })
 export class JourneysSelector implements OnInit {
+  @Input() userId: string | null = null;
 
-  @Output() selectionChange = new EventEmitter<{
-    journeyId: string | null;
-    year: string | null;
-  }>();
+  journeys = signal<string[]>([]);
+  
+  lastJourneys = computed(() => this.journeys().slice(0, 5));
+  
+  expandedList: boolean = false;
+  selectedJourney: number = 0;
 
   years = signal<string[]>([]);
-  journeys = signal<{ id: string; name: string }[]>([]);
-  lastJourneys = signal<{ id: string; name: string }[]>([]);
 
-  expandedList = false;
-  selectedJourney: string | null = null;
-  selectedYear: string | null = null;
+  ngOnInit() {
+    this.loadJourneys();
+  }
 
-  constructor(private journeysService: JourneysService) {}
+  async loadJourneys() {
+    if (!this.userId) {
+      console.warn('No userId provided for journeys');
+      return;
+    }
 
-  async ngOnInit() {
-    const journeyList = await this.journeysService.getCurrentUserJourneys();
+    try {
+      // Load journeys from database
+      const { data, error } = await supabase
+        .from('journeys')
+        .select('journey_id, journey_name, year, created_at')
+        .eq('user_id', this.userId)
+        .order('created_at', { ascending: false });
 
-    const names = journeyList.map(j => ({
-      id: j.journey_id,
-      name: j.journey_name
-    }));
+      if (error) {
+        console.error('Error loading journeys:', error);
+        return;
+      }
 
-    const yearsList = journeyList.map(j => {
-      const date = new Date(j.date_creation);
-      return date.getFullYear().toString();
-    });
+      if (data && data.length > 0) {
+        // Set journey names
+        this.journeys.set(data.map(j => j.journey_name));
 
-    const uniqueYears = Array.from(new Set(yearsList));
+        // Extract unique years
+        const yearsSet = new Set<string>();
+        data.forEach(j => {
+          if (j.year) {
+            yearsSet.add(j.year.toString());
+          } else if (j.created_at) {
+            const year = new Date(j.created_at).getFullYear();
+            yearsSet.add(year.toString());
+          }
+        });
 
-    this.journeys.set(names);
-    this.lastJourneys.set(names.slice(0, 5));
-    this.years.set(uniqueYears);
+        // Sort years descending
+        const sortedYears = Array.from(yearsSet).sort((a, b) => 
+          parseInt(b) - parseInt(a)
+        );
+        
+        this.years.set(sortedYears);
 
-    // auto-select first journey
-    if (names.length > 0) {
-      this.selectedJourney = names[0].id;
-      this.emitSelection();
+        console.log('Loaded journeys:', {
+          count: data.length,
+          years: sortedYears
+        });
+      } else {
+        // No journeys found - set empty arrays
+        this.journeys.set([]);
+        this.years.set([]);
+        console.log('No journeys found for user:', this.userId);
+      }
+
+    } catch (err) {
+      console.error('Unexpected error loading journeys:', err);
     }
   }
 
-  selectJourney(id: string) {
-    this.selectedJourney = id;
-    this.emitSelection();
-  }
-
-  selectYear(year: string) {
-    this.selectedYear = year;
-    this.emitSelection();
-  }
-
-  private emitSelection() {
-    this.selectionChange.emit({
-      journeyId: this.selectedJourney,
-      year: this.selectedYear
-    });
+  selectJourney(i: number) {
+    this.selectedJourney = i;
+    // TODO: Emit event or navigate to journey detail
+    console.log('Selected journey:', this.journeys()[i]);
   }
 
   toggleExpandList() {
