@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { userSignIn } from '../../shared/model/user/usersignin.type';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,7 +23,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './signin.html',
   styleUrl: './signin.css'
 })
-export class Signin {
+export class Signin{
   model: userSignIn = {
     email: '',
     password: '',
@@ -32,7 +32,6 @@ export class Signin {
 
   showPassword = false;
   errorMessage = '';
-  loading: boolean = true;
 
   constructor(
     private auth: AuthService,
