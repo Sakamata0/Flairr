@@ -1,26 +1,20 @@
 <div class="container">
   <div class="icon">
-    <img src="assets/icons/logout/logout.svg" alt="logout_icon">
+    <img
+      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' y1='12' x2='9' y2='12'/%3E%3C/svg%3E"
+      alt="logout_icon"
+    />
   </div>
-  
-  <h3>Already leaving ?</h3>
-  <h4>We'll keep an eye on your journeys while you're gone.<br> And we will miss you a lot...</h4>
+
+  <h3>Already leaving?</h3>
+  <h4>We'll keep an eye on your journeys while you're gone. And we will miss you a lot...</h4>
+
   <div class="buttons">
-    <button id="yes" [mat-dialog-close]="true">Yes, Log out</button>
-    <button id="no" mat-dialog-close>No, I am staying</button>
+    <button id="no" type="button" mat-dialog-close>
+      <span>No, I'm staying</span>
+    </button>
+    <button id="yes" type="button" [mat-dialog-close]="true">
+      <span>Yes, log out</span>
+    </button>
   </div>
 </div>
-
-
-<!--
-<h2 mat-dialog-title>Log out</h2>
-
-<div mat-dialog-content>
-  Do you really want to log out?
-</div>
-
-<div mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>No</button>
-  <button mat-button color="warn" [mat-dialog-close]="true">Yes</button>
-</div>
--->

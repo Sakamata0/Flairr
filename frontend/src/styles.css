@@ -56,7 +56,7 @@ body {
 /* Base styles for your dialogs */
 .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
 .custom-journey-creation-dialog .mat-mdc-dialog-surface {
-  width: 600px !important;
+  width: fit-content !important;
   height: auto !important;
   max-width: 90vw !important; /* allow responsiveness even at larger screens */
   max-height: 90vh !important;

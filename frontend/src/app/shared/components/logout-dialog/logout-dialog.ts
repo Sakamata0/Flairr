@@ -9,5 +9,4 @@ import { MatDialogModule } from '@angular/material/dialog';
   styleUrl: './logout-dialog.css'
 })
 export class LogoutDialog {
-
 }
