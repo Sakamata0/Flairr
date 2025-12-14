@@ -1,5 +1,5 @@
-// profile.ts - FIXED VERSION with proper data loading
-import { Component, ElementRef, OnInit } from '@angular/core';
+// profile.ts - FIXED VERSION with proper route parameter handling
+import { Component, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
 import { FlurrCreationCard } from "../../shared/components/flurr-creation-card/flurr-creation-card";
@@ -7,6 +7,7 @@ import { Post } from "../../shared/components/post-components/post/post";
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgIf, NgForOf } from '@angular/common';
 import { JourneysSelector } from "../../shared/components/profile/journeys-selector/journeys-selector";
+import { Subscription } from 'rxjs';
 
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
@@ -19,9 +20,9 @@ import { AuthService } from '../../core/auth/auth.service';
   templateUrl: './profile.html',
   styleUrls: ['./profile.css']
 })
-export class Profile implements OnInit {
+export class Profile implements OnInit, OnDestroy {
 
-  loading = false;
+  loading: boolean = true;
   error = '';
 
   profile: any = null;
@@ -33,6 +34,8 @@ export class Profile implements OnInit {
   sortType: string = 'Top';
   sortingPostsMethodOpen: boolean = false;
 
+  private paramSubscription?: Subscription;
+
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     private router: Router,
@@ -42,21 +45,23 @@ export class Profile implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProfileFromRoute();
-    
-    // Reload when auth state changes
-    supabase.auth.onAuthStateChange(() => {
+    // Subscribe to route parameter changes
+    this.paramSubscription = this.route.paramMap.subscribe(params => {
+      console.log('[Profile] Route params changed:', params.get('id'));
       this.loadProfileFromRoute();
     });
 
-    // Reload when route params change (navigating between profiles)
-    this.route.paramMap.subscribe(() => {
+    // Also reload when auth state changes
+    supabase.auth.onAuthStateChange(() => {
       this.loadProfileFromRoute();
     });
   }
 
+  ngOnDestroy(): void {
+    this.paramSubscription?.unsubscribe();
+  }
+
   async loadProfileFromRoute() {
-    this.loading = true;
     this.error = '';
     this.profile = null;
     this.posts = [];
@@ -64,19 +69,39 @@ export class Profile implements OnInit {
     this.isOwnProfile = false;
 
     try {
-      const routeId = this.route.snapshot.paramMap.get('id');
+      // Get the user ID from the route parameter
+      // The route is defined as 'profile/:profileId' so we need to use 'profileId'
+      const routeId = this.route.snapshot.paramMap.get('profileId');
+      
+      // Get the current logged-in user ID
       const { data: sessionData } = await supabase.auth.getSession();
       const currentUid = sessionData.session?.user?.id ?? this.authService.getUserId();
 
-      const targetId = routeId ?? currentUid;
-      console.log('[Profile] IDs:', { routeId, currentUid, targetId });
+      // Log ALL route params to debug
+      console.log('[Profile] ALL ROUTE PARAMS:', this.route.snapshot.paramMap.keys);
+      this.route.snapshot.paramMap.keys.forEach(key => {
+        console.log(`  - ${key}: ${this.route.snapshot.paramMap.get(key)}`);
+      });
+      console.log('[Profile] Loading profile:', { routeId, currentUid, url: this.router.url });
 
-      if (!targetId) {
+      // Determine which profile to load
+      let targetId: string;
+      
+      if (routeId) {
+        // If there's a route ID, always use it (viewing someone else's profile)
+        targetId = routeId;
+        this.isOwnProfile = routeId === currentUid;
+      } else if (currentUid) {
+        // No route ID means we're at /profile, show current user's profile
+        targetId = currentUid;
+        this.isOwnProfile = true;
+      } else {
         this.error = 'No profile selected and no user logged in.';
+        this.loading = false;
         return;
       }
 
-      this.isOwnProfile = targetId === currentUid;
+      console.log('[Profile] Target ID:', targetId, 'Is own profile:', this.isOwnProfile);
 
       // -------------------------
       // LOAD USER PROFILE
@@ -87,11 +112,14 @@ export class Profile implements OnInit {
         .eq('user_id', targetId)
         .single();
 
-      if (userErr) {
+      if (userErr || !userRow) {
         console.error('[Profile] userErr', userErr);
-        this.error = userErr.message;
+        this.error = userErr?.message ?? 'User not found';
+        this.loading = false;
         return;
       }
+
+      console.log('[Profile] Loaded user:', userRow.full_name);
 
       // -------------------------
       // LOAD FOLLOWERS COUNT
@@ -129,7 +157,6 @@ export class Profile implements OnInit {
         };
       });
 
-      // Extract IDs for UserService
       const followersIds = (followersData || []).map((f: any) => f.follower_id);
 
       // -------------------------
@@ -152,7 +179,6 @@ export class Profile implements OnInit {
         };
       });
 
-      // Extract IDs for UserService
       const followingIds = (followingData || []).map((f: any) => f.followed_id);
 
       // -------------------------
@@ -164,7 +190,7 @@ export class Profile implements OnInit {
         .eq('poster_id', targetId)
         .order('created_at', { ascending: false });
 
-      console.log('[Profile] flurrs result:', { flurrs, flurrsErr });
+      console.log('[Profile] flurrs result:', { count: flurrs?.length, error: flurrsErr });
 
       if (flurrsErr) console.warn('[Profile] flurrsErr', flurrsErr);
       this.posts = flurrs ?? [];
@@ -178,7 +204,7 @@ export class Profile implements OnInit {
         .eq('space_owner', targetId);
 
       const { data: joinedSpaces } = await supabase
-        .from('spaces_users')
+        .from('spaces')
         .select(`
           space_id,
           space:space_id(space_id, space_name, space_bio, avatar_img, space_owner)
@@ -231,7 +257,7 @@ export class Profile implements OnInit {
       // -------------------------
       // UPDATE USERSERVICE (if viewing own profile)
       // -------------------------
-      if (this.isOwnProfile) {
+      if (this.isOwnProfile && currentUid) {
         this.userService.setUser({
           userID: userRow.user_id,
           fullName: userRow.full_name ?? '',
@@ -241,7 +267,7 @@ export class Profile implements OnInit {
           coverImg: userRow.cover_img ?? '',
           followers: followersIds,
           following: followingIds,
-          journeys: [], // TODO: load journeys
+          journeys: [],
           flurrs: flurrs || [],
           spacesCreated: ownedSpaces || [],
           spacesJoined: Array.from(allSpaces.values()),
@@ -252,6 +278,8 @@ export class Profile implements OnInit {
 
       console.log('[Profile] Complete profile loaded:', {
         user: this.profile.full_name,
+        userId: this.profile.user_id,
+        isOwnProfile: this.isOwnProfile,
         followers: followersDisplay.length,
         following: followingDisplay.length,
         posts: this.posts.length,
@@ -276,7 +304,6 @@ export class Profile implements OnInit {
         return dateB - dateA;
       });
     } else if (this.sortType === 'Top') {
-      // Sort by engagement (likes + comments) with time decay
       this.posts.sort((a: any, b: any) => {
         return this.computeScore(b) - this.computeScore(a);
       });
@@ -290,7 +317,6 @@ export class Profile implements OnInit {
     const created = new Date(post.created_at || post.date_publish).getTime();
     const ageHours = Math.max(1, (now - created) / 3_600_000);
 
-    // These would need to be loaded from flurr_action table
     const likes = post.likes_count ?? 0;
     const comments = post.comments_count ?? 0;
 

@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -13,7 +13,7 @@ import { UserService } from '../../../core/services/user.service';
 @Component({
     selector: 'app-flurr-header',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule,NgIf],
     templateUrl: './flurr-header.html',
     styleUrls: ['./flurr-header.css']
 })
@@ -191,10 +191,12 @@ export class FlurrHeaderComponent {
         });
 
         dialogRef.afterClosed().subscribe(ok => {
+            
             if (ok) {
                 this.auth.logout();
                 this.router.navigate(['/signin']);
             }
         });
+        
     }
 }

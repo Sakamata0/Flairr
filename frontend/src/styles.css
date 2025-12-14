@@ -1,3 +1,5 @@
+@import "primeicons/primeicons.css";
+
 :root {
   --primary-color: #EDF1D6;
   --secondary-color: #9DC08B;
@@ -154,6 +156,7 @@ hr {
   font-size: 3em;
   font-family: 'Pacifico', cursive;
   font-weight: 500;
+  user-select: none;
 }
 
 .loading-screen h2 {
@@ -168,3 +171,22 @@ hr {
     opacity: 1;
   }
 }
+
+.p-fileupload-advanced {
+    border:  none !important; 
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--p-fileupload-color);
+}
+
+/*.p-fileupload-file-info {
+  display: none !important;
+}
+
+.p-fileupload-file {
+  flex-direction: column;
+}
+
+.p-fileupload-file-actions {
+  margin-inline-start: 0 !important;
+}*/

@@ -221,6 +221,7 @@
 }
 
 
+
 @media (max-width:630px){
   .post-card { width:100%; padding:14px; border-radius:25px; }
   :root { --card-width: 100%; }

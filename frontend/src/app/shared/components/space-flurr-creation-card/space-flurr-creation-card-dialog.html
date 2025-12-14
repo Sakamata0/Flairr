@@ -51,26 +51,36 @@
 
   <!-- bottom section -->
   <div class="flurr-bottom">
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
-      <span>Image</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
-      <span>Video</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
-      <span>Tags</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
-      <span>Location</span>
-    </button>
+    <p-fileUpload
+      name="files"
+      [customUpload]="true"
+      [auto]="false"
+      [multiple]="true"
+      accept="image/*,video/*"
+      [maxFileSize]="50 * 1024 * 1024"
+      [showUploadButton]="false"
+      (onSelect)="onFileSelect($event)"
+    >
+      <ng-template #empty>
+        <div>Drag and drop files here</div>
+      </ng-template>
+    </p-fileUpload>
   </div>
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button class="btn" id="flurrBtn" matButton [disabled]=f.invalid (click)="submit()">Share to the Space!</button>
+  <button
+    [disabled]="!f.valid || isSubmitting"
+    class="btn"
+    id="flurrBtn"
+    matButton
+    (click)="onSubmit()">
+    <ng-container *ngIf="!isSubmitting; else loadingTpl">
+      Share to the Space!
+    </ng-container>
+    <ng-template #loadingTpl>
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    </ng-template>
+  </button>
 </mat-dialog-actions>
 </form>

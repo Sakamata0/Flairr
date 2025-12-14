@@ -1,10 +1,11 @@
-import { Component, ElementRef, input } from '@angular/core';
+import { Component, ElementRef, inject, input } from '@angular/core';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { Post } from '../../shared/components/post-components/post/post';
 import { ProfileHeader } from '../../shared/components/profile/profile-header/profile-header';
 import { NgIf } from '@angular/common';
 import { SpaceInfo, SpaceVisibility } from '../../shared/model/space-info.type';
 import { SpaceFlurrCreationCard } from '../../shared/components/space-flurr-creation-card/space-flurr-creation-card';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-flurr-space-profile',
@@ -32,7 +33,15 @@ export class FlurrSpaceProfile {
     }
   );
   
-  constructor(private elementRef: ElementRef<HTMLElement>) {};
+  public currentSpaceID;
+  private route = inject(ActivatedRoute);
+  constructor(
+    private elementRef: ElementRef<HTMLElement>,
+  ) {
+    // Read the `id` param from the route
+    const id = this.route.snapshot.paramMap.get('spaceId'); 
+    this.currentSpaceID = id; // combine
+  };
 
   invitations =  [
     {id: '1', title: 'Amine Dev', imageUrl: './assets/images/hama.png', withSubtitle: true, subtitle: '10.9K Followers', subtitleOnSameLevel: false, withIcon: false, withButton: true, buttonText: 'Invite', buttonAction: () => { console.log('user invited')} },
@@ -50,5 +59,9 @@ export class FlurrSpaceProfile {
     if (wrap) {
       wrap.classList.toggle('sorting-posts-method-open', this.sortingPostsMethodOpen);
     }
+  }
+
+  ngOnInit(){
+    console.log("spaaaaaaaaaace", this.currentSpaceID)
   }
 }
