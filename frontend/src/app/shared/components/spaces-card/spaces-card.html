@@ -1,51 +1,44 @@
 <div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h3>Spaces</h3>    
-        <img src="./assets/icons/spaces-card/settings.png" alt="settings icon" title="settings">
+  <div class="header">
+    <h3>Spaces</h3>    
+    <img src="./assets/icons/spaces-card/settings.png" alt="settings icon" title="settings">
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-container">
+      <input id="search-input" type="text" placeholder="Search spaces" aria-label="Search" />
+      <i class="fa fa-magnifying-glass"></i>
     </div>
-    <!-- Search Bar -->
-    <div class="search-wrap" aria-hidden="false">
-        <div class="search-container" role="search">
-            <input id="search-input"
-                type="text"
-                placeholder="Search spaces"
-                aria-label="Search"
-            />
-            <i class="fa fa-magnifying-glass" aria-hidden="true"></i>
-        </div>
+  </div>
+
+  <div class="spaces-types">
+    <div *ngFor="let spaceType of spacesTypes"
+         [class.active]="spaceType.key === activeSpaceTypeKey"
+         (click)="setActiveSpaceType(spaceType.key)">
+      <div class="icon-wrap" [class.active]="spaceType.key === activeSpaceTypeKey">
+        <img [src]="spaceType.key === activeSpaceTypeKey ? spaceType.activeIconUrl : spaceType.iconUrl" />
+      </div>
+      <span>{{ spaceType.name }}</span>
     </div>
-    <!-- Space Types -->
-    <div class="spaces-types">
-        <div *ngFor="let spaceType of spacesTypes"
-            [class.active]="spaceType.key === activeSpaceTypeKey"
-            (click)="setActiveSpaceType(spaceType.key)">
-            <div class="icon-wrap" [class.active]="spaceType.key === activeSpaceTypeKey">
-                <img [src]="spaceType.key === activeSpaceTypeKey ? spaceType.activeIconUrl : spaceType.iconUrl" />
-            </div>
-            <span>{{ spaceType.name }}</span>
-        </div>
+  </div>
+
+  <button class="profile-btn" (click)="openSpaceCreationDialog()">
+    <img src="./assets/icons/spaces-card/plus-math.png" alt="">
+    <span>Create new space</span>
+  </button>
+  <hr>
+
+  <div class="joined-spaces-header">
+    <h3>{{ title }}</h3>
+    <a href="#" title="See all {{ title }}">See all</a>
+  </div>
+
+  <div class="joined-spaces-container">
+    <h4 *ngIf="items.length === 0" id="no-items-message">
+      {{ noItemsMessage }}
+    </h4>
+    <div class="items-container">
+      <app-item-panel *ngFor="let item of items" [info]="item"></app-item-panel>
     </div>
-    <!-- Space Creation Button -->
-    <button class="profile-btn" (click)="openSpaceCreationDialog()">
-        <img src="./assets/icons/spaces-card/plus-math.png" alt="">
-        <span>Create new space</span>
-    </button>
-    <hr>
-    <!-- Spaces List -->
-    <div class="joined-spaces-header">
-        <h3>{{ title() }}</h3>
-        <a href="#" title="See all {{ title() }}">See all</a>
-    </div>
-    <div class="joined-spaces-container">
-        <h4 *ngIf="items().length == 0" id="no-items-message">
-            {{ noItemsMessage() || 'No items to display.' }}
-        </h4>
-        <div class="items-container">
-            <app-item-panel
-                *ngFor="let item of items()"
-                [info]="item">
-            </app-item-panel>
-        </div>
-    </div>
+  </div>
 </div>
