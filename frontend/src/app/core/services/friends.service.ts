@@ -132,5 +132,30 @@ export class FriendsService {
     }
 
 
+    //send follow request logic
+    async sendFollowRequest(targetUserId: string, currentUserId: string) {
+        const { error } = await this.supabase
+            .from('request_follow')
+            .insert({
+                requester_id: currentUserId,
+                requested_id: targetUserId,
+                status: 'pending'
+            });
+
+        if (error) throw error;
+
+        this.suggestionsSig.update(list =>
+            list.filter(u => u.id !== targetUserId)
+        );
+    }
+
+    //remove from suggestions
+    removeFromSuggestions(userId: string) {
+        this.suggestionsSig.update(list =>
+            list.filter(u => u.id !== userId)
+        );
+    }
+
+
 
 }

@@ -5,4 +5,3 @@ export const supabase = createClient(
   environment.supabaseUrl,
   environment.supabaseAnonKey
 );
-
