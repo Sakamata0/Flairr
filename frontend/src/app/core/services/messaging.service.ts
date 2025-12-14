@@ -321,49 +321,138 @@ export class MessagingService implements OnDestroy {
         return contacts;
     }
 
-    async findOrCreateConversation(otherUserId: string): Promise<string> {
-        const currentUserId = await this.getCurrentUserId();
+    // messaging.service.ts - FIXED findOrCreateConversation method
+// Remplacez cette méthode dans votre fichier existant
 
-        const { data: rows, error: pErr } = await this.supabase
-            .from('participants')
-            .select('conversation_id, user_id')
-            .in('user_id', [currentUserId, otherUserId]);
+async findOrCreateConversation(otherUserId: string): Promise<string> {
+  console.log('=== findOrCreateConversation START ===');
+  console.log('1. Other user ID:', otherUserId);
 
-        if (pErr) throw pErr;
+  try {
+    // Get current user ID
+    const currentUserId = await this.getCurrentUserId();
+    console.log('2. Current user ID:', currentUserId);
 
-        const convMap = new Map<string, Set<string>>();
-        (rows ?? []).forEach((r: any) => {
-            const set = convMap.get(r.conversation_id) ?? new Set<string>();
-            set.add(r.user_id);
-            convMap.set(r.conversation_id, set);
-        });
-
-        for (const [convId, userSet] of convMap.entries()) {
-            if (userSet.has(currentUserId) && userSet.has(otherUserId)) {
-                return convId;
-            }
-        }
-
-        const { data: convData, error: convErr } = await this.supabase
-            .from('conversations')
-            .insert({})
-            .select('id')
-            .limit(1)
-            .single();
-
-        if (convErr) throw convErr;
-        const newConvId: string = convData.id;
-
-        const inserts = [
-            { conversation_id: newConvId, user_id: currentUserId },
-            { conversation_id: newConvId, user_id: otherUserId }
-        ];
-        const { error: insErr } = await this.supabase.from('participants').insert(inserts);
-        if (insErr) throw insErr;
-
-        return newConvId;
+    if (!currentUserId) {
+      throw new Error('No authenticated user');
     }
 
+    if (currentUserId === otherUserId) {
+      throw new Error('Cannot create conversation with yourself');
+    }
+
+    // Check if conversation already exists
+    console.log('3. Checking existing conversations...');
+    
+    const { data: rows, error: pErr } = await this.supabase
+      .from('participants')
+      .select('conversation_id, user_id')
+      .in('user_id', [currentUserId, otherUserId]);
+
+    if (pErr) {
+      console.error('❌ Error fetching participants:', pErr);
+      throw pErr;
+    }
+
+    console.log('4. Participants found:', rows);
+
+    // Group by conversation_id
+    const convMap = new Map<string, Set<string>>();
+    (rows ?? []).forEach((r: any) => {
+      const set = convMap.get(r.conversation_id) ?? new Set<string>();
+      set.add(r.user_id);
+      convMap.set(r.conversation_id, set);
+    });
+
+    console.log('5. Conversation map:', Array.from(convMap.entries()));
+
+    // Find conversation that has both users
+    for (const [convId, userSet] of convMap.entries()) {
+      if (userSet.has(currentUserId) && userSet.has(otherUserId)) {
+        console.log('✅ Found existing conversation:', convId);
+        console.log('=== findOrCreateConversation END (existing) ===');
+        return convId;
+      }
+    }
+
+    // No existing conversation - create new one
+    console.log('6. No existing conversation found, creating new...');
+
+    const { data: convData, error: convErr } = await this.supabase
+      .from('conversations')
+      .insert({
+        created_at: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+
+    if (convErr) {
+      console.error('❌ Error creating conversation:', convErr);
+      throw convErr;
+    }
+
+    if (!convData || !convData.id) {
+      throw new Error('No conversation ID returned from insert');
+    }
+
+    const newConvId: string = convData.id;
+    console.log('7. New conversation created:', newConvId);
+
+    // Insert participants
+    console.log('8. Inserting participants...');
+    
+    const inserts = [
+      { 
+        conversation_id: newConvId, 
+        user_id: currentUserId,
+        other_user_id: otherUserId,
+        joined_at: new Date().toISOString()
+      },
+      { 
+        conversation_id: newConvId, 
+        user_id: otherUserId,
+        other_user_id: currentUserId,
+        joined_at: new Date().toISOString()
+      }
+    ];
+
+    const { error: insErr } = await this.supabase
+      .from('participants')
+      .insert(inserts);
+
+    if (insErr) {
+      console.error('❌ Error inserting participants:', insErr);
+      
+      // Try to clean up the conversation
+      try {
+        await this.supabase
+          .from('conversations')
+          .delete()
+          .eq('id', newConvId);
+        console.log('🧹 Cleaned up failed conversation');
+      } catch (cleanupErr) {
+        console.error('Failed to cleanup conversation:', cleanupErr);
+      }
+      
+      throw insErr;
+    }
+
+    console.log('✅ Participants inserted successfully');
+    console.log('=== findOrCreateConversation END (created) ===');
+    
+    return newConvId;
+
+  } catch (error: any) {
+    console.error('❌ findOrCreateConversation ERROR:', error);
+    console.error('Error details:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details,
+      hint: error?.hint
+    });
+    throw error;
+  }
+}
     async fetchMessages(convId: string, limit = 100): Promise<Message[]> {
         const { data: rows, error } = await this.supabase
             .from('messages')

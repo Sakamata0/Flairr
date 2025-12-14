@@ -1,17 +1,20 @@
+/* comment-popup.css - Fixed Close Button */
+
 .popup-container {
-  background: #EDF1D6;
-  color: #40513B;
-  border-radius: 16px;
-  padding: 20px;
+  background: linear-gradient(135deg, #EBF4DD 0%, #f5f9ed 100%);
+  color: #3B4953;
+  border-radius: 20px;
+  padding: 30px;
   width: 95%;
   max-width: 800px;
   max-height: 80vh;
   margin: 0 auto;
   overflow-y: auto;
-  overflow-x: show; 
-  box-shadow: 0 4px 20px rgba(64, 81, 59, 0.25);
-  font-family: sans-serif !important;
+  overflow-x: hidden;
+  box-shadow: 0 10px 40px rgba(59, 73, 83, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   box-sizing: border-box;
+  border: 1px solid rgba(144, 171, 139, 0.2);
 }
 
 ::ng-deep .mat-mdc-dialog-surface {
@@ -19,82 +22,142 @@
   box-shadow: none !important;
 }
 
-
-
 .popup-container h3 {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #40513B;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #3B4953;
+  letter-spacing: 0.5px;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.popup-container h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #90AB8B, #5A7863);
+  border-radius: 2px;
 }
 
 .no-comments {
   text-align: center;
-  color: #609966;
-  margin-bottom: 15px;
+  color: #5A7863;
+  margin: 40px 0;
+  padding: 30px;
+  background: rgba(144, 171, 139, 0.1);
+  border-radius: 12px;
+  border: 2px dashed #90AB8B;
   font-style: italic;
-  word-wrap: break-word;
+  font-size: 15px;
 }
 
 .add-comment {
-  margin-top: 15px;
-  border-top: 1px solid #9DC08B;
-  padding-top: 10px;
+  margin-top: 25px;
+  border-top: 2px solid rgba(144, 171, 139, 0.3);
+  padding-top: 20px;
 }
 
 .add-comment textarea {
   width: 100%;
-  resize: none;
-  background: #F8FAF3;
-  color: #40513B;
-  border: 1px solid #9DC08B;
-  border-radius: 8px;
-  padding: 8px;
+  resize: vertical;
+  min-height: 80px;
+  background: #ffffff;
+  color: #3B4953;
+  border: 2px solid #90AB8B;
+  border-radius: 12px;
+  padding: 12px 15px;
   font-size: 14px;
   box-sizing: border-box;
-  word-wrap: break-word;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  line-height: 1.5;
+}
+
+.add-comment textarea:focus {
+  outline: none;
+  border-color: #5A7863;
+  background: #EBF4DD;
+  box-shadow: 0 0 0 3px rgba(90, 120, 99, 0.1);
+}
+
+.add-comment textarea::placeholder {
+  color: rgba(59, 73, 83, 0.5);
 }
 
 .add-comment button {
-  background: #609966;
-  font-weight: bold;
-  color: #EDF1D6;
+  background: linear-gradient(135deg, #5A7863 0%, #90AB8B 100%);
+  color: #EBF4DD;
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  margin-top: 5px;
+  border-radius: 10px;
+  padding: 10px 24px;
+  margin-top: 12px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s, transform 0.1s;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(90, 120, 99, 0.3);
 }
 
 .add-comment button:hover {
-  background: #40513B;
+  background: linear-gradient(135deg, #3B4953 0%, #5A7863 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 73, 83, 0.4);
+}
+
+.add-comment button:active {
+  transform: translateY(0);
 }
 
 .close-btn {
   display: block;
-  margin: 15px auto 0;
-  background: #9dc08b;
-  color: #fff;
+  margin: 25px auto 0;
+  background: #90AB8B;
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
+  border-radius: 10px;
+  padding: 10px 28px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s, transform 0.1s;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(144, 171, 139, 0.3);
+  min-width: 120px;
+  white-space: nowrap;
+  overflow: visible;
 }
 
 .close-btn:hover {
-  background: #609966;
-  color: #EDF1D6;
-  transform: scale(1.05);
+  background: #5A7863;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(90, 120, 99, 0.4);
 }
 
-
-h3{
-  font-family: sans-serif;
-  font-weight: 500;
-  color: black;
+.close-btn:active {
+  transform: translateY(0);
 }
+
+/* Custom Scrollbar */
+.popup-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.popup-container::-webkit-scrollbar-track {
+  background: rgba(144, 171, 139, 0.1);
+  border-radius: 10px;
+}
+
+.popup-container::-webkit-scrollbar-thumb {
+  background: #90AB8B;
+  border-radius: 10px;
+}
+
+.popup-container::-webkit-scrollbar-thumb:hover {
+  background: #5A7863;
+}
+

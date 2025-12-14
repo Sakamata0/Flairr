@@ -1,3 +1,4 @@
+// contacts-list.component.ts - COMPLETE UPDATED VERSION
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +17,7 @@ import { Contact } from '../../model/messaging.models';
 export class ContactsList implements OnInit, OnDestroy {
     @Input() contacts: Contact[] | null = null;
     @Output() openThread = new EventEmitter<Contact>();
+    @Output() newMessage = new EventEmitter<void>();
 
     selectedFilter = 'All';
     query = '';
@@ -164,6 +166,11 @@ export class ContactsList implements OnInit, OnDestroy {
         // Emit the ORIGINAL contact, not the updated one
         console.log('📤 Emitting contact to parent:', c);
         this.openThread.emit(c);
+    }
+
+    onNewMessageClick(): void {
+        console.log('➕ New message button clicked');
+        this.newMessage.emit();
     }
 
     clearSearch(): void {

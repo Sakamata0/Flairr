@@ -1,29 +1,33 @@
-// profile-header.ts - FIXED VERSION
+// profile-header.ts - WITH DEBUG LOGGING
 import { Component, Input } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
 import { UserService } from '../../../../core/services/user.service';
+import { MessagingService } from '../../../../core/services/messaging.service';
 
 @Component({
   selector: 'app-profile-header',
   standalone: true,
-  imports: [NgIf],
+  imports: [CommonModule],
   templateUrl: './profile-header.html',
   styleUrls: ['./profile-header.css']
 })
 export class ProfileHeader {
   @Input() profile: any | null = null;
+  
+  isLoadingMessage = false;
 
   constructor(
     private dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private messagingService: MessagingService,
+    private router: Router
   ) {}
 
   get effectiveProfile() {
     if (!this.profile) return null;
-
-    // Always return the profile from @Input with properly loaded data
     return this.profile;
   }
 
@@ -49,7 +53,6 @@ export class ProfileHeader {
     const p = this.effectiveProfile;
     if (!p) return;
 
-    // Transform profile data to match EditProfilePopup expectations
     const dialogData = {
       fullName: p.full_name ?? p.fullName ?? '',
       bio: p.bio ?? '',
@@ -66,13 +69,100 @@ export class ProfileHeader {
       data: dialogData
     });
 
-    // Reload profile after edit
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Profile updated, reloading...');
-        // Trigger a reload by dispatching a custom event or calling parent component
-        window.location.reload(); // Simple solution, or use a better pattern
+        window.location.reload();
       }
     });
+  }
+
+  /**
+   * Open messaging with this user
+   */
+  async openMessageDialog() {
+    console.log('=== openMessageDialog START ===');
+    
+    const p = this.effectiveProfile;
+    console.log('1. Profile:', p);
+    
+    if (!p) {
+      console.error('❌ No profile available');
+      alert('Profile not loaded. Please try again.');
+      return;
+    }
+
+    const otherUserId = p.user_id ?? p.userID;
+    console.log('2. Other user ID:', otherUserId);
+    
+    if (!otherUserId) {
+      console.error('❌ No user ID available');
+      alert('User ID not found. Please try again.');
+      return;
+    }
+
+    // Don't allow messaging yourself
+    if (this.isOwnProfile) {
+      console.warn('⚠️ Cannot message yourself');
+      alert('You cannot message yourself.');
+      return;
+    }
+
+    // Check current user
+    const currentUser = this.userService.currentUser();
+    console.log('3. Current user:', currentUser);
+    
+    if (!currentUser) {
+      console.error('❌ No current user');
+      alert('You must be logged in to send messages.');
+      return;
+    }
+
+    this.isLoadingMessage = true;
+
+    try {
+      console.log('4. Calling findOrCreateConversation with:', otherUserId);
+
+      // Find or create conversation
+      const conversationId = await this.messagingService.findOrCreateConversation(otherUserId);
+      
+      console.log('5. Conversation ID received:', conversationId);
+
+      if (!conversationId) {
+        throw new Error('No conversation ID returned');
+      }
+
+      // Prepare contact data for navigation
+      const contactData = {
+        id: otherUserId,
+        name: p.full_name ?? p.fullName ?? 'User',
+        avatar: p.avatar_img ?? p.avatarImg ?? null,
+        conversationId: conversationId
+      };
+
+      console.log('6. Navigating to /messages with state:', contactData);
+
+      // Navigate to messages page with the conversation pre-selected
+      await this.router.navigate(['/messages'], {
+        state: {
+          openConversation: contactData
+        }
+      });
+
+      console.log('7. Navigation complete');
+      console.log('=== openMessageDialog END ===');
+
+    } catch (error: any) {
+      console.error('❌ Error in openMessageDialog:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
+      
+      alert('Failed to open conversation. Please try again.\nError: ' + (error?.message || 'Unknown error'));
+    } finally {
+      this.isLoadingMessage = false;
+    }
   }
 }

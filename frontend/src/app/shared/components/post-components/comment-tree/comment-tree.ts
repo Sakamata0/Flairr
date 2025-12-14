@@ -1,4 +1,4 @@
-// comment-tree.ts - FIXED to properly save replies to database
+// comment-tree.ts - FIXED: Replies stay as replies, not root comments
 import { Component, Input } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,7 @@ export class CommentNode {
 export class CommentTree {
   @Input() comments: CommentNode[] = [];
   @Input() currentUser!: { name: string; avatarUrl: string | null };
-  @Input() flurrId?: string;  // NEW: Need flurr_id to link replies
+  @Input() flurrId?: string;
   vplus: boolean = false;
 
   openCommentText(comment: CommentNode) {
@@ -70,13 +70,14 @@ export class CommentTree {
 
       console.log('addComment - Creating reply to comment:', parentCommentId);
 
-      // 1. Insert reply into comments table with parent link
+      // CRITICAL FIX: Only insert reply into comments table with parent link
+      // DO NOT add to flurr_action - that would make it a root comment
       const { data: replyRow, error: insertErr } = await supabase
         .from('comments')
         .insert([{ 
           content: draft, 
           user_id: uid,
-          suprerior_comment_id: parentCommentId, // Link to parent comment
+          suprerior_comment_id: parentCommentId, // Link to parent comment ONLY
           created_at: new Date().toISOString()
         }])
         .select(`
@@ -100,29 +101,29 @@ export class CommentTree {
 
       const replyId = replyRow.comment_id;
       console.log('Reply created with ID:', replyId);
+      console.log('Reply is linked to parent via suprerior_comment_id ONLY');
 
-      // 2. IMPORTANT: If we have flurrId, link the reply to the post too
-      // This ensures the reply shows up when we load comments
-      if (this.flurrId) {
-        const { error: linkErr } = await supabase
-          .from('flurr_action')
-          .insert([{ 
-            user_id: uid, 
-            flurr_id: this.flurrId, 
-            comment_id: replyId,
-            is_liked: false,
-            acted_at: new Date().toISOString()
+      // Create notification for the parent comment author
+      try {
+        // Get the parent comment's author
+        const parentAuthorId = (comment.author as any)?.userId || (comment as any)?.userId;
+        
+        if (parentAuthorId && parentAuthorId !== uid) {
+          await supabase.from('notifications').insert([{
+            user_id: parentAuthorId,
+            actor_id: uid,
+            flurr_id: this.flurrId || null,
+            type: 'reply',
+            content: 'replied to your comment',
+            created_at: new Date().toISOString()
           }]);
-
-        if (linkErr) {
-          console.warn('Could not link reply to post:', linkErr);
-          // Don't fail - reply is still created
-        } else {
-          console.log('Reply linked to post');
+          console.log('Reply notification sent to parent comment author');
         }
+      } catch (notifErr) {
+        console.warn('Could not create reply notification:', notifErr);
       }
 
-      // 3. Add reply to UI with proper author info
+      // Add reply to UI with proper author info
       const user = Array.isArray(replyRow.user) ? replyRow.user[0] : replyRow.user;
       const authorName = user?.full_name ?? (user?.email ? user.email.split('@')[0] : this.currentUser.name);
       const authorAvatar = user?.avatar_img || this.currentUser.avatarUrl;
@@ -135,14 +136,14 @@ export class CommentTree {
 
       comment.addAnwser(reply);
 
-      // 4. Close the reply box
+      // Close the reply box
       comment.isOpen = false;
       comment.replyText = '';
 
-      // 5. Make sure the new answer is visible immediately
+      // Make sure the new answer is visible immediately
       this.vplus = true;
 
-      console.log('Reply added successfully');
+      console.log('Reply added successfully and will remain a reply after refresh');
 
     } catch (err) {
       console.error('addComment unexpected error', err);

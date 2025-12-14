@@ -51,13 +51,20 @@ export class NotificationsService {
      * Get icon URL based on notification type
      */
     private getIconUrl(type: string): string {
-        const iconMap: { [key: string]: string } = {
-            'like': 'assets/icons/panel/like.png',
-            'comment': 'assets/icons/panel/comment.png',
-            'follow': 'assets/icons/panel/follow.png'
-        };
-        return iconMap[type] || 'assets/icons/panel/notification.png';
-    }
+    const iconMap: { [key: string]: string } = {
+        'like': 'assets/icons/post/like.png',        
+        'comment': 'assets/icons/post/comment.png',  
+        'follow': 'assets/icons/panel/follow.png',
+        'reply': 'assets/icons/post/comment.png'     
+    };
+    
+    const iconPath = iconMap[type] || 'assets/icons/panel/notification.png';
+    
+    // Debug log to see what's being set
+    console.log(`Icon for type "${type}":`, iconPath);
+    
+    return iconPath;
+}
 
     /**
      * Fetch all notifications for the current user from Supabase
