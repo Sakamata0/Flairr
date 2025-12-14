@@ -248,3 +248,247 @@ hr {
     border-radius: 10px 10px 0 0;
   }
 }
+
+
+
+
+/* Message Button */
+#message-button {
+  background: #609966;
+  color: white;
+  border: none;
+}
+
+#message-button:hover:not(:disabled) {
+  background: #548659;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+#message-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#message-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#message-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+/* Follow Button (optional) */
+#follow-button {
+  background: #1da1f2;
+  color: white;
+  border: none;
+}
+
+#follow-button:hover {
+  background: #1a8cd8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(29, 161, 242, 0.3);
+}
+
+#follow-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+
+/* =========================== */
+/* Join Button (green) */
+/* =========================== */
+#join-button {
+  background: #609966; /* green */
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  padding: 0 20px;
+  margin-top: 10px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+#join-button:hover:not(:disabled) {
+  background: #548659;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+#join-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#join-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
+/* =========================== */
+/* Leave Button (red) */
+/* =========================== */
+#leave-button {
+  background: #d9534f; /* red */
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  padding: 0 20px;
+  margin-top: 10px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+#leave-button:hover:not(:disabled) {
+  background: #c9302c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 80, 80, 0.4);
+}
+
+#leave-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#leave-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
+/* SVG styling for consistency */
+#join-button svg,
+#leave-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Shared button styles */
+#edit-profile-button,
+#message-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  
+  height: 40px;
+  padding: 0 20px;
+  margin-top: 10px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#edit-profile-button {
+  background-color: var(--third-color);
+  width: 100px;
+}
+
+#edit-profile-button:hover {
+  background-color: var(--fourth-color);
+}
+
+#edit-profile-button img {
+  height: 20px;
+  width: 20px;
+}
+
+/* Message Button - matching the profile style */
+#message-button {
+  background-color:#609966;
+  min-width: 120px;
+}
+
+#message-button:hover:not(:disabled) {
+  background-color: #609966;
+}
+
+#message-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+#message-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
+#message-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  #edit-profile-button,
+  #message-button {
+    position: absolute;
+    top: -50px;
+  }
+  
+  #edit-profile-button {
+    right: 0;
+  }
+  
+  #message-button {
+    right: 110px; /* Position to the left of edit button */
+  }
+}
+
+@media (max-width: 700px) {
+  #edit-profile-button,
+  #message-button {
+    font-size: 0.8em;
+    height: 35px;
+    padding: 0 12px;
+  }
+  
+  #edit-profile-button {
+    width: 75px;
+    right: 0;
+  }
+  
+  #message-button {
+    min-width: 90px;
+    right: 85px;
+  }
+  
+  #edit-profile-button img,
+  #message-button svg {
+    width: 15px;
+    height: 15px;
+  }
+}

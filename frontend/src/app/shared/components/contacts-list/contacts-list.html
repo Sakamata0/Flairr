@@ -1,6 +1,18 @@
+<!-- contacts-list.html - COMPLETE UPDATED VERSION -->
 <aside class="sidebar" role="navigation" aria-label="Conversations">
   <div class="sidebar-header">
     <div class="sidebar-legend">Messages</div>
+    <button 
+      class="new-message-btn" 
+      (click)="onNewMessageClick()"
+      aria-label="New message"
+      title="Start new conversation"
+      type="button"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14m-7-7h14" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 
   <div class="search" role="search">
@@ -54,7 +66,7 @@
         tabindex="0"
         aria-label="Open conversation with {{ c.name }}"
       >
-        <!-- pass contact to child message component; if your component accepts a different input name, change it accordingly -->
+        <!-- pass contact to child message component -->
         <app-message-component [contact]="c"></app-message-component>
       </div>
     </ng-container>

@@ -1,6 +1,7 @@
-<!-- profile-header.html - FIXED VERSION -->
 <ng-container *ngIf="effectiveProfile as profile; else emptyTpl">
   <div id="main-container">
+
+    <!-- Banner -->
     <div id="banner-image">
       <img
         [src]="profile.cover_img || profile.coverImg || 'assets/images/default-banner-image.png'"
@@ -9,6 +10,8 @@
     </div>
 
     <div id="main-section">
+
+      <!-- Avatar -->
       <img
         id="profile-image"
         [src]="profile.avatar_img || profile.avatarImg || 'assets/images/default-profile-picture.png'"
@@ -17,37 +20,131 @@
 
       <div id="info-container">
         <div id="name-a-bio-container">
+
+          <!-- INFO -->
           <div id="info">
             <h3>{{ (profile.full_name || profile.fullName) ?? 'Unnamed' }}</h3>
-            <h4>@{{ (profile.username) ?? ((profile.email || '').split('@')[0]) ?? 'handle' }}</h4>
+
+            <!-- Username ONLY for user profiles -->
+            <h4 *ngIf="isUserProfile">
+              @{{ profile.username ?? ((profile.email || '').split('@')[0]) ?? 'handle' }}
+            </h4>
 
             <p id="bio" *ngIf="profile.bio || profile.description">
               {{ profile.bio || profile.description }}
             </p>
           </div>
 
-          <button id="edit-profile-button" *ngIf="isOwnProfile" (click)="openEditProfileDialog()">
-            <img src="assets/icons/profile/edit.png" alt="edit icon" /> Edit
-          </button>
+          <!-- ACTION BUTTONS -->
+          <div class="action-buttons">
+
+            <!-- ========================= -->
+            <!-- EDIT (OWNER ONLY) -->
+            <!-- ========================= -->
+            <button
+              
+              id="edit-profile-button"
+              *ngIf="isOwnProfile"
+              (click)="openEditProfileDialog()"
+              title="Edit"
+            >
+              <img src="assets/icons/profile/edit.png" alt="edit icon" />
+              Edit
+            </button>
+
+            <!-- ========================= -->
+            <!-- USER PROFILE → MESSAGE -->
+            <!-- ========================= -->
+            <button
+              id="message-button"
+              class="message-btn"
+              *ngIf="isUserProfile && !isOwnProfile"
+              (click)="openMessageDialog()"
+              [disabled]="isLoadingMessage"
+              title="Send a message"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8
+                     8.5 8.5 0 0 1-7.6 4.7
+                     8.38 8.38 0 0 1-3.8-.9L3 21
+                     l1.9-5.7a8.38 8.38 0 0 1-.9-3.8
+                     8.5 8.5 0 0 1 4.7-7.6
+                     8.38 8.38 0 0 1 3.8-.9h.5
+                     a8.48 8.48 0 0 1 8 8v.5z"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <span *ngIf="!isLoadingMessage">Message</span>
+              <span *ngIf="isLoadingMessage">Opening…</span>
+            </button>
+
+            <!-- SPACE PROFILE → JOIN -->
+            <button
+              id="join-button"
+              *ngIf="isSpaceProfile && !isOwnProfile && !isMember"
+              (click)="joinSpace()"
+              [disabled]="isJoining"
+            >
+              <!-- Example: plus icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>{{ isJoining ? 'Joining…' : 'Join Space' }}</span>
+            </button>
+
+            <!-- SPACE PROFILE → LEAVE -->
+            <button
+              id="leave-button"
+              *ngIf="isSpaceProfile && !isOwnProfile && isMember"
+              (click)="leaveSpace()"
+              [disabled]="isJoining"
+            >
+              <!-- Example: cross icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>{{ isJoining ? 'Leaving…' : 'Leave Space' }}</span>
+            </button>
+          </div>
         </div>
 
         <hr />
 
+        <!-- STATS -->
         <div id="stats-container">
-          <span>
-            <strong>{{ formatFollowerCount(profile.followers?.length ?? 0) }}</strong>
-            Followers
-          </span>
 
-          <span>
-            <strong>{{ formatFollowerCount(profile.following?.length ?? 0) }}</strong>
-            Following
-          </span>
+          <!-- User stats -->
+          <ng-container *ngIf="isUserProfile">
+            <span>
+              <strong>{{ formatFollowerCount(profile.followers?.length ?? 0) }}</strong>
+              Followers
+            </span>
 
-          <span>
-            <strong>{{ formatFollowerCount(flurrsNumber) }}</strong>
-            Flurrs
-          </span>
+            <span>
+              <strong>{{ formatFollowerCount(profile.following?.length ?? 0) }}</strong>
+              Following
+            </span>
+
+            <span>
+              <strong>{{ formatFollowerCount(flurrsNumber) }}</strong>
+              Flurrs
+            </span>
+          </ng-container>
+
+          <!-- Space stats (optional – safe default) -->
+          <ng-container *ngIf="isSpaceProfile">
+            <span>
+              <strong>{{ formatFollowerCount(profile.membersCount ?? 0) }}</strong>
+              Members
+            </span>
+          </ng-container>
+
         </div>
       </div>
     </div>
@@ -56,6 +153,6 @@
 
 <ng-template #emptyTpl>
   <div id="main-container" class="empty">
-    <p>Loading profile...</p>
+    <p>Loading profile…</p>
   </div>
 </ng-template>

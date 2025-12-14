@@ -67,8 +67,7 @@ export class JourneyCreationCard {
     MatDialogContent,
     MatDialogActions,
     MatSelectModule,
-    FormsModule,
-    FileUpload,
+    FormsModule
   ],
 })
 

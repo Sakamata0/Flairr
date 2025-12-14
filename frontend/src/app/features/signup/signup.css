@@ -14,12 +14,14 @@
   padding: 30px 50px;
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.3);
   z-index: 2;
+  overflow-y: scroll;
 }
 
 .sign-in-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 50px 0;
 }
 
 .sign-in-container h2 {
@@ -32,6 +34,7 @@
 .green-link {
   color: var(--third-color);
   text-decoration: none;
+  cursor: pointer;
 }
 
 .green-link:hover {
@@ -115,7 +118,7 @@ form {
   margin-bottom: 20px;
 }
 
-.input-box input {
+.input-box :is(input, select) {
   width: 100%;
   padding: 12px 20px;
   border-radius: 12px;
@@ -125,6 +128,10 @@ form {
   background: #eff3f9;
   color: #000;
   backdrop-filter: blur(10px);
+}
+
+select {
+  appearance: none;
 }
 
 .input-box:has(.right-icon) input {
@@ -190,7 +197,7 @@ form {
   opacity: 0.8;
 }
 
-.input-box.invalid input {
+.input-box.invalid :is(input, select) {
   border: 2px solid #e53935;
   background: #fff5f5;
 }
@@ -198,7 +205,8 @@ form {
 .error {
   color: #e53935;
   font-size: 13px;
-  margin-top: -20px;
+  margin-top: -10px;
+  margin-bottom: 10px;
   font-weight: 500;
 }
 
@@ -265,4 +273,107 @@ form {
 
 .w-190 {
   width: 190px;
+}
+
+
+.custom-select {
+  position: relative;
+  display: flex;
+  flex: 1;
+}
+
+.custom-arrow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  width: 40px;
+  height: 100%;
+  pointer-events: none;
+}
+
+.custom-arrow::before,
+.custom-arrow::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom-arrow::before {
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #000;
+}
+
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: all 0.4s ease;
+}
+
+.strength-fill.weak {
+  width: 33%;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.strength-fill.medium {
+  width: 66%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.strength-fill.strong {
+  width: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.strength-text {
+  font-size: 0.8em;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.strength-fill.weak ~ .strength-text {
+  color: #ef4444;
+}
+
+.strength-fill.medium ~ .strength-text {
+  color: #f59e0b;
+}
+
+.strength-fill.strong ~ .strength-text {
+  color: #10b981;
+}
+
+.success-message {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95em;
+  animation: slideDown 0.4s ease-out;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }

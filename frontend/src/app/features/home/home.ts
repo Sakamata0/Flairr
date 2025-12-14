@@ -48,10 +48,6 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     this.loadAllData();
-
-    supabase.auth.onAuthStateChange(() => {
-      this.loadAllData();
-    });
   }
 
   // Handle when a post is changed (follow/unfollow)
@@ -250,27 +246,46 @@ export class Home implements OnInit {
       // -------------------------------------------------
       // SPACES — SHORTCUTS
       // -------------------------------------------------
-      const { data: spaces } = await supabase
-        .from('spaces')
-        .select('space_id, space_name, space_bio, avatar_img')
-        .order('created_at', { ascending: false })
-        .limit(12);
+      const currentUserId = this.userService.currentUser()?.userID;
 
-      if (spaces) {
-        this.shortcuts = spaces.map((s: any) => ({
-          id: s.space_id,
-          title: s.space_name,
-          imageUrl: s.avatar_img || './assets/images/hama.png',
-          withSubtitle: !!s.space_bio,
-          subtitle: s.space_bio ?? '',
-          withButton: true,
-          buttonText: 'Visit',
-          buttonAction: () => {
-            console.log('VISIT CLICKED', s.space_id);
-            this.router.navigate(['/spaces', s.space_id])
-          }
-        }));
+      if (currentUserId) {
+        // Get space IDs the user has already joined
+        const { data: joinedSpaces } = await supabase
+          .from('join_spaces')
+          .select('space_id')
+          .eq('user_id', currentUserId);
+
+        const joinedIds = joinedSpaces?.map(js => js.space_id) || [];
+
+        // Fetch spaces NOT joined AND NOT owned
+        const { data: spaces } = await supabase
+          .from('spaces')
+          .select('space_id, space_name, space_bio, avatar_img, space_owner')
+          .not('space_id', 'in', `(${joinedIds.join(',')})`)      // exclude joined spaces
+          .not('space_owner', 'eq', currentUserId)                // exclude spaces owned by the user
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        // Map spaces into shortcuts
+        if (spaces) {
+          this.shortcuts = spaces.map((s: any) => ({
+            id: s.space_id,
+            title: s.space_name,
+            imageUrl: s.avatar_img || './assets/images/hama.png',
+            withSubtitle: !!s.space_bio,
+            subtitle: s.space_bio ?? '',
+            withButton: true,
+            buttonText: 'Visit',
+            buttonAction: () => {
+              console.log('VISIT CLICKED', s.space_id);
+              this.router.navigate(['/spaces', s.space_id]);
+            }
+          }));
+        }
+      } else {
+        this.shortcuts = []; // not logged in
       }
+
 
       // -------------------------------------------------
       // NOTIFICATIONS
@@ -281,7 +296,7 @@ export class Home implements OnInit {
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(3);
 
         if (notifs) {
           this.notifications = await Promise.all(

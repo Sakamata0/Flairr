@@ -1,5 +1,5 @@
 import { Component, ElementRef, inject, OnInit } from '@angular/core';
-import { NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import { FriendsOptions } from '../../shared/components/friends-options/friends-options';
 import { FriendRequest } from '../../shared/components/friend-request/friend-request';
@@ -7,6 +7,7 @@ import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
 
 import { FriendsService } from '../../core/services/friends.service';
 import { MessagingService } from '../../core/services/messaging.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-friends',
@@ -14,8 +15,9 @@ import { MessagingService } from '../../core/services/messaging.service';
     imports: [
         FriendRequest,
         FriendsOptions,
-        NgFor,
-        ConfirmDialog
+        CommonModule,
+        ConfirmDialog,
+        RouterModule
     ],
     templateUrl: './friends.html',
     styleUrl: './friends.css'
@@ -24,17 +26,17 @@ export class Friends implements OnInit {
 
     private friendsService = inject(FriendsService);
     private messagingService = inject(MessagingService);
-
     private currentUserId!: string;
+    private router = inject(Router);
 
     selectedType = 'Follow Request';
     key = 0;
 
-    list$ = this.friendsService.suggestions;
+    list$ = this.friendsService.friendRequests;
 
     // confirm dialog state
     confirmOpen = false;
-    confirmMode: 'delete' | 'reject' | null = null;
+    confirmMode: 'delete' | 'reject' | 'remove' | 'unfollow' | null = null;
     userToActOn: string | null = null;
 
     constructor(private elementRef: ElementRef<HTMLElement>) { }
@@ -51,8 +53,39 @@ export class Friends implements OnInit {
             this.friendsService.loadFollowers(user.id),
             this.friendsService.loadFollowing(user.id),
         ]);
+
+        this.onFriendOptionSelected({ key: 0, name: 'Follow Request' });
     }
 
+    get confirmTitle(): string {
+        switch (this.confirmMode) {
+            case 'delete':
+                return 'Remove suggestion';
+            case 'reject':
+                return 'Reject follow request';
+            case 'remove':
+                return 'Remove follower';
+            case 'unfollow':
+                return 'Unfollow user';
+            default:
+                return '';
+        }
+    }
+
+    get confirmMessage(): string {
+        switch (this.confirmMode) {
+            case 'delete':
+                return 'Are you sure you want to remove this user from your suggestions?';
+            case 'reject':
+                return 'Are you sure you want to reject this follow request?';
+            case 'remove':
+                return 'This user will no longer follow you. Are you sure?';
+            case 'unfollow':
+                return 'You will stop following this user. Are you sure?';
+            default:
+                return '';
+        }
+    }
 
     onFriendOptionSelected(option: { key: number; name: string }) {
         this.selectedType = option.name;
@@ -75,23 +108,34 @@ export class Friends implements OnInit {
     }
 
     async onFollow(userId: string) {
-        const user = await this.messagingService.getCurrentUser();
-        if (!user) return;
-
-        await this.friendsService.sendFollowRequest(userId, user.id);
+        await this.friendsService.sendFollowRequest(userId, this.currentUserId);
     }
 
-    // ---------- DELETE (suggestion) ----------
+    // ---------- (popup) DELETE (suggestion) ----------
     onDelete(userId: string) {
         this.userToActOn = userId;
         this.confirmMode = 'delete';
         this.confirmOpen = true;
     }
 
-    // ---------- REJECT (follow request) ----------
+    // ---------- (popup) REJECT (follow request) ----------
     onReject(userId: string) {
         this.userToActOn = userId;
         this.confirmMode = 'reject';
+        this.confirmOpen = true;
+    }
+
+    // ---------- (popup) REMOVE FOLLOWER ----------
+    onRemoveFollower(userId: string) {
+        this.userToActOn = userId;
+        this.confirmMode = 'remove';
+        this.confirmOpen = true;
+    }
+
+    // ---------- (popup) UNFOLLOW ----------
+    onUnfollow(userId: string) {
+        this.userToActOn = userId;
+        this.confirmMode = 'unfollow';
         this.confirmOpen = true;
     }
 
@@ -107,18 +151,59 @@ export class Friends implements OnInit {
     async onConfirmAction() {
         if (!this.userToActOn || !this.confirmMode) return;
 
-        if (this.confirmMode === 'delete') {
-            this.friendsService.removeFromSuggestions(this.userToActOn);
-        }
+        switch (this.confirmMode) {
+            case 'delete':
+                // For suggestions, just hide it from UI (it will reappear on next load if needed)
+                // Or optionally reload suggestions to refresh the list
+                await this.friendsService.loadSuggestions(this.currentUserId);
+                break;
 
-        if (this.confirmMode === 'reject') {
-            await this.friendsService.rejectFollowRequest(
-                this.userToActOn,
-                this.currentUserId
-            );
+            case 'reject':
+                await this.friendsService.rejectFollowRequest(
+                    this.userToActOn,
+                    this.currentUserId
+                );
+                break;
+
+            case 'remove':
+                await this.friendsService.removeFollower(
+                    this.userToActOn,
+                    this.currentUserId
+                );
+                break;
+
+            case 'unfollow':
+                await this.friendsService.unfollow(
+                    this.userToActOn,
+                    this.currentUserId
+                );
+                break;
         }
 
         this.resetConfirm();
+    }
+
+    onRemoveAction(userId: string) {
+        this.userToActOn = userId;
+
+        switch (this.key) {
+            case 1: // Suggestions
+                this.confirmMode = 'delete';
+                break;
+
+            case 2: // Followers
+                this.confirmMode = 'remove';
+                break;
+
+            case 3: // Following
+                this.confirmMode = 'unfollow';
+                break;
+
+            default:
+                return;
+        }
+
+        this.confirmOpen = true;
     }
 
     onCancelAction() {
@@ -129,5 +214,15 @@ export class Friends implements OnInit {
         this.confirmOpen = false;
         this.confirmMode = null;
         this.userToActOn = null;
+    }
+
+    // ---------- OPEN CHAT ----------
+    async openChat(userId: string) {
+        const convoId = await this.friendsService.getOrCreateConversation(
+            this.currentUserId,
+            userId
+        );
+
+        this.router.navigate(['/messages', convoId]);
     }
 }

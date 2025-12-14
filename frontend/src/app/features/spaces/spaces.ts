@@ -51,7 +51,7 @@ export class Spaces implements OnInit {
       const { data: session } = await supabase.auth.getSession();
       const uid = session.session?.user?.id;
       if (!uid) return;
-
+      
       // --------------------------------------------
       // 1) JOINED SPACES
       // --------------------------------------------
@@ -146,6 +146,7 @@ export class Spaces implements OnInit {
         .from('spaces')
         .select('space_id, space_name, avatar_img')
         .not('space_id', 'in', `(${spaceIds.join(',') || 'null'})`)
+        .not('space_owner', 'eq', uid)  
         .limit(6);
 
       this.friendsSuggestions = (suggestions ?? []).map((s: any) => ({
@@ -155,8 +156,11 @@ export class Spaces implements OnInit {
         withSubtitle: true,
         subtitle: 'Suggested space',
         withButton: true,
-        buttonText: 'Join',
-        buttonAction: () => this.joinSpace(s.space_id)
+        buttonText: 'Visit',
+        buttonAction: () => {
+          console.log('VISIT CLICKED', s.space_id);
+          this.router.navigate(['/spaces', s.space_id]);
+        }
       }));
 
     } finally {

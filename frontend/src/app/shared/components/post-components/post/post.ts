@@ -263,124 +263,130 @@ export class Post implements OnInit, OnDestroy {
     }
   }
 
-  async loadComments(): Promise<void> {
-    if (!this.post) return;
-    const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
+ // Replace your loadComments method in post.ts with this version
+// This includes user_id so reply notifications know who to notify
 
-    console.log('=== loadComments START ===');
-    console.log('Post ID:', flurrId);
+async loadComments(): Promise<void> {
+  if (!this.post) return;
+  const flurrId = (this.post as any).id ?? (this.post as any).flurr_id;
 
-    try {
-      // Step 1: Get root comment IDs from flurr_action
-      const { data: actions, error: actionsErr } = await supabase
-        .from('flurr_action')
-        .select('comment_id')
-        .eq('flurr_id', flurrId)
-        .not('comment_id', 'is', null);
+  console.log('=== loadComments START ===');
+  console.log('Post ID:', flurrId);
 
-      if (actionsErr) {
-        console.warn('loadComments actions error', actionsErr);
-        return;
-      }
+  try {
+    // Step 1: Get root comment IDs from flurr_action
+    const { data: actions, error: actionsErr } = await supabase
+      .from('flurr_action')
+      .select('comment_id')
+      .eq('flurr_id', flurrId)
+      .not('comment_id', 'is', null);
 
-      console.log('flurr_action records found:', actions?.length || 0);
+    if (actionsErr) {
+      console.warn('loadComments actions error', actionsErr);
+      return;
+    }
 
-      if (!actions || actions.length === 0) {
-        console.log('No comments linked to this post');
-        this.post.comments = [];
-        this.post.commentsCount = 0;
-        return;
-      }
+    console.log('flurr_action records found:', actions?.length || 0);
 
-      const rootCommentIds = actions.map(a => a.comment_id).filter(Boolean);
-      console.log('Root comment IDs:', rootCommentIds);
+    if (!actions || actions.length === 0) {
+      console.log('No comments linked to this post');
+      this.post.comments = [];
+      this.post.commentsCount = 0;
+      return;
+    }
 
-      // Step 2: Get ALL comments (root + their replies)
-      const { data: allComments, error: commentsErr } = await supabase
-        .from('comments')
-        .select(`
-          comment_id,
-          content,
-          suprerior_comment_id,
-          created_at,
-          user:user_id (
-            user_id,
-            full_name,
-            avatar_img,
-            email
-          )
-        `)
-        .order('created_at', { ascending: true });
+    const rootCommentIds = actions.map(a => a.comment_id).filter(Boolean);
+    console.log('Root comment IDs:', rootCommentIds);
 
-      if (commentsErr) {
-        console.warn('loadComments error', commentsErr);
-        return;
-      }
+    // Step 2: Get ALL comments (root + their replies) WITH user_id
+    const { data: allComments, error: commentsErr } = await supabase
+      .from('comments')
+      .select(`
+        comment_id,
+        content,
+        user_id,
+        suprerior_comment_id,
+        created_at,
+        user:user_id (
+          user_id,
+          full_name,
+          avatar_img,
+          email
+        )
+      `)
+      .order('created_at', { ascending: true });
 
-      console.log('Total comments in database:', allComments?.length || 0);
+    if (commentsErr) {
+      console.warn('loadComments error', commentsErr);
+      return;
+    }
 
-      if (!allComments) {
-        this.post.comments = [];
-        this.post.commentsCount = 0;
-        return;
-      }
+    console.log('Total comments in database:', allComments?.length || 0);
 
-      // Step 3: Build comment tree
-      const commentMap = new Map<string, CommentNode>();
-      const rootComments: CommentNode[] = [];
-      let totalCommentCount = 0;
+    if (!allComments) {
+      this.post.comments = [];
+      this.post.commentsCount = 0;
+      return;
+    }
 
-      // Create all nodes first
-      for (const c of allComments) {
-        const user = Array.isArray(c.user) ? c.user[0] : c.user;
-        const authorName = user?.full_name ?? (user?.email ? user.email.split('@')[0] : 'Anonymous');
-        const authorAvatar = user?.avatar_img || this.defaultAvatar;
+    // Step 3: Build comment tree
+    const commentMap = new Map<string, CommentNode>();
+    const rootComments: CommentNode[] = [];
+    let totalCommentCount = 0;
 
-        const node = new CommentNode(c.content, {
-          name: authorName,
-          avatarUrl: authorAvatar
-        });
-        (node as any).id = c.comment_id;
+    // Create all nodes first
+    for (const c of allComments) {
+      const user = Array.isArray(c.user) ? c.user[0] : c.user;
+      const authorName = user?.full_name ?? (user?.email ? user.email.split('@')[0] : 'Anonymous');
+      const authorAvatar = user?.avatar_img || this.defaultAvatar;
 
-        commentMap.set(c.comment_id, node);
-      }
+      const node = new CommentNode(c.content, {
+        name: authorName,
+        avatarUrl: authorAvatar
+      });
+      (node as any).id = c.comment_id;
+      (node as any).userId = c.user_id; // ✅ Store user_id for reply notifications
+      (node.author as any).userId = c.user_id; // ✅ Also store in author object
 
-      // Build tree structure and count ALL comments (root + replies)
-      for (const c of allComments) {
-        const node = commentMap.get(c.comment_id);
-        if (!node) continue;
+      commentMap.set(c.comment_id, node);
+    }
 
-        // Check if this is a root comment
-        if (rootCommentIds.includes(c.comment_id)) {
-          rootComments.push(node);
+    // Build tree structure and count ALL comments (root + replies)
+    for (const c of allComments) {
+      const node = commentMap.get(c.comment_id);
+      if (!node) continue;
+
+      // Check if this is a root comment
+      if (rootCommentIds.includes(c.comment_id)) {
+        rootComments.push(node);
+        totalCommentCount++;
+        console.log('  → Root comment:', c.comment_id.substring(0, 8));
+      } else if (c.suprerior_comment_id) {
+        // This is a reply
+        const parent = commentMap.get(c.suprerior_comment_id);
+        if (parent) {
+          parent.addAnwser(node);
           totalCommentCount++;
-          console.log('  → Root comment:', c.comment_id.substring(0, 8));
-        } else if (c.suprerior_comment_id) {
-          // This is a reply
-          const parent = commentMap.get(c.suprerior_comment_id);
-          if (parent) {
-            parent.addAnwser(node);
-            totalCommentCount++;
-            console.log('  → Reply:', c.comment_id.substring(0, 8), 'to', c.suprerior_comment_id.substring(0, 8));
-          }
+          console.log('  → Reply:', c.comment_id.substring(0, 8), 'to', c.suprerior_comment_id.substring(0, 8));
         }
       }
-
-      console.log('Built tree:', rootComments.length, 'root,', totalCommentCount, 'total');
-      
-      // CRITICAL: Create NEW array reference to trigger Angular change detection
-      this.post.comments = [...rootComments];
-      this.post.commentsCount = totalCommentCount;
-      
-      // Force change detection
-      this.cdr.detectChanges();
-      
-      console.log('=== loadComments END ===');
-      
-    } catch (err) {
-      console.error('loadComments unexpected error', err);
     }
+
+    console.log('Built tree:', rootComments.length, 'root,', totalCommentCount, 'total');
+    
+    // CRITICAL: Create NEW array reference to trigger Angular change detection
+    this.post.comments = [...rootComments];
+    this.post.commentsCount = totalCommentCount;
+    
+    // Force change detection
+    this.cdr.detectChanges();
+    
+    console.log('=== loadComments END ===');
+    
+  } catch (err) {
+    console.error('loadComments unexpected error', err);
   }
+}
 
   async ngOnInit(): Promise<void> {
     if (typeof document !== 'undefined') {
@@ -759,4 +765,8 @@ export class Post implements OnInit, OnDestroy {
     if (event) event.stopPropagation();
     this.showMenu = !this.showMenu;
   }
+
+
+
+  
 }

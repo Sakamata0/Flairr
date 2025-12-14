@@ -1,7 +1,5 @@
 @import "primeicons/primeicons.css";
 
-
-
 :root {
   --primary-color: #EDF1D6;
   --secondary-color: #9DC08B;
@@ -60,7 +58,7 @@ body {
 /* Base styles for your dialogs */
 .custom-flurr-creation-dialog .mat-mdc-dialog-surface,
 .custom-journey-creation-dialog .mat-mdc-dialog-surface {
-  width: 600px !important;
+  width: fit-content !important;
   height: auto !important;
   max-width: 90vw !important; /* allow responsiveness even at larger screens */
   max-height: 90vh !important;
@@ -158,6 +156,7 @@ hr {
   font-size: 3em;
   font-family: 'Pacifico', cursive;
   font-weight: 500;
+  user-select: none;
 }
 
 .loading-screen h2 {

@@ -22,7 +22,7 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class Profile implements OnInit, OnDestroy {
 
-  loading = false;
+  loading: boolean = true;
   error = '';
 
   profile: any = null;
@@ -62,7 +62,6 @@ export class Profile implements OnInit, OnDestroy {
   }
 
   async loadProfileFromRoute() {
-    this.loading = true;
     this.error = '';
     this.profile = null;
     this.posts = [];
@@ -205,7 +204,7 @@ export class Profile implements OnInit, OnDestroy {
         .eq('space_owner', targetId);
 
       const { data: joinedSpaces } = await supabase
-        .from('spaces_users')
+        .from('spaces')
         .select(`
           space_id,
           space:space_id(space_id, space_name, space_bio, avatar_img, space_owner)

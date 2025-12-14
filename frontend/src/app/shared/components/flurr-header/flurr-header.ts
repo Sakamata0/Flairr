@@ -6,6 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../../core/auth/auth.service';
 import { supabase } from '../../../core/supabase/supabase.client';
 import { LogoutDialog } from '../logout-dialog/logout-dialog';
+import { effect } from '@angular/core';
+import { UserService } from '../../../core/services/user.service';
+
 
 @Component({
     selector: 'app-flurr-header',
@@ -30,6 +33,10 @@ export class FlurrHeaderComponent {
     defaultAvatar = '/assets/default-user.png';
     defaultSpace = '/assets/default-space.png';
 
+    userAvatar = this.defaultAvatar;
+    userId!: string;
+
+
     items = [
         { key: 'home', label: 'Home' },
         { key: 'explore', label: 'Explore' },
@@ -41,8 +48,20 @@ export class FlurrHeaderComponent {
         private elementRef: ElementRef<HTMLElement>,
         private router: Router,
         private auth: AuthService,
-        private dialog: MatDialog
-    ) { }
+        private dialog: MatDialog,
+        private userService: UserService
+    ) {
+        effect(() => {
+            const user = this.userService.currentUser();
+
+            this.userAvatar =
+                user?.avatarImg && user.avatarImg.trim()
+                    ? user.avatarImg
+                    : this.defaultAvatar;
+            this.userId = user?.userID ?? '';
+
+        });
+    }
 
     /* ================= SEARCH ================= */
 
@@ -153,28 +172,16 @@ export class FlurrHeaderComponent {
     toggleProfile(ev?: Event) {
         ev?.stopPropagation();
         this.profileOpen = !this.profileOpen;
-
-        const wrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
-        wrap?.classList.toggle('profile-open', this.profileOpen);
     }
+
 
     /* ================= GLOBAL CLICK ================= */
 
-    @HostListener('document:click', ['$event'])
-    onDocumentClick(ev: MouseEvent) {
-        const target = ev.target as Node;
-
-        const search = this.elementRef.nativeElement.querySelector('.search-wrap');
-        if (search && !search.contains(target)) {
-            this.searchOpen = false;
-        }
-
-        const avatar = this.elementRef.nativeElement.querySelector('.avatar-wrap');
-        if (avatar && !avatar.contains(target)) {
-            this.profileOpen = false;
-            avatar.classList.remove('profile-open');
-        }
+    @HostListener('document:click')
+    onDocumentClick() {
+        this.profileOpen = false;
     }
+
 
     /* ================= LOGOUT ================= */
 
@@ -184,10 +191,12 @@ export class FlurrHeaderComponent {
         });
 
         dialogRef.afterClosed().subscribe(ok => {
+            
             if (ok) {
                 this.auth.logout();
                 this.router.navigate(['/signin']);
             }
         });
+        
     }
 }

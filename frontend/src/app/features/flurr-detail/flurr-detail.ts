@@ -102,7 +102,7 @@ export class FlurrDetailComponent implements OnInit {
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(3);
 
         if (notifs) {
           this.notifications = await Promise.all(
