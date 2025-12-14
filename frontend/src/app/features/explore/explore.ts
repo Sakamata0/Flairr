@@ -324,6 +324,7 @@ console.log("FEED AUTHOR IDS =", excludedAuthorIds);
     if (!type) return 'assets/icons/panel/notification.png';
     if (type.includes('like')) return 'assets/icons/panel/like.png';
     if (type.includes('comment')) return 'assets/icons/panel/comment.png';
+    if (type.includes('reply')) return 'assets/icons/panel/comment.png';
     return 'assets/icons/panel/notification.png';
   }
 

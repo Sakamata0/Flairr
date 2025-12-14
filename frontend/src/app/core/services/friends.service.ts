@@ -6,27 +6,21 @@ import { SupabaseService } from '../../core/services/supabase.service';
 @Injectable({ providedIn: 'root' })
 export class FriendsService {
 
-  // Single Supabase client instance (shared app-wide)
   private supabase: SupabaseClient;
 
   constructor(private supabaseService: SupabaseService) {
     this.supabase = this.supabaseService.client;
   }
 
-  // ==================================================
   // STATE (Angular Signals)
-  // ==================================================
-  // Each signal represents ONE tab in the Friends UI
   private friendRequestsSig = signal<FriendsProfile[]>([]);
   private followersSig = signal<FriendsProfile[]>([]);
   private followingSig = signal<FriendsProfile[]>([]);
   private suggestionsSig = signal<FriendsProfile[]>([]);
 
-  // Loading states
   private loadingSig = signal<boolean>(false);
   private errorSig = signal<string | null>(null);
 
-  // Expose read-only signals to components
   friendRequests = this.friendRequestsSig.asReadonly();
   followers = this.followersSig.asReadonly();
   following = this.followingSig.asReadonly();
@@ -34,9 +28,7 @@ export class FriendsService {
   loading = this.loadingSig.asReadonly();
   error = this.errorSig.asReadonly();
 
-  // ==================================================
   // SUGGESTIONS
-  // ==================================================
   async loadSuggestions(me: string): Promise<void> {
     try {
       this.loadingSig.set(true);
@@ -48,7 +40,6 @@ export class FriendsService {
         .from('users')
         .select('user_id, full_name, avatar_img, cover_img');
 
-      // Only add the exclusion filter if there are IDs to exclude
       if (excludedIds.length > 0) {
         query = query.not('user_id', 'in', `(${excludedIds.join(',')})`);
       }
@@ -61,7 +52,6 @@ export class FriendsService {
         throw error;
       }
 
-      // Map DB users → UI-friendly profile objects
       this.suggestionsSig.set(
         (data ?? []).map(u => ({
           id: u.user_id,
@@ -79,9 +69,6 @@ export class FriendsService {
     }
   }
 
-  /**
-   * Builds a list of user IDs that should NOT appear in suggestions.
-   */
   private async getExcludedUserIds(me: string): Promise<string[]> {
     try {
       const { data, error } = await this.supabase
@@ -93,11 +80,11 @@ export class FriendsService {
 
       if (error) {
         console.error('Error getting excluded user IDs:', error);
-        return [me]; // At minimum, exclude self
+        return [me];
       }
 
       const excluded = new Set<string>();
-      excluded.add(me); // never suggest myself
+      excluded.add(me);
 
       (data ?? []).forEach(row => {
         excluded.add(row.requester_id);
@@ -111,10 +98,7 @@ export class FriendsService {
     }
   }
 
-  // ==================================================
   // FOLLOW REQUESTS
-  // ==================================================
-
   async sendFollowRequest(targetUserId: string, me: string): Promise<void> {
     try {
       this.errorSig.set(null);
@@ -137,7 +121,6 @@ export class FriendsService {
         throw error;
       }
 
-      // Remove user from suggestions immediately (optimistic UI)
       this.suggestionsSig.update(list =>
         list.filter(u => u.id !== targetUserId)
       );
@@ -153,10 +136,12 @@ export class FriendsService {
       this.loadingSig.set(true);
       this.errorSig.set(null);
 
+      // FIXED: Use the correct FK name 'fk_request_follow_requester' or 'requester_id'
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requester:users!user_id (
+          requester_id,
+          requester:users!fk_request_follow_requester (
             user_id,
             full_name,
             avatar_img,
@@ -174,7 +159,7 @@ export class FriendsService {
 
       this.friendRequestsSig.set(
         (data ?? [])
-          .filter((row: any) => row.requester) // Filter out null requester
+          .filter((row: any) => row.requester)
           .map((row: any) => ({
             id: row.requester.user_id,
             name: row.requester.full_name,
@@ -210,7 +195,6 @@ export class FriendsService {
         throw error;
       }
 
-      // Remove from requests list in UI
       this.friendRequestsSig.update(list =>
         list.filter(u => u.id !== requesterId)
       );
@@ -250,19 +234,18 @@ export class FriendsService {
     }
   }
 
-  // ==================================================
   // FOLLOWERS / FOLLOWING
-  // ==================================================
-
   async loadFollowers(me: string): Promise<void> {
     try {
       this.loadingSig.set(true);
       this.errorSig.set(null);
 
+      // FIXED: Use the correct FK name
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requester:users!user_id (
+          requester_id,
+          requester:users!fk_request_follow_requester (
             user_id,
             full_name,
             avatar_img,
@@ -302,10 +285,12 @@ export class FriendsService {
       this.loadingSig.set(true);
       this.errorSig.set(null);
 
+      // FIXED: Use the correct FK name
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requested:users!user_id (
+          requested_id,
+          requested:users!fk_request_follow_requested (
             user_id,
             full_name,
             avatar_img,
@@ -394,10 +379,7 @@ export class FriendsService {
     }
   }
 
-  // ==================================================
   // MESSAGING
-  // ==================================================
-
   async getOrCreateConversation(me: string, other: string): Promise<string> {
     try {
       this.errorSig.set(null);
@@ -419,7 +401,6 @@ export class FriendsService {
         return existing[0].conversation_id;
       }
 
-      // No conversation yet → create one
       const { data: convo, error: createError } = await this.supabase
         .from('conversations')
         .insert({})
@@ -431,7 +412,6 @@ export class FriendsService {
         throw createError;
       }
 
-      // Register both users as participants
       const { error: participantsError } = await this.supabase
         .from('participants')
         .insert([
@@ -452,13 +432,7 @@ export class FriendsService {
     }
   }
 
-  // ==================================================
   // UTILITY METHODS
-  // ==================================================
-
-  /**
-   * Load all data for a user (call this on component init)
-   */
   async loadAllData(userId: string): Promise<void> {
     await Promise.all([
       this.loadSuggestions(userId),
@@ -468,9 +442,6 @@ export class FriendsService {
     ]);
   }
 
-  /**
-   * Clear all error messages
-   */
   clearError(): void {
     this.errorSig.set(null);
   }
