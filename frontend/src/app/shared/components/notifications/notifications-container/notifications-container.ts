@@ -1,26 +1,47 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import { Notification } from '../../../model/notification.type';
-import { NgFor } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { NotificationsService } from '../../../../core/services/notifications.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-notifications-container',
-  imports: [],
+  imports: [NgIf],
   templateUrl: './notifications-container.html',
   styleUrl: './notifications-container.css'
 })
-
-export class NotificationsContainer {
+export class NotificationsContainer implements OnInit, OnDestroy {
   currentFilter = input<string>('all');
+  Notifications = input<Notification[]>([]);
+  openMenuId: string | null = null;
+  
+  private subscription?: Subscription;
 
-  Notifications = input<Notification[]>([
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T19:00:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "read"},
-    {id: "N00001", name: "Skander Boughnimi", profileUrl: "assets/images/skander.png", iconUrl: "assets/icons/panel/like.png", action: "liked your Flurr!", date: "2025-12-02T18:40:00.000Z", status: "unread"}
-  ]);
+  constructor(
+    private notificationsService: NotificationsService,
+    private router: Router
+  ) {}
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    // Only close if a menu is open
+    if (this.openMenuId) {
+      this.openMenuId = null;
+    }
+  }
+
+  async ngOnInit() {
+    this.subscription = this.notificationsService.notifications$.subscribe(
+      notifications => {
+        // Update handled in parent component
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
+  }
 
   filteredNotifications = computed(() => {
     const allNotifs = this.Notifications();
@@ -33,10 +54,28 @@ export class NotificationsContainer {
     return allNotifs.filter(n => n.status === filter);
   });
 
+  async onNotificationClick(notification: Notification) {
+    if (notification.status === 'unread') {
+      await this.notificationsService.markAsRead(notification.id);
+    }
+
+    if (notification.flurrId) {
+      this.router.navigate(['/flurr', notification.flurrId]);
+    } else if (notification.type === 'follow' && notification.actorId) {
+      this.router.navigate(['/profile', notification.actorId]);
+    }
+  }
+
+  async deleteNotification(event: Event, notificationId: string) {
+    event.stopPropagation();
+    await this.notificationsService.deleteNotification(notificationId);
+    this.openMenuId = null;
+  }
+
   getTimeAgo(date: string | Date): string {
     const now = new Date();
     const past = new Date(date);
-    const diff = (now.getTime() - past.getTime()) / 1000; // in seconds
+    const diff = (now.getTime() - past.getTime()) / 1000;
 
     if (diff < 60) return `${Math.floor(diff)}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
@@ -48,5 +87,14 @@ export class NotificationsContainer {
 
     const yearsDiff = now.getFullYear() - past.getFullYear();
     return `${yearsDiff}y`;
+  }
+
+  openOptions(ev: Event, notificationId: string) {
+    ev.stopPropagation();
+    this.openMenuId = this.openMenuId === notificationId ? null : notificationId;
+  }
+
+  isMenuOpen(notificationId: string): boolean {
+    return this.openMenuId === notificationId;
   }
 }

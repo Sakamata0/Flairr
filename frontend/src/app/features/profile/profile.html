@@ -4,7 +4,7 @@
 
 <div class="layout">
   <nav>
-    <app-journeys-selector></app-journeys-selector>
+    <app-journeys-selector [userId]="profile?.user_id"></app-journeys-selector>
   </nav>
 
   <main>
@@ -19,16 +19,13 @@
       </span>
 
       <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen">
-        <button (click)="sortType='Top'; toggleSortingMethodMenu($event)">Top</button>
-        <button (click)="sortType='Recent'; toggleSortingMethodMenu($event)">Recent</button>
+        <button (click)="sortType='Top'; applySorting(); toggleSortingMethodMenu($event)">Top</button>
+        <button (click)="sortType='Recent'; applySorting(); toggleSortingMethodMenu($event)">Recent</button>
       </div>
-
-
     </div>
 
-    <ng-container *ngIf="!loading; else loadingTpl" >
-
-     
+    <ng-container *ngIf="!loading; else loadingTpl">
+      <ng-container *ngIf="posts.length > 0; else noPosts">
         <app-post *ngFor="let p of posts"
           [show]=1
           [post]="$any({
@@ -43,11 +40,13 @@
             }
           })">
         </app-post>
+      </ng-container>
 
-      <ng-template #noPosts *ngIf="posts.length <= 0 ">
-        <p class="no-posts">No posts yet.</p>
+      <ng-template #noPosts>
+        <p class="no-posts">
+          {{ isOwnProfile ? 'You haven\'t posted anything yet.' : 'No posts yet.' }}
+        </p>
       </ng-template>
-
     </ng-container>
 
     <ng-template #loadingTpl>
@@ -59,7 +58,7 @@
   <aside>
     <app-card-panel
       title="My Flairr Spaces"
-      noItemsMessage="You still didn't join any Flairr space"
+      [noItemsMessage]="isOwnProfile ? 'You still didn\'t join any Flairr space' : 'No spaces joined yet'"
       [items]="FlairrSpaces">
     </app-card-panel>
   </aside>

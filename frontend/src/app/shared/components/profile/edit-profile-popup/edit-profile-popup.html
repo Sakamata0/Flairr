@@ -1,7 +1,11 @@
 <div id="main-container">
   <header>
     <h1 class="title">Edit Profile</h1>
-    <button class="close-btn" (click)="closeDialog()" [disabled]="isSaving">
+    <button 
+      class="close-btn" 
+      (click)="closeDialog()" 
+      [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
+    >
       <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
         <path d="M8 8L22 22M22 8L8 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
@@ -16,17 +20,54 @@
 
     <!-- Profile Images -->
     <div id="pictures">
-      <div id="banner-image" class="image-container">
-        <img [src]="modifiableInfo.bannerUrl || 'assets/images/default-banner-image.png'" alt="Banner">
+      <!-- Banner Image -->
+      <div 
+        id="banner-image" 
+        class="image-container"
+        [class.uploading]="isUploadingBanner"
+        (click)="triggerBannerUpload()"
+      >
+        <img 
+          [src]="modifiableInfo.bannerUrl || 'assets/images/default-banner-image.png'" 
+          alt="Banner"
+        />
         <div class="edit-layer">
-          <span>Edit Banner</span>
+          <div class="edit-content" *ngIf="!isUploadingBanner">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>Change Banner</span>
+          </div>
+          <div class="spinner" *ngIf="isUploadingBanner">
+            <div class="loader"></div>
+            <span>Uploading...</span>
+          </div>
         </div>
       </div>
 
-      <div id="profile-image" class="image-container">
-        <img [src]="modifiableInfo.avatarUrl || 'assets/images/default-profile-picture.png'" alt="Profile">
+      <!-- Profile Image -->
+      <div 
+        id="profile-image" 
+        class="image-container"
+        [class.uploading]="isUploadingAvatar"
+        (click)="triggerAvatarUpload()"
+      >
+        <img 
+          [src]="modifiableInfo.avatarUrl || 'assets/images/default-profile-picture.png'" 
+          alt="Profile"
+        />
         <div class="edit-layer">
-          <span>Edit</span>
+          <div class="edit-content" *ngIf="!isUploadingAvatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>Edit</span>
+          </div>
+          <div class="spinner" *ngIf="isUploadingAvatar">
+            <div class="loader"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -43,7 +84,7 @@
               type="text" 
               [(ngModel)]="modifiableInfo.fullName" 
               name="fullName"
-              [disabled]="isSaving"
+              [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
               required
             />
             <label>Your full name</label>
@@ -60,7 +101,7 @@
               [(ngModel)]="modifiableInfo.bio" 
               name="bio"
               rows="4"
-              [disabled]="isSaving"
+              [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
               maxlength="500"
             ></textarea>
             <label>Tell us about yourself...</label>
@@ -68,34 +109,34 @@
         </div>
       </div>
 
-      <!-- Avatar URL -->
+      <!-- Avatar URL (optional manual input) -->
       <div class="row">
-        <label>Avatar URL</label>
+        <label>Avatar URL <span class="optional">(optional)</span></label>
         <div class="inputs">
           <div class="inputGroup">
             <input 
               type="url" 
               [(ngModel)]="modifiableInfo.avatarUrl" 
               name="avatarUrl"
-              [disabled]="isSaving"
+              [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
             />
-            <label>https://example.com/avatar.jpg</label>
+            <label>Or paste a direct image URL</label>
           </div>
         </div>
       </div>
 
-      <!-- Banner URL -->
+      <!-- Banner URL (optional manual input) -->
       <div class="row">
-        <label>Banner URL</label>
+        <label>Banner URL <span class="optional">(optional)</span></label>
         <div class="inputs">
           <div class="inputGroup">
             <input 
               type="url" 
               [(ngModel)]="modifiableInfo.bannerUrl" 
               name="bannerUrl"
-              [disabled]="isSaving"
+              [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
             />
-            <label>https://example.com/banner.jpg</label>
+            <label>Or paste a direct image URL</label>
           </div>
         </div>
       </div>
@@ -109,7 +150,7 @@
       class="btn save" 
       (click)="saveProfile()"
       [class.clicked]="saveClicked"
-      [disabled]="isSaving"
+      [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
     >
       <div class="svg-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -117,14 +158,15 @@
           <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
         </svg>
       </div>
-      <span>Save Changes</span>
+      <span *ngIf="!isSaving">Save Changes</span>
+      <span *ngIf="isSaving">Saving...</span>
     </button>
     
     <button 
       type="button" 
       class="btn discard" 
       (click)="closeDialog()"
-      [disabled]="isSaving"
+      [disabled]="isSaving || isUploadingAvatar || isUploadingBanner"
     >
       Cancel
     </button>

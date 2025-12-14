@@ -1,10 +1,10 @@
+
 <div class="layout">
     <nav>
         <app-mini-profile-card></app-mini-profile-card>
         <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="shortcuts"></app-card-panel>
     </nav>
     <main>
-        <app-flurr-creation-card></app-flurr-creation-card>
         <div id="sort-selection">
             <hr>
             <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
@@ -13,33 +13,25 @@
             <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
                 <button 
                     role="menuitem" 
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'; applySorting()">
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
                     Top
                 </button>
                 <button
                     role="menuitem"
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'; applySorting()">
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
                     Recent
                 </button>
             </div>
         </div>
         
-        <ng-container *ngIf="!loading; else loadingTpl">
-            <!-- Listen to postChanged event to refresh feed when user unfollows someone -->
-            <app-post 
-                *ngFor="let p of posts" 
-                [post]="p"
-                (postChanged)="onPostChanged()">
-            </app-post>
-            <div *ngIf="posts.length === 0" class="no-posts">
-                <p>No posts to show.</p>
-                <p>Follow some users to see their posts in your feed!</p>
-            </div>
-        </ng-container>
+       <ng-container *ngIf="!loading; else loadingTpl">
+    <app-post *ngFor="let p of posts" [post]="p"></app-post>
+    <div *ngIf="posts.length === 0" class="no-posts">No posts yet.</div>
+  </ng-container>
 
-        <ng-template #loadingTpl>
-            <div class="loading">Loading feed…</div>
-        </ng-template>
+  <ng-template #loadingTpl>
+    <div class="loading">Loading feed…</div>
+  </ng-template>
     </main>
     <aside>
         <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications" link="notifications"></app-card-panel>

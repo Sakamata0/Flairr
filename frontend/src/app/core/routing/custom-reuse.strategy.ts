@@ -14,6 +14,7 @@ export class CustomRouteReuseStrategy extends BaseRouteReuseStrategy {
       'spaces',
       'friends',
       'notifications',
+      'explore',
       'profile',
       'profile/:profileId',
     ];

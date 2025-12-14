@@ -1,4 +1,4 @@
-// profile-header.ts
+// profile-header.ts - FIXED VERSION
 import { Component, Input } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,23 +21,21 @@ export class ProfileHeader {
   ) {}
 
   get effectiveProfile() {
-    const serviceUser = this.userService.currentUser();
+    if (!this.profile) return null;
 
-    if (!this.profile) return serviceUser;
-    if (!serviceUser) return this.profile;
-
-    // If viewing your own profile → always use UserService (correct counts)
-    const shownId = this.profile.user_id ?? this.profile.userID;
-    const meId = serviceUser.userID;
-
-    return shownId === meId ? serviceUser : this.profile;
+    // Always return the profile from @Input with properly loaded data
+    return this.profile;
   }
 
   get isOwnProfile(): boolean {
     const p = this.effectiveProfile;
     const me = this.userService.currentUser();
     if (!p || !me) return false;
-    return (p.user_id ?? p.userID) === me.userID;
+    
+    const profileId = p.user_id ?? p.userID;
+    const meId = me.userID;
+    
+    return profileId === meId;
   }
 
   formatFollowerCount(count: number | null | undefined): string {
@@ -51,12 +49,30 @@ export class ProfileHeader {
     const p = this.effectiveProfile;
     if (!p) return;
 
-    this.dialog.open(EditProfilePopup, {
+    // Transform profile data to match EditProfilePopup expectations
+    const dialogData = {
+      fullName: p.full_name ?? p.fullName ?? '',
+      bio: p.bio ?? '',
+      avatarUrl: p.avatar_img ?? p.avatarImg ?? '',
+      bannerUrl: p.cover_img ?? p.coverImg ?? '',
+      email: p.email ?? ''
+    };
+
+    const dialogRef = this.dialog.open(EditProfilePopup, {
       width: '100vw',
       maxWidth: '700px',
       maxHeight: '90vh',
       panelClass: 'edit-profile-dialog',
-      data: p
+      data: dialogData
+    });
+
+    // Reload profile after edit
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Profile updated, reloading...');
+        // Trigger a reload by dispatching a custom event or calling parent component
+        window.location.reload(); // Simple solution, or use a better pattern
+      }
     });
   }
 }
