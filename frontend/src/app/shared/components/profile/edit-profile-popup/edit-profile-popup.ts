@@ -230,71 +230,84 @@ export class EditProfilePopup {
 
   async saveProfile() {
     if (this.isSaving) return;
-    
+
     this.isSaving = true;
     this.errorMessage = '';
 
     try {
-      // Get current user ID
-      const uid = await this.getCurrentUid();
-      if (!uid) {
-        this.errorMessage = 'You must be logged in to edit your profile.';
+      const currentUser = this.userService.currentUser();
+      if (!currentUser) {
+        this.errorMessage = 'You must be logged in to edit this profile.';
         this.isSaving = false;
         return;
       }
 
-      // Prepare update data
+      const isUserProfile = !!(this.data as any).user_id;
+      const isSpaceProfile = !!(this.data as any).space_id;
+
       const updates: any = {
         updated_at: new Date().toISOString()
       };
 
-      // Add all editable fields
-      if (this.modifiableInfo.fullName?.trim()) {
-        updates.full_name = this.modifiableInfo.fullName.trim();
-      }
-      
-      if (this.modifiableInfo.bio !== undefined) {
-        updates.bio = this.modifiableInfo.bio?.trim() || null;
-      }
-      
-      if (this.modifiableInfo.avatarUrl !== undefined) {
-        updates.avatar_img = this.modifiableInfo.avatarUrl?.trim() || null;
-      }
-      
-      if (this.modifiableInfo.bannerUrl !== undefined) {
-        updates.cover_img = this.modifiableInfo.bannerUrl?.trim() || null;
-      }
+      // Add editable fields
+      if (this.modifiableInfo.fullName?.trim()) updates.full_name = this.modifiableInfo.fullName.trim();
+      if (this.modifiableInfo.bio !== undefined) updates.bio = this.modifiableInfo.bio?.trim() || null;
+      if (this.modifiableInfo.avatarUrl !== undefined) updates.avatar_img = this.modifiableInfo.avatarUrl?.trim() || null;
+      if (this.modifiableInfo.bannerUrl !== undefined) updates.cover_img = this.modifiableInfo.bannerUrl?.trim() || null;
 
-      console.log('Saving profile updates:', updates);
+      if (isUserProfile) {
+        // Only allow editing if the user owns this profile
+        if ((this.data as any).user_id !== currentUser.userID) {
+          this.errorMessage = 'You cannot edit this user profile.';
+          this.isSaving = false;
+          return;
+        }
 
-      // Update in Supabase
-      const { data: updatedUser, error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('user_id', uid)
-        .select()
-        .single();
+        const { data: updatedUser, error } = await supabase
+          .from('users')
+          .update(updates)
+          .eq('user_id', currentUser.userID)
+          .select()
+          .single();
 
-      if (error) {
-        console.error('Error updating profile:', error);
-        this.errorMessage = error.message || 'Failed to update profile. Please try again.';
+        if (error) throw error;
+
+        // Reload user in UserService
+        await this.userService.loadUserById(currentUser.userID);
+
+      } else if (isSpaceProfile) {
+        // Only allow editing if the user is the space owner
+        if ((this.data as any).space_owner !== currentUser.userID) {
+          this.errorMessage = 'You cannot edit this space profile.';
+          this.isSaving = false;
+          return;
+        }
+
+        const { data: updatedSpace, error } = await supabase
+          .from('spaces')
+          .update({
+            space_name: this.modifiableInfo.fullName?.trim() || undefined,
+            space_bio: this.modifiableInfo.bio?.trim() || null,
+            avatar_img: this.modifiableInfo.avatarUrl?.trim() || null,
+            cover_img: this.modifiableInfo.bannerUrl?.trim() || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('space_id', (this.data as any).space_id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+      } else {
+        this.errorMessage = 'Invalid profile type.';
         this.isSaving = false;
         return;
-      }
-
-      console.log('Profile updated successfully:', updatedUser);
-
-      // Update UserService with new data
-      try {
-        await this.userService.loadUserById(uid);
-      } catch (serviceErr) {
-        console.warn('Could not reload user in UserService:', serviceErr);
       }
 
       // Animate save button
       this.animateSave();
 
-      // Close dialog and return updated data after animation
+      // Close dialog after short delay
       setTimeout(() => {
         this.dialogRef.close({
           success: true,
@@ -303,11 +316,13 @@ export class EditProfilePopup {
       }, 1000);
 
     } catch (err: any) {
-      console.error('Unexpected error saving profile:', err);
+      console.error('Error saving profile:', err);
       this.errorMessage = err?.message || 'An unexpected error occurred.';
       this.isSaving = false;
     }
   }
+
+
 
   private async getCurrentUid(): Promise<string | null> {
     try {

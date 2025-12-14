@@ -110,6 +110,18 @@ export class FlurrSpaceProfile implements OnInit, OnDestroy {
 
       this.posts = flurrs ?? [];
 
+        // -------------------------
+        // LOAD MEMBERS COUNT
+        // -------------------------
+        const { count: membersCount, error: membersErr } = await supabase
+          .from('join_spaces')
+          .select('*', { count: 'exact', head: true })
+          .eq('space_id', this.spaceId);
+
+        if (membersErr) {
+          console.warn('[SpaceProfile] membersErr', membersErr);
+        }
+
       // -------------------------
       // FINAL SPACE OBJECT
       // -------------------------
@@ -120,7 +132,8 @@ export class FlurrSpaceProfile implements OnInit, OnDestroy {
         avatar_img: spaceRow.avatar_img,
         cover_img: spaceRow.cover_img,
         owner_id: spaceRow.space_owner,
-        created_at: spaceRow.created_at
+        created_at: spaceRow.created_at,
+        membersCount: membersCount
       };
 
       this.applySorting();

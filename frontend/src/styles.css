@@ -60,7 +60,8 @@ body {
 .custom-journey-creation-dialog .mat-mdc-dialog-surface {
   width: fit-content !important;
   height: auto !important;
-  max-width: 90vw !important; /* allow responsiveness even at larger screens */
+  width: 600px !important;
+  /*max-width: 90vw !important; /* allow responsiveness even at larger screens */
   max-height: 90vh !important;
   padding: 12px 16px !important;
   background-color: #ffffff !important;

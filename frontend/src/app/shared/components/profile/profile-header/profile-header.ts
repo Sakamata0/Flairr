@@ -48,6 +48,13 @@ export class ProfileHeader implements OnChanges {
         await this.checkIfMember();
       }
     }
+
+    /*if (changes['spaces']) {
+      // SPACE PROFILE → check membership
+      if (this.profile?.space_id) {
+        await this.checkIfMember();
+      }
+    }*/
   }
 
 
@@ -175,28 +182,24 @@ export class ProfileHeader implements OnChanges {
       bio: p.bio ?? '',
       avatarUrl: p.avatar_img ?? p.avatarImg ?? '',
       bannerUrl: p.cover_img ?? p.coverImg ?? '',
-      email: p.email ?? ''
+      email: p.email ?? '',
+      user_id: p.user_id ?? null,
+      space_id: p.space_id ?? null,
+      space_owner: p.space_owner ?? p.owner_id ?? null   // <-- correct owner field
     };
-    if (!this.profile) return;
 
-    const dialogRef = this.dialog.open(EditProfilePopup, {
+    this.dialog.open(EditProfilePopup, {
       width: '100vw',
       maxWidth: '700px',
       maxHeight: '90vh',
       panelClass: 'edit-profile-dialog',
-      data: {
-        fullName: this.profile.full_name ?? '',
-        bio: this.profile.bio ?? '',
-        avatarUrl: this.profile.avatar_img ?? '',
-        bannerUrl: this.profile.cover_img ?? '',
-        email: this.profile.email ?? ''
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) window.location.reload();
+      data: dialogData
     });
   }
+
+
+
+
 
   /**
    * Open messaging with this user

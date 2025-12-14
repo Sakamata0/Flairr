@@ -183,7 +183,9 @@ export class Profile implements OnInit, OnDestroy {
         .from('flurrs')
         .select('*')
         .eq('poster_id', targetId)
+        .eq('type', 'flurr')          // added filter
         .order('created_at', { ascending: false });
+
 
       console.log('[Profile] flurrs result:', { count: flurrs?.length, error: flurrsErr });
 
