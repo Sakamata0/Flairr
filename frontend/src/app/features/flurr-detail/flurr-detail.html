@@ -1,24 +1,51 @@
-<div class="flurr-detail-container">
-    <div class="back-button" (click)="goBack()">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M12 4l-8 8 8 8" stroke="currentColor" stroke-width="2" fill="none"/>
-    </svg>
-    Back
-    </div>
-    
-    <div *ngIf="loading" class="loading">
-    <div class="spinner"></div>
-    <p>Loading post...</p>
-    </div>
-    
-    <app-post 
-        *ngIf="!loading && post" 
-        [post]="post" 
-        [show]="1"
-        [currentUser]="currentUser">
-    </app-post>
-    
-    <div *ngIf="!loading && !post" class="error">
-    <p>Post not found</p>
-    </div>
+<div class="layout">
+    <nav>
+        <app-mini-profile-card></app-mini-profile-card>
+        <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="shortcuts"></app-card-panel>
+    </nav>
+    <main>
+        <div class="flurr-detail-container">
+            <div class="back-button" (click)="goBack()">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12 4l-8 8 8 8" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+            Back
+            </div>
+            
+            <div *ngIf="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading post...</p>
+            </div>
+            
+            <app-post 
+                *ngIf="!loading && post" 
+                [post]="post" 
+                [show]="1"
+                [currentUser]="currentUser">
+            </app-post>
+            
+            <div *ngIf="!loading && !post" class="error">
+            <p>Post not found</p>
+            </div>
+        </div>
+    </main>
+    <aside>
+        <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications" link="notifications"></app-card-panel>
+        <app-card-panel title="Friends Suggestions" noItemsMessage="You have no friends suggestions." [items]="this.friendsSuggestions"></app-card-panel>
+        <div id="credits">
+            <a>About us</a>
+            <span>·</span>
+            <a>Privacy Policy</a>
+            <span>·</span>
+            <a>Cookie Policy</a>
+            <span>·</span>
+            <p>© 2025 Flairr, Inc</p>
+        </div>
+    </aside>
 </div>
+
+<div class="loading-screen" *ngIf="loading">
+  <h2>F</h2>
+</div>
+
+

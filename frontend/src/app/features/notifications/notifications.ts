@@ -3,6 +3,7 @@ import { MiniProfileCard } from "../../shared/components/mini-profile-card/mini-
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
 import { Router } from '@angular/router';
 import { NotificationsSelector } from "../../shared/components/notifications/notifications-selector/notifications-selector";
+import { supabase } from '../../core/supabase/supabase.client';
 import { NotificationsContainer } from "../../shared/components/notifications/notifications-container/notifications-container";
 import { Subscription } from 'rxjs';
 import { CommonModule, NgIf } from '@angular/common';
@@ -19,6 +20,7 @@ export class Notifications implements OnInit, OnDestroy {
   selectedNotifications: string = "all";
   notifications: Notification[] = [];
   loading = true;
+  currentUser: any = null;
   
   private subscription?: Subscription;
   private realtimeChannel?: any;
@@ -32,7 +34,8 @@ export class Notifications implements OnInit, OnDestroy {
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     private router: Router,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+
   ) {}
 
   async ngOnInit() {
@@ -40,7 +43,6 @@ export class Notifications implements OnInit, OnDestroy {
     this.subscription = this.notificationsService.notifications$.subscribe(
       notifications => {
         this.notifications = notifications;
-        this.loading = false;
       }
     );
 
@@ -52,6 +54,9 @@ export class Notifications implements OnInit, OnDestroy {
     if (userId) {
       this.realtimeChannel = this.notificationsService.subscribeToNotifications(userId);
     }
+    
+    await this.loadCurrentUser();
+    this.loading = false;
   }
 
   ngOnDestroy() {
@@ -69,5 +74,24 @@ export class Notifications implements OnInit, OnDestroy {
   hasUnreadNotifications()
   {
     return this.notifications.some(n => n.status === 'unread');
+  }
+  async loadCurrentUser() {
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('full_name, avatar_img')
+        .eq('user_id', data.user.id)
+        .single();
+
+      this.currentUser = {
+        name: userData?.full_name || 'User',
+        avatarUrl: userData?.avatar_img || 'assets/icons/post/avatar-img.avif'
+      };
+    } catch (err) {
+      console.error('loadCurrentUser error:', err);
+    }
   }
 }

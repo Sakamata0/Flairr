@@ -1,20 +1,20 @@
-import { Component, computed, input, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { Notification } from '../../../model/notification.type';
 import { Subscription } from 'rxjs';
 import { NotificationsService } from '../../../../core/services/notifications.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-notifications-container',
-  imports: [],
+  imports: [NgIf],
   templateUrl: './notifications-container.html',
   styleUrl: './notifications-container.css'
 })
 export class NotificationsContainer implements OnInit, OnDestroy {
   currentFilter = input<string>('all');
-  
-  // This will now come from the service instead of hardcoded
   Notifications = input<Notification[]>([]);
+  openMenuId: string | null = null;
   
   private subscription?: Subscription;
 
@@ -23,13 +23,18 @@ export class NotificationsContainer implements OnInit, OnDestroy {
     private router: Router
   ) {}
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    // Only close if a menu is open
+    if (this.openMenuId) {
+      this.openMenuId = null;
+    }
+  }
+
   async ngOnInit() {
-    // Subscribe to notifications from service
     this.subscription = this.notificationsService.notifications$.subscribe(
       notifications => {
-        // Update the component's notifications
-        // Note: Since Notifications is an input signal, 
-        // we'll handle this in the parent component instead
+        // Update handled in parent component
       }
     );
   }
@@ -50,29 +55,27 @@ export class NotificationsContainer implements OnInit, OnDestroy {
   });
 
   async onNotificationClick(notification: Notification) {
-    // Mark as read if unread
     if (notification.status === 'unread') {
       await this.notificationsService.markAsRead(notification.id);
     }
 
-    // Navigate to the flurr if it exists
     if (notification.flurrId) {
       this.router.navigate(['/flurr', notification.flurrId]);
     } else if (notification.type === 'follow' && notification.actorId) {
-      // Navigate to the actor's profile for follow notifications
       this.router.navigate(['/profile', notification.actorId]);
     }
   }
 
   async deleteNotification(event: Event, notificationId: string) {
-    event.stopPropagation(); // Prevent navigation when deleting
+    event.stopPropagation();
     await this.notificationsService.deleteNotification(notificationId);
+    this.openMenuId = null;
   }
 
   getTimeAgo(date: string | Date): string {
     const now = new Date();
     const past = new Date(date);
-    const diff = (now.getTime() - past.getTime()) / 1000; // in seconds
+    const diff = (now.getTime() - past.getTime()) / 1000;
 
     if (diff < 60) return `${Math.floor(diff)}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
@@ -84,5 +87,14 @@ export class NotificationsContainer implements OnInit, OnDestroy {
 
     const yearsDiff = now.getFullYear() - past.getFullYear();
     return `${yearsDiff}y`;
+  }
+
+  openOptions(ev: Event, notificationId: string) {
+    ev.stopPropagation();
+    this.openMenuId = this.openMenuId === notificationId ? null : notificationId;
+  }
+
+  isMenuOpen(notificationId: string): boolean {
+    return this.openMenuId === notificationId;
   }
 }

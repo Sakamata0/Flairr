@@ -30,16 +30,21 @@
                         <img 
                             src="assets/icons/general-icons/three-dots-menu.svg" 
                             alt="menu_icon"
-                            (click)="deleteNotification($event, notif.id)"
                             style="cursor: pointer;"
-                            title="Delete notification">
+                            (click)="openOptions($event, notif.id)">
+                        <!-- ✅ Only show menu for THIS notification -->
+                        <div class="avatar-menu" 
+                             *ngIf="isMenuOpen(notif.id)" 
+                             role="menu" 
+                             (click)="$event.stopPropagation()">
+                            <a role="menuitem" (click)="deleteNotification($event, notif.id)">Supprimer</a>
+                        </div>
                     </span>
                 </span>
             </div>
         </div>
     }
     
-    <!-- Empty state for filtered view (matches your design) -->
     @if (filteredNotifications().length === 0) {
         <div class="empty-filtered-state">
             <p>No {{ currentFilter() }} notifications</p>
