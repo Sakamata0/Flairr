@@ -1,314 +1,477 @@
-import { Injectable, NgZone, signal } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { FriendsProfile } from '../../shared/model/friends-profile.type';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseService } from '../../core/services/supabase.service';
 
-
 @Injectable({ providedIn: 'root' })
-
 export class FriendsService {
 
-    // nesna3 fi supabase client
-    private supabase: SupabaseClient;
+  // Single Supabase client instance (shared app-wide)
+  private supabase: SupabaseClient;
 
-    constructor(
-        private ngZone: NgZone,
-        private supabaseService: SupabaseService
-    ) {
-        this.supabase = this.supabaseService.client;
+  constructor(private supabaseService: SupabaseService) {
+    this.supabase = this.supabaseService.client;
+  }
 
-        // optional, only for debugging
-        try {
-            (window as any).supabase = this.supabase;
-        } catch { }
+  // ==================================================
+  // STATE (Angular Signals)
+  // ==================================================
+  // Each signal represents ONE tab in the Friends UI
+  private friendRequestsSig = signal<FriendsProfile[]>([]);
+  private followersSig = signal<FriendsProfile[]>([]);
+  private followingSig = signal<FriendsProfile[]>([]);
+  private suggestionsSig = signal<FriendsProfile[]>([]);
+
+  // Loading states
+  private loadingSig = signal<boolean>(false);
+  private errorSig = signal<string | null>(null);
+
+  // Expose read-only signals to components
+  friendRequests = this.friendRequestsSig.asReadonly();
+  followers = this.followersSig.asReadonly();
+  following = this.followingSig.asReadonly();
+  suggestions = this.suggestionsSig.asReadonly();
+  loading = this.loadingSig.asReadonly();
+  error = this.errorSig.asReadonly();
+
+  // ==================================================
+  // SUGGESTIONS
+  // ==================================================
+  async loadSuggestions(me: string): Promise<void> {
+    try {
+      this.loadingSig.set(true);
+      this.errorSig.set(null);
+
+      const excludedIds = await this.getExcludedUserIds(me);
+
+      let query = this.supabase
+        .from('users')
+        .select('user_id, full_name, avatar_img, cover_img');
+
+      // Only add the exclusion filter if there are IDs to exclude
+      if (excludedIds.length > 0) {
+        query = query.not('user_id', 'in', `(${excludedIds.join(',')})`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading suggestions:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      // Map DB users → UI-friendly profile objects
+      this.suggestionsSig.set(
+        (data ?? []).map(u => ({
+          id: u.user_id,
+          name: u.full_name,
+          avatar: u.avatar_img,
+          banner: u.cover_img,
+          mutuals: 0
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to load suggestions:', error);
+      this.errorSig.set('Failed to load suggestions');
+    } finally {
+      this.loadingSig.set(false);
     }
-    //declarations mta3 el signals
-    private allUsersSig = signal<FriendsProfile[]>([]);
-    private friendRequestsSig = signal<FriendsProfile[]>([]);
-    private followersSig = signal<FriendsProfile[]>([]);
-    private followingSig = signal<FriendsProfile[]>([]);
-    private suggestionsSig = signal<FriendsProfile[]>([]);
+  }
 
-    //variables declaration
-    allUsers = this.allUsersSig.asReadonly();
-    friendRequests = this.friendRequestsSig.asReadonly();
-    followers = this.followersSig.asReadonly();
-    following = this.followingSig.asReadonly();
-    suggestions = this.suggestionsSig.asReadonly();
-
-    // suggestions
-    async loadSuggestions(currentUserId: string) {
-        const { data, error } = await this.getSuggestions(currentUserId);
-        if (error) throw error;
-
-        const followersMap = await this.getFollowersMap();
-
-        // get my followers
-        const { data: myFollowersRows } = await this.supabase
-            .from('friends')
-            .select('follower_id')
-            .eq('followed_id', currentUserId);
-
-        const myFollowersSet = new Set(
-            (myFollowersRows ?? []).map(r => r.follower_id)
+  /**
+   * Builds a list of user IDs that should NOT appear in suggestions.
+   */
+  private async getExcludedUserIds(me: string): Promise<string[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('request_follow')
+        .select('requester_id, requested_id, status')
+        .or(
+          `and(requester_id.eq.${me},status.in.(pending,accepted)),and(requested_id.eq.${me},status.in.(pending,accepted))`
         );
 
-        const withMutuals = (data ?? []).map(u => ({
-            id: u.user_id,
-            name: u.full_name,
-            avatar: u.avatar_img,
-            banner: u.cover_img,
-            mutuals: this.countMutuals(u.user_id, myFollowersSet, followersMap)
-        }));
+      if (error) {
+        console.error('Error getting excluded user IDs:', error);
+        return [me]; // At minimum, exclude self
+      }
 
-        withMutuals.sort((a, b) => b.mutuals - a.mutuals);
+      const excluded = new Set<string>();
+      excluded.add(me); // never suggest myself
 
-        this.suggestionsSig.set(withMutuals);
+      (data ?? []).forEach(row => {
+        excluded.add(row.requester_id);
+        excluded.add(row.requested_id);
+      });
+
+      return Array.from(excluded);
+    } catch (error) {
+      console.error('Failed to get excluded user IDs:', error);
+      return [me];
     }
+  }
 
+  // ==================================================
+  // FOLLOW REQUESTS
+  // ==================================================
 
-    private async getSuggestions(me: string) {
-        const excludedIds = await this.getExcludedUserIds(me);
+  async sendFollowRequest(targetUserId: string, me: string): Promise<void> {
+    try {
+      this.errorSig.set(null);
 
-        return this.supabase
-            .from('users')
-            .select('user_id, full_name, avatar_img, cover_img')
-            .not('user_id', 'in', `(${excludedIds.join(',')})`);
+      const { error } = await this.supabase
+        .from('request_follow')
+        .upsert(
+          {
+            requester_id: me,
+            requested_id: targetUserId,
+            status: 'pending',
+            responded_at: null
+          },
+          { onConflict: 'requester_id,requested_id' }
+        );
+
+      if (error) {
+        console.error('Error sending follow request:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      // Remove user from suggestions immediately (optimistic UI)
+      this.suggestionsSig.update(list =>
+        list.filter(u => u.id !== targetUserId)
+      );
+    } catch (error) {
+      console.error('Failed to send follow request:', error);
+      this.errorSig.set('Failed to send follow request');
+      throw error;
     }
+  }
 
-    private async getExcludedUserIds(me: string) {
-        const [friends, requests] = await Promise.all([
-            this.supabase
-                .from('friends')
-                .select('followed_id')
-                .eq('follower_id', me),
+  async loadFriendRequests(me: string): Promise<void> {
+    try {
+      this.loadingSig.set(true);
+      this.errorSig.set(null);
 
-            this.supabase
-                .from('request_follow')
-                .select('requester_id, requested_id')
-                .eq('status', 'pending')
-                .or(`requester_id.eq.${me},requested_id.eq.${me}`)
+      const { data, error } = await this.supabase
+        .from('request_follow')
+        .select(`
+          requester:users!request_follow_requester_id_fkey (
+            user_id,
+            full_name,
+            avatar_img,
+            cover_img
+          )
+        `)
+        .eq('requested_id', me)
+        .eq('status', 'pending');
+
+      if (error) {
+        console.error('Error loading friend requests:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.friendRequestsSig.set(
+        (data ?? [])
+          .filter((row: any) => row.requester) // Filter out null requester
+          .map((row: any) => ({
+            id: row.requester.user_id,
+            name: row.requester.full_name,
+            avatar: row.requester.avatar_img,
+            banner: row.requester.cover_img,
+            mutuals: 0
+          }))
+      );
+    } catch (error) {
+      console.error('Failed to load friend requests:', error);
+      this.errorSig.set('Failed to load friend requests');
+    } finally {
+      this.loadingSig.set(false);
+    }
+  }
+
+  async acceptFollowRequest(requesterId: string, me: string): Promise<void> {
+    try {
+      this.errorSig.set(null);
+
+      const { error } = await this.supabase
+        .from('request_follow')
+        .update({
+          status: 'accepted',
+          responded_at: new Date().toISOString()
+        })
+        .eq('requester_id', requesterId)
+        .eq('requested_id', me);
+
+      if (error) {
+        console.error('Error accepting follow request:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      // Remove from requests list in UI
+      this.friendRequestsSig.update(list =>
+        list.filter(u => u.id !== requesterId)
+      );
+    } catch (error) {
+      console.error('Failed to accept follow request:', error);
+      this.errorSig.set('Failed to accept follow request');
+      throw error;
+    }
+  }
+
+  async rejectFollowRequest(requesterId: string, me: string): Promise<void> {
+    try {
+      this.errorSig.set(null);
+
+      const { error } = await this.supabase
+        .from('request_follow')
+        .update({
+          status: 'rejected',
+          responded_at: new Date().toISOString()
+        })
+        .eq('requester_id', requesterId)
+        .eq('requested_id', me);
+
+      if (error) {
+        console.error('Error rejecting follow request:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.friendRequestsSig.update(list =>
+        list.filter(u => u.id !== requesterId)
+      );
+    } catch (error) {
+      console.error('Failed to reject follow request:', error);
+      this.errorSig.set('Failed to reject follow request');
+      throw error;
+    }
+  }
+
+  // ==================================================
+  // FOLLOWERS / FOLLOWING
+  // ==================================================
+
+  async loadFollowers(me: string): Promise<void> {
+    try {
+      this.loadingSig.set(true);
+      this.errorSig.set(null);
+
+      const { data, error } = await this.supabase
+        .from('request_follow')
+        .select(`
+          requester:users!request_follow_requester_id_fkey (
+            user_id,
+            full_name,
+            avatar_img,
+            cover_img
+          )
+        `)
+        .eq('requested_id', me)
+        .eq('status', 'accepted');
+
+      if (error) {
+        console.error('Error loading followers:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.followersSig.set(
+        (data ?? [])
+          .filter((row: any) => row.requester)
+          .map((row: any) => ({
+            id: row.requester.user_id,
+            name: row.requester.full_name,
+            avatar: row.requester.avatar_img,
+            banner: row.requester.cover_img,
+            mutuals: 0
+          }))
+      );
+    } catch (error) {
+      console.error('Failed to load followers:', error);
+      this.errorSig.set('Failed to load followers');
+    } finally {
+      this.loadingSig.set(false);
+    }
+  }
+
+  async loadFollowing(me: string): Promise<void> {
+    try {
+      this.loadingSig.set(true);
+      this.errorSig.set(null);
+
+      const { data, error } = await this.supabase
+        .from('request_follow')
+        .select(`
+          requested:users!request_follow_requested_id_fkey (
+            user_id,
+            full_name,
+            avatar_img,
+            cover_img
+          )
+        `)
+        .eq('requester_id', me)
+        .eq('status', 'accepted');
+
+      if (error) {
+        console.error('Error loading following:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.followingSig.set(
+        (data ?? [])
+          .filter((row: any) => row.requested)
+          .map((row: any) => ({
+            id: row.requested.user_id,
+            name: row.requested.full_name,
+            avatar: row.requested.avatar_img,
+            banner: row.requested.cover_img,
+            mutuals: 0
+          }))
+      );
+    } catch (error) {
+      console.error('Failed to load following:', error);
+      this.errorSig.set('Failed to load following');
+    } finally {
+      this.loadingSig.set(false);
+    }
+  }
+
+  async removeFollower(followerId: string, me: string): Promise<void> {
+    try {
+      this.errorSig.set(null);
+
+      const { error } = await this.supabase
+        .from('request_follow')
+        .delete()
+        .eq('requester_id', followerId)
+        .eq('requested_id', me)
+        .eq('status', 'accepted');
+
+      if (error) {
+        console.error('Error removing follower:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.followersSig.update(list =>
+        list.filter(u => u.id !== followerId)
+      );
+    } catch (error) {
+      console.error('Failed to remove follower:', error);
+      this.errorSig.set('Failed to remove follower');
+      throw error;
+    }
+  }
+
+  async unfollow(userId: string, me: string): Promise<void> {
+    try {
+      this.errorSig.set(null);
+
+      const { error } = await this.supabase
+        .from('request_follow')
+        .delete()
+        .eq('requester_id', me)
+        .eq('requested_id', userId)
+        .eq('status', 'accepted');
+
+      if (error) {
+        console.error('Error unfollowing user:', error);
+        this.errorSig.set(error.message);
+        throw error;
+      }
+
+      this.followingSig.update(list =>
+        list.filter(u => u.id !== userId)
+      );
+    } catch (error) {
+      console.error('Failed to unfollow user:', error);
+      this.errorSig.set('Failed to unfollow user');
+      throw error;
+    }
+  }
+
+  // ==================================================
+  // MESSAGING
+  // ==================================================
+
+  async getOrCreateConversation(me: string, other: string): Promise<string> {
+    try {
+      this.errorSig.set(null);
+
+      const { data: existing, error: searchError } = await this.supabase
+        .from('participants')
+        .select('conversation_id')
+        .or(
+          `and(user_id.eq.${me},other_user_id.eq.${other}),and(user_id.eq.${other},other_user_id.eq.${me})`
+        )
+        .limit(1);
+
+      if (searchError) {
+        console.error('Error searching for conversation:', searchError);
+        throw searchError;
+      }
+
+      if (existing && existing.length > 0) {
+        return existing[0].conversation_id;
+      }
+
+      // No conversation yet → create one
+      const { data: convo, error: createError } = await this.supabase
+        .from('conversations')
+        .insert({})
+        .select('id')
+        .single();
+
+      if (createError) {
+        console.error('Error creating conversation:', createError);
+        throw createError;
+      }
+
+      // Register both users as participants
+      const { error: participantsError } = await this.supabase
+        .from('participants')
+        .insert([
+          { conversation_id: convo.id, user_id: me, other_user_id: other },
+          { conversation_id: convo.id, user_id: other, other_user_id: me }
         ]);
 
-        const excluded = new Set<string>();
-        friends.data?.forEach(f => excluded.add(f.followed_id));
-        requests.data?.forEach(r => {
-            excluded.add(r.requester_id);
-            excluded.add(r.requested_id);
-        });
+      if (participantsError) {
+        console.error('Error creating participants:', participantsError);
+        throw participantsError;
+      }
 
-        excluded.add(me);
-        return Array.from(excluded);
+      return convo.id;
+    } catch (error) {
+      console.error('Failed to get or create conversation:', error);
+      this.errorSig.set('Failed to create conversation');
+      throw error;
     }
+  }
 
-    //suggestions algorithm
-    private async getFollowersMap(): Promise<Map<string, string[]>> { //traja3lk el followers lkol mta3 lfriends mta3k
-        const { data, error } = await this.supabase
-            .from('friends')
-            .select('follower_id, followed_id');
+  // ==================================================
+  // UTILITY METHODS
+  // ==================================================
 
-        if (error) throw error;
+  /**
+   * Load all data for a user (call this on component init)
+   */
+  async loadAllData(userId: string): Promise<void> {
+    await Promise.all([
+      this.loadSuggestions(userId),
+      this.loadFriendRequests(userId),
+      this.loadFollowers(userId),
+      this.loadFollowing(userId)
+    ]);
+  }
 
-        const map = new Map<string, string[]>();
-
-        (data ?? []).forEach(row => {
-            const arr = map.get(row.followed_id) ?? [];
-            arr.push(row.follower_id);
-            map.set(row.followed_id, arr);
-        });
-
-        return map;
-    }
-
-    private countMutuals(
-        userId: string,
-        myFollowers: Set<string>,
-        followersMap: Map<string, string[]>
-    ): number {
-        const theirFollowers = followersMap.get(userId) ?? [];
-        let count = 0;
-
-        for (const f of theirFollowers) {
-            if (myFollowers.has(f)) count++;
-        }
-
-        return count;
-    }
-
-
-    //send follow request logic
-    async sendFollowRequest(targetUserId: string, currentUserId: string) {
-        const { error } = await this.supabase
-            .from('request_follow')
-            .insert({
-                requester_id: currentUserId,
-                requested_id: targetUserId,
-                status: 'pending'
-            });
-
-        if (error) throw error;
-
-        this.suggestionsSig.update(list =>
-            list.filter(u => u.id !== targetUserId)
-        );
-    }
-
-    //remove from suggestions
-    removeFromSuggestions(userId: string) {
-        this.suggestionsSig.update(list =>
-            list.filter(u => u.id !== userId)
-        );
-    }
-
-    //load friend requests
-    async loadFriendRequests(currentUserId: string) {
-        console.log('🔍 Loading friend requests for user:', currentUserId);
-
-        const { data, error } = await this.supabase
-            .from('request_follow')
-            .select(`
-            requester_id,
-            requester:users!requester_id (
-                user_id,
-                full_name,
-                avatar_img,
-                cover_img
-            )
-        `)
-            .eq('requested_id', currentUserId)
-            .eq('status', 'pending');
-
-        if (error) {
-            console.error('❌ Friend request error:', error);
-            this.friendRequestsSig.set([]);
-            return;
-        }
-
-        const mapped: FriendsProfile[] = (data ?? [])
-            .filter((row: any) => row.requester)
-            .map((row: any) => ({
-                id: row.requester.user_id,
-                name: row.requester.full_name,
-                avatar: row.requester.avatar_img,
-                banner: row.requester.cover_img,
-                mutuals: 0
-            }));
-
-        console.log('✅ Mapped friend requests:', mapped);
-
-        this.friendRequestsSig.set(mapped);
-    }
-
-    // accept follow request
-    async acceptFollowRequest(requesterId: string, currentUserId: string) {
-        // 1. Mark request as accepted
-        const { error: updateErr } = await this.supabase
-            .from('request_follow')
-            .update({ status: 'accepted', responded_at: new Date().toISOString() })
-            .eq('requester_id', requesterId)
-            .eq('requested_id', currentUserId);
-
-        if (updateErr) throw updateErr;
-
-        // 2. Create friendship (follower -> followed)
-        const { error: friendErr } = await this.supabase
-            .from('friends')
-            .insert({
-                follower_id: requesterId,
-                followed_id: currentUserId
-            });
-
-        if (friendErr) throw friendErr;
-
-        // 3. Update UI (remove request)
-        this.friendRequestsSig.update(list =>
-            list.filter(u => u.id !== requesterId)
-        );
-    }
-
-    // reject Follow Request
-    async rejectFollowRequest(requesterId: string, currentUserId: string) {
-        const { error } = await this.supabase
-            .from('request_follow')
-            .update({ status: 'rejected', responded_at: new Date().toISOString() })
-            .eq('requester_id', requesterId)
-            .eq('requested_id', currentUserId);
-
-        if (error) throw error;
-
-        // Remove from UI
-        this.friendRequestsSig.update(list =>
-            list.filter(u => u.id !== requesterId)
-        );
-    }
-
-    // people who follow me
-    async loadFollowers(currentUserId: string) {
-        console.log('🔍 Loading followers for user:', currentUserId);
-
-        const { data, error } = await this.supabase
-            .from('request_follow')
-            .select(`
-            requester_id,
-            requester:users!requester_id (
-                user_id,
-                full_name,
-                avatar_img,
-                cover_img
-            )
-        `)
-            .eq('requested_id', currentUserId)
-            .eq('status', 'accepted');
-
-        if (error) throw error;
-
-        const mapped: FriendsProfile[] = (data ?? [])
-            .filter((row: any) => row.requester)
-            .map((row: any) => ({
-                id: row.requester.user_id,
-                name: row.requester.full_name,
-                avatar: row.requester.avatar_img,
-                banner: row.requester.cover_img,
-                mutuals: 0
-            }));
-
-        this.followersSig.set(mapped);
-
-        console.log('✅ Followers loaded:', mapped);
-    }
-
-    // people i follow
-    async loadFollowing(currentUserId: string) {
-        console.log('🔍 Loading following for user:', currentUserId);
-
-        const { data, error } = await this.supabase
-            .from('request_follow')
-            .select(`
-            requested_id,
-            requested:users!requested_id (
-                user_id,
-                full_name,
-                avatar_img,
-                cover_img
-            )
-        `)
-            .eq('requester_id', currentUserId)
-            .eq('status', 'accepted');
-
-        if (error) throw error;
-
-        const mapped: FriendsProfile[] = (data ?? [])
-            .filter((row: any) => row.requested)
-            .map((row: any) => ({
-                id: row.requested.user_id,
-                name: row.requested.full_name,
-                avatar: row.requested.avatar_img,
-                banner: row.requested.cover_img,
-                mutuals: 0
-            }));
-
-        this.followingSig.set(mapped);
-
-        console.log('✅ Following loaded:', mapped);
-    }
+  /**
+   * Clear all error messages
+   */
+  clearError(): void {
+    this.errorSig.set(null);
+  }
 }

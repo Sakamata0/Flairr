@@ -17,7 +17,8 @@
           (follow)="onFollow(r.id)"
           (accept)="onAccept(r.id)"
           (reject)="onReject(r.id)"
-          (remove)="onDelete(r.id)"
+          (remove)="onRemoveAction(r.id)"
+          (message)="openChat(r.id)"
         >
         </app-friend-request>
       </div>
@@ -28,12 +29,8 @@
 <!-- SHARED CONFIRM DIALOG -->
 <app-confirm-dialog
   [open]="confirmOpen"
-  [title]="confirmMode === 'delete' ? 'Remove suggestion' : 'Reject follow request'"
-  [message]="
-    confirmMode === 'delete'
-      ? 'Are you sure you want to remove this user from your suggestions?'
-      : 'Are you sure you want to reject this follow request?'
-  "
+  [title]="confirmTitle"
+  [message]="confirmMessage"
   confirmLabel="Confirm"
   cancelLabel="Cancel"
   (confirm)="onConfirmAction()"

@@ -13,7 +13,7 @@
       <h4 class="username">{{ displayContact?.name || 'Unknown' }}</h4>
 
       <span class="span">
-        <p class="text">{{ contact.lastMessage || '' }}</p>
+        <p class="text">{{ contact.lastMessage || 'No messages yet. Say hi 👋' }}</p>
         <p>&ThickSpace;
           {{ contact.lastAt ? (contact.lastAt | date:'shortTime') : '' }}
         </p>

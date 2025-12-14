@@ -63,9 +63,9 @@
       <button
         class="Accept"
         *ngIf="variab() === 2"
-        (click)="$event.stopPropagation(); follow.emit()"
+        (click)="onMessage($event)"
       >
-        Follow
+        Message
       </button>
 
       <button
@@ -73,14 +73,14 @@
         *ngIf="variab() === 2"
         (click)="$event.stopPropagation(); remove.emit()"
       >
-        Delete
+        Remove
       </button>
 
       <!-- FOLLOWING -->
       <button
         class="Accept"
         *ngIf="variab() === 3"
-        (click)="$event.stopPropagation(); follow.emit()"
+        (click)="onMessage($event)"
       >
         Message
       </button>
@@ -90,7 +90,7 @@
         *ngIf="variab() === 3"
         (click)="$event.stopPropagation(); remove.emit()"
       >
-        Following
+        Unfollow
       </button>
     </div>
   </div>
