@@ -4,19 +4,20 @@
 <div class="container">
   <div class="container-header">
     <span>Friends</span>
-    <img src="/assets/icons/friends/parametre.png" alt="parametre" class="param">
   </div>
 
   <div class="spaces-types">
     <a *ngFor="let f of friendsOpTypes"
        (click)="setActivefriendsOpTypes(f.key)"
        [class.active]="f.key === activefriendsOpTypesKey">
+      
       <div class="icon-wrap" [class.active]="f.key === activefriendsOpTypesKey">
-        <img [src]="f.key === activefriendsOpTypesKey ? f.activeIconUrl : f.iconUrl" />
+        <div [innerHTML]="getIconSvg(f.icon, f.key === activefriendsOpTypesKey)" style="width: fit-content;"></div>
       </div>
+      
       <span>{{ f.name }}</span>
+
+      <div class="active-indicator" *ngIf="f.key === activefriendsOpTypesKey"></div>
     </a>
   </div>
 </div>
-
-
