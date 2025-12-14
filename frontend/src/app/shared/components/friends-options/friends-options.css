@@ -1,95 +1,178 @@
-.container{
-    /*
-    background-color: white;
-    width: 100%;
-    padding: 25px;
-    height: 100vh;
-    */
-    background-color: #fff;
-    width: 350px;
-    padding: 26px 33px;
-    border-radius: 25px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    gap: 10px;
-    margin: 20px;
-    height: 500px;
-
+.container {
+  background-color: #fff;
+  width: 350px;
+  padding: 40px 20px 20px 20px;
+  margin-top: 24px;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-span{
-    font-family: 'Pacifico', cursive;
-    font-weight: 400;
-    font-size: 40px;
-    color: rgba(0, 0, 0, 1);
+.container-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
 }
 
-a{
-    text-decoration: none;
-    display: flex;
-    flex-direction: row;
-    align-items:center ;
-    gap: 15px;
+.container-header span {
+  font-family: 'Pacifico', cursive;
+  font-size: 36px;
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.2;
 }
 
-.container-header{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s ease;
 }
 
-.container-header img{
-    height: 42px;
-    width: 42px;
-    cursor: pointer;
+.settings-btn:hover {
+  color: #609966;
 }
-
-
-
-img{
-    height: 48px;
-    width: 48px;
-}
-
-
 
 .spaces-types {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: flex-start;
-    user-select: none;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+  width: 100%;
 }
 
-.spaces-types div {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    cursor: pointer;
-    padding: 8px 0px;
+.spaces-types a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
 }
 
-.spaces-types div:hover {
-    color: #609966;
+.spaces-types a:hover {
+  background-color: #f9fafb;
+}
+
+.spaces-types a.active {
+  background-color: #f3f4f6;
+}
+
+.icon-wrap {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+  background-color: #f5f6f7;
+
+  line-height: 0; /* 🔴 critical */
+}
+
+.spaces-types a.active .icon-wrap {
+  background-color: #609966;
+}
+
+.spaces-types span {
+  font-family: 'anek-bangla-variable', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.4;
+  flex: 1;
 }
 
 .spaces-types a.active span {
-    color: #609966;
-    font-weight: 600;
-    cursor: pointer;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
-.spaces-types span{
-    font-family: "anek-bangla-variable", sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    padding: 15px;
-    cursor: pointer;
-
+.active-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #609966;
+  flex-shrink: 0;
 }
-.spaces-types span:hover{
-    color: #609966;
 
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .container {
+    width: 320px;
+    padding: 24px 20px;
+  }
+
+  .container-header span {
+    font-size: 28px;
+  }
+
+  .spaces-types span {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .spaces-types {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .spaces-types a {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .active-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .container-header span {
+    font-size: 24px;
+  }
+
+  .spaces-types {
+    grid-template-columns: 1fr;
+  }
+
+  .spaces-types a {
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+  }
 }
