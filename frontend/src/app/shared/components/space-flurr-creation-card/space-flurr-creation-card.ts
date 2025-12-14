@@ -35,6 +35,7 @@ import { FlurrsService } from '../../../core/services/flurrs.service';
 })
 export class SpaceFlurrCreationCard {
   readonly dialog = inject(MatDialog);
+  user = inject(UserService).currentUser;
 
   /** Space ID passed from parent component */
   @Input() currentSpaceID!: string;
