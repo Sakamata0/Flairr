@@ -33,6 +33,17 @@
             content: p.content,
             type: p.type,
             created_at: p.created_at ?? p.date_publish,
+            media: p.media || [],
+            reactions: { like: p.likes_count || 0 },
+            commentsCount: p.comments_count || 0,
+            userHasLiked: p.userHasLiked || false,
+            comments: p.comments || [],
+            author: {
+              id: profile?.user_id,
+              name: profile?.full_name || profile?.username || 'Unknown',
+              avatarUrl: profile?.avatar_img || './assets/images/hama.png',
+              isFollowed: false
+            },
             poster: {
               user_id: profile?.user_id,
               full_name: profile?.full_name,
