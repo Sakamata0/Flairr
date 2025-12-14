@@ -1,50 +1,56 @@
 <div class="layout">
-    <nav>
-        <app-spaces-card
-            [items]="joinedSpaces"
-            title="Spaces you've Joined"
-        ></app-spaces-card>
+  <nav>
+    <app-spaces-card
+        [items]="joinedSpaces"
+        title="Spaces you've Joined"
+    ></app-spaces-card>
+  </nav>
 
-    </nav>
-    <main>
-        <div id="sort-selection">
-            <hr>
-            <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
-                <img src="assets/icons/home/arrow-down.png">
-            </span>
-            <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
-                <button 
-                    role="menuitem" 
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
-                    Top
-                </button>
-                <button
-                    role="menuitem"
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
-                    Recent
-                </button>
-            </div>
-        </div>
-        
-        <app-post
-            *ngFor="let post of posts"
-            [post]="post"
-            (postChanged)="loadAllData()"
-        ></app-post>
+  <main>
+    <div id="sort-selection">
+      <hr>
+      <span (click)="toggleSortingMethodMenu($event)">
+        Sort by: {{sortType}}
+        <img src="assets/icons/home/arrow-down.png">
+      </span>
+      <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
+        <button role="menuitem" (click)="toggleSortingMethodMenu($event); sortType = 'Top'; applySorting()">
+          Top
+        </button>
+        <button role="menuitem" (click)="toggleSortingMethodMenu($event); sortType = 'Recent'; applySorting()">
+          Recent
+        </button>
+      </div>
+    </div>
 
-    </main>
-    <aside>
-        <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications"></app-card-panel>
-        <app-card-panel title="Spaces Suggestions" noItemsMessage="You have no friends suggestions." [items]="this.friendsSuggestions"></app-card-panel>
-        <div id="credits">
-            <a>About us</a>
-            <span>·</span>
-            <a>Privacy Policy</a>
-            <span>·</span>
-            <a>Cookie Policy</a>
-            <span>·</span>
-            <p>© 2025 Flairr, Inc</p>
-        </div>
-    </aside>
+    <!-- Show posts if available -->
+    <ng-container *ngIf="posts && posts.length > 0; else noPostsTpl">
+      <app-post
+        *ngFor="let post of posts"
+        [post]="post"
+        (postChanged)="loadAllData()"
+      ></app-post>
+    </ng-container>
+
+    <!-- Fallback when no flurrs -->
+    <ng-template #noPostsTpl>
+      <p class="no-posts">
+        You haven't posted in any spaces yet.
+      </p>
+    </ng-template>
+  </main>
+
+  <aside>
+    <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications"></app-card-panel>
+    <app-card-panel title="Spaces Suggestions" noItemsMessage="You have no friends suggestions." [items]="this.friendsSuggestions"></app-card-panel>
+    <div id="credits">
+      <a>About us</a>
+      <span>·</span>
+      <a>Privacy Policy</a>
+      <span>·</span>
+      <a>Cookie Policy</a>
+      <span>·</span>
+      <p>© 2025 Flairr, Inc</p>
+    </div>
+  </aside>
 </div>
-

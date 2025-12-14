@@ -82,41 +82,77 @@ export class Spaces implements OnInit {
       const spaceIds = this.joinedSpaces.map(s => s.id);
 
       // --------------------------------------------
-      // 2) SPACE POSTS
+      // 2) SPACE POSTS (all flurrs of type 'space' from joined OR owned spaces)
       // --------------------------------------------
-      if (spaceIds.length > 0) {
-        const { data: flurrs } = await supabase
-          .from('flurrs')
-          .select(`
-            flurr_id,
-            content,
-            created_at,
-            space_id,
-            poster:poster_id (
-              user_id,
-              full_name,
-              avatar_img
-            )
-          `)
-          //.in('space_id', spaceIds);
+      if (uid) {
+        // Get spaces the user has joined
+        const { data: joinedSpaces } = await supabase
+          .from('join_spaces')
+          .select('space_id')
+          .eq('user_id', uid);
 
-        this.posts = (flurrs ?? []).map((r: any) => ({
-          id: r.flurr_id,
-          content: r.content,
-          createdAt: new Date(r.created_at),
-          author: {
-            id: r.poster.user_id,
-            name: r.poster.full_name,
-            avatarUrl: r.poster.avatar_img || './assets/images/hama.png',
-            isFollowed: true
-          },
-          reactions: { like: 0 },
-          commentsCount: 0,
-          userHasLiked: false
-        }));
+        const joinedSpaceIds = joinedSpaces?.map(js => js.space_id) || [];
+
+        // Get spaces the user owns
+        const { data: ownedSpaces } = await supabase
+          .from('spaces')
+          .select('space_id')
+          .eq('space_owner', uid);
+
+        const ownedSpaceIds = ownedSpaces?.map(os => os.space_id) || [];
+
+        // Combine both joined + owned spaces (unique IDs)
+        const allSpaceIds = Array.from(new Set([...joinedSpaceIds, ...ownedSpaceIds]));
+
+        if (allSpaceIds.length > 0) {
+          // Fetch flurrs of type 'space' from all relevant spaces
+          const { data: flurrs } = await supabase
+            .from('flurrs')
+            .select(`
+              flurr_id,
+              content,
+              created_at,
+              date_publish,
+              space_id,
+              poster:poster_id (
+                user_id,
+                full_name,
+                avatar_img
+              )
+            `)
+            .eq('type', 'space')
+            .in('space_id', allSpaceIds)
+            .order('created_at', { ascending: false });
+
+          // Map results
+          this.posts = (flurrs ?? []).map((r: any) => ({
+            id: r.flurr_id,
+            content: r.content,
+            createdAt: new Date(r.created_at ?? r.date_publish),
+            author: {
+              id: r.poster?.user_id,
+              name: r.poster?.full_name,
+              avatarUrl: r.poster?.avatar_img || './assets/images/hama.png',
+              isFollowed: true
+            },
+            reactions: { like: 0 },
+            commentsCount: 0,
+            userHasLiked: false,
+            spaceId: r.space_id
+          }));
+
+          this.applySorting();
+        } else {
+          // User hasn't joined or owned any spaces
+          this.posts = [];
+        }
+      } else {
+        // Not logged in
+        this.posts = [];
       }
 
-      this.applySorting();
+
+
 
       // --------------------------------------------
       // 3) NOTIFICATIONS
