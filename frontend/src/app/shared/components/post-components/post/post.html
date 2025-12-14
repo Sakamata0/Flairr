@@ -52,7 +52,7 @@
       <p class="text" *ngIf="post?.content" [innerHTML]="formatHashtags(post?.content)"></p>
 
       <div class="media" *ngIf="mediaCount > 0">
-        <ng-container *ngIf="firstMedia?.type === 'video'; else imageTpl">
+        <!--<ng-container *ngIf="firstMedia?.type === 'video'; else imageTpl">
           <video class="media-item" controls [poster]="firstMedia?.thumbnailUrl">
             <source [src]="firstMedia?.url" [type]="firstMedia?.mime">
           </video>
@@ -62,7 +62,28 @@
           <img class="media-item" [src]="firstMedia?.url" [alt]="firstMedia?.filename || 'post image'">
         </ng-template>
 
-        <div class="media-count" *ngIf="mediaCount > 1">+{{ mediaCount - 1 }}</div>
+        <div class="media-count" *ngIf="mediaCount > 1">+{{ mediaCount - 1 }}</div>-->
+        <p-galleria 
+          [value]="post!.media" 
+          [numVisible]="1" 
+          [circular]="true" 
+          [showItemNavigators]="true" 
+          [showThumbnails]="false" 
+          [showIndicators]="true"
+          [showIndicatorsOnItem]="true"
+          [showItemNavigatorsOnHover]="true"
+          [responsiveOptions]="responsiveOptions" 
+          [containerStyle]="{ 'max-width': '640px', height: '600px' }">
+          <ng-template #item let-item>
+            <ng-container [ngSwitch]="item.type">
+              <!-- Image -->
+              <img *ngSwitchCase="'image'" [src]="item.url" style="height: 600px; width: 100%; display: block; object-fit: cover;" />
+              
+              <!-- Video -->
+              <video *ngSwitchCase="'video'" [src]="item.url" controls style="height: 600px; width: 100%; display: block; object-fit: cover;"></video>
+            </ng-container>
+          </ng-template>
+        </p-galleria>
       </div>
     </section>
 

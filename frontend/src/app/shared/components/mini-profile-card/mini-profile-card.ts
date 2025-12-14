@@ -1,14 +1,15 @@
 // src/app/shared/components/mini-profile-card/mini-profile-card.ts
 import { Component, OnInit, OnDestroy, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { UserService } from '../../../core/services/user.service';
-import { Subscription } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+//import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-mini-profile-card',
   standalone: true,
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink,NgIf, ButtonModule, CommonModule],
   templateUrl: './mini-profile-card.html',
   styleUrls: ['./mini-profile-card.css']
 })

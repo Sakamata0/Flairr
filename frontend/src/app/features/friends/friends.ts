@@ -1,11 +1,12 @@
 import { Component, ElementRef, inject, OnInit } from '@angular/core';
+import { NgFor } from '@angular/common';
+
 import { FriendsOptions } from '../../shared/components/friends-options/friends-options';
 import { FriendRequest } from '../../shared/components/friend-request/friend-request';
+import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
 
-import { NgFor, NgIf } from '@angular/common';
 import { FriendsService } from '../../core/services/friends.service';
 import { MessagingService } from '../../core/services/messaging.service';
-import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
 
 @Component({
     selector: 'app-friends',
@@ -14,7 +15,7 @@ import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
         FriendRequest,
         FriendsOptions,
         NgFor,
-        ConfirmDialog,
+        ConfirmDialog
     ],
     templateUrl: './friends.html',
     styleUrl: './friends.css'
@@ -23,15 +24,18 @@ export class Friends implements OnInit {
 
     private friendsService = inject(FriendsService);
     private messagingService = inject(MessagingService);
-    private currentUserId!: string;
 
-    confirmOpen = false;
-    userToDelete: string | null = null;
+    private currentUserId!: string;
 
     selectedType = 'Follow Request';
     key = 0;
 
     list$ = this.friendsService.suggestions;
+
+    // confirm dialog state
+    confirmOpen = false;
+    confirmMode: 'delete' | 'reject' | null = null;
+    userToActOn: string | null = null;
 
     constructor(private elementRef: ElementRef<HTMLElement>) { }
 
@@ -40,8 +44,15 @@ export class Friends implements OnInit {
         if (!user) return;
 
         this.currentUserId = user.id;
-        await this.friendsService.loadSuggestions(user.id);
+
+        await Promise.all([
+            this.friendsService.loadSuggestions(user.id),
+            this.friendsService.loadFriendRequests(user.id),
+            this.friendsService.loadFollowers(user.id),
+            this.friendsService.loadFollowing(user.id),
+        ]);
     }
+
 
     onFriendOptionSelected(option: { key: number; name: string }) {
         this.selectedType = option.name;
@@ -70,23 +81,53 @@ export class Friends implements OnInit {
         await this.friendsService.sendFollowRequest(userId, user.id);
     }
 
+    // ---------- DELETE (suggestion) ----------
     onDelete(userId: string) {
-        this.userToDelete = userId;
+        this.userToActOn = userId;
+        this.confirmMode = 'delete';
         this.confirmOpen = true;
     }
 
-    onConfirmDelete() {
-        if (!this.userToDelete) return;
-
-        this.friendsService.removeFromSuggestions(this.userToDelete);
-        this.userToDelete = null;
-        this.confirmOpen = false;
+    // ---------- REJECT (follow request) ----------
+    onReject(userId: string) {
+        this.userToActOn = userId;
+        this.confirmMode = 'reject';
+        this.confirmOpen = true;
     }
 
-    onCancelDelete() {
-        this.userToDelete = null;
-        this.confirmOpen = false;
+    // ---------- ACCEPT ----------
+    async onAccept(userId: string) {
+        await this.friendsService.acceptFollowRequest(
+            userId,
+            this.currentUserId
+        );
     }
 
+    // ---------- CONFIRM HANDLER ----------
+    async onConfirmAction() {
+        if (!this.userToActOn || !this.confirmMode) return;
 
+        if (this.confirmMode === 'delete') {
+            this.friendsService.removeFromSuggestions(this.userToActOn);
+        }
+
+        if (this.confirmMode === 'reject') {
+            await this.friendsService.rejectFollowRequest(
+                this.userToActOn,
+                this.currentUserId
+            );
+        }
+
+        this.resetConfirm();
+    }
+
+    onCancelAction() {
+        this.resetConfirm();
+    }
+
+    private resetConfirm() {
+        this.confirmOpen = false;
+        this.confirmMode = null;
+        this.userToActOn = null;
+    }
 }

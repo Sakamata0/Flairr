@@ -1,6 +1,6 @@
 // src/app/shared/components/new-message-dialog/new-message-dialog.component.ts
 import { Component, EventEmitter, Output, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { supabase } from '../../../core/supabase/supabase.client';
 
@@ -14,7 +14,7 @@ interface UserSearchResult {
 @Component({
   selector: 'app-new-message-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NgFor],
   templateUrl: './new-message-dialog.html',
   styleUrls: ['./new-message-dialog.css']
 })

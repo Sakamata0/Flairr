@@ -9,12 +9,9 @@ import { CustomRouteReuseStrategy } from '../routing/custom-reuse.strategy';
 export interface SignupData {
   email: string;
   password: string;
-  first_name: string;
-  last_name: string;
-  username: string;
-  tel_number?: number;
-  type: 'personal' | 'business';
-  role: 'admin' | 'employee';
+  full_name: string;
+  country: string;
+  birthdate: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -61,7 +58,7 @@ export class AuthService {
       // ÉTAPE 1: Vérifier si l'email existe déjà
       const { data: existingUser } = await supabase
         .from('users')
-        .select('id, email')
+        .select('user_id, email')
         .eq('email', signupData.email)
         .single();
 
@@ -75,11 +72,7 @@ export class AuthService {
         password: signupData.password,
         options: {
           data: {
-            first_name: signupData.first_name,
-            last_name: signupData.last_name,
-            username: signupData.username,
-            type: signupData.type,
-            role: signupData.role
+            full_name: signupData.full_name
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`
         }
@@ -102,8 +95,8 @@ export class AuthService {
       // ÉTAPE 4: Vérifier si le profil existe
       const { data: profileCheck, error: checkError } = await supabase
         .from('users')
-        .select('id')
-        .eq('id', authData.user.id)
+        .select('user_id')
+        .eq('user_id', authData.user.id)
         .maybeSingle();
 
       // ÉTAPE 5: Créer le profil manuellement si nécessaire
@@ -111,20 +104,12 @@ export class AuthService {
         console.warn('⚠️ Profile not found, creating manually...');
 
         const profileData: any = {
-          id: authData.user.id,
+          user_id: authData.user.id,
           email: signupData.email,
-          first_name: signupData.first_name,
-          last_name: signupData.last_name,
-          username: signupData.username,
-          type: signupData.type,
-          role: signupData.role,
-          language: 'en',
-          theme: 'light'
+          full_name: signupData.full_name,
+          country: signupData.country,
+          birthdate: signupData.birthdate
         };
-
-        if (signupData.tel_number) {
-          profileData.tel_number = signupData.tel_number;
-        }
 
         const { data: insertedProfile, error: profileError } = await supabase
           .from('users')

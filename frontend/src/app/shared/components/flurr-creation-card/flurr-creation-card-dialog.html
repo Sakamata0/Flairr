@@ -25,11 +25,14 @@
         <mat-form-field appearance="outline" class="flurr-select" id="journey-select">
           <mat-select 
             name="selectedJourney" 
-            [(ngModel)]="model.selectedJourney" 
+            [(ngModel)]="model.selectedJourneyId" 
             placeholder="Select a Journey" 
             required>
-            <mat-option *ngFor="let journey of journeys" [value]="journey.getJourneyID()">
-              {{ journey.getJourneyName() }}
+            <mat-option *NgIf="journeys().length === 0" [disabled]="true" [value]="0">
+              Add a Journey
+            </mat-option>
+            <mat-option *ngFor="let journey of journeys()" [value]="journey.id">
+              {{ journey.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -53,31 +56,57 @@
     ></textarea>
   </mat-form-field>
 
+
   <!-- bottom section -->
   <div class="flurr-bottom">
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
-      <span>Image</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
-      <span>Video</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
-      <span>Tags</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
-      <span>Location</span>
-    </button>
+    <!-- File Upload -->
+
+    <p-fileUpload
+      name="files"
+      [customUpload]="true"
+      [auto]="false"
+      [multiple]="true"
+      accept="image/*,video/*"
+      [maxFileSize]="50 * 1024 * 1024"
+      [showUploadButton]="false"
+      (onSelect)="onFileSelect($event)"
+    >
+      <ng-template #empty>
+        <div>Drag and drop files here</div>
+      </ng-template>
+    </p-fileUpload>
+
   </div>
+
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button [disabled]=!f.valid class="btn" id="flurrBtn" matButton (click)="onSubmit()">Flurr it!</button>
-  <button class="btn" id="createBtn" matButton cdkFocusInitial (click)="openJourneyCreationDialog()">
-    Create a new Journey
+  <button
+    [disabled]="!f.valid || isSubmitting"
+    class="btn"
+    id="flurrBtn"
+    matButton
+    (click)="onSubmit()">
+    <ng-container *ngIf="!isSubmitting; else loadingTpl">
+      Flurr it!
+    </ng-container>
+    <ng-template #loadingTpl>
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    </ng-template>
+  </button>
+
+  <button
+    class="btn"
+    id="createBtn"
+    matButton
+    [disabled]="isSubmitting"
+    cdkFocusInitial
+    (click)="!isSubmitting && openJourneyCreationDialog()">
+
+    <ng-container>
+      Create a new Journey
+    </ng-container>
   </button>
 </mat-dialog-actions>
+
 </form>

@@ -7,6 +7,7 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { supabase } from '../../core/supabase/supabase.client';
 import { Router } from '@angular/router';
+import { FriendsService } from '../../core/services/friends.service';
 
 @Component({
   selector: 'app-explore',
@@ -36,7 +37,8 @@ export class Explore implements OnInit {
     private elementRef: ElementRef<HTMLElement>,
     private router: Router,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private friendsService: FriendsService
   ) {}
 
   ngOnInit(): void {
@@ -63,7 +65,7 @@ export class Explore implements OnInit {
       // -------------------------------------------------
       // 1) GET FRIENDS (people I follow)
       // -------------------------------------------------
-      let feedAuthorIds: string[] = [];
+      let excludedAuthorIds: string[] = [];
       if (uid) {
         const { data: friends, error: friendsErr } = await supabase
           .from('friends')
@@ -74,7 +76,7 @@ export class Explore implements OnInit {
           console.warn('friendsErr:', friendsErr);
         } else if (friends) {
           const friendIds = friends.map((f: any) => f.followed_id as string);
-          feedAuthorIds = Array.from(new Set(friendIds));
+          excludedAuthorIds = Array.from(new Set(friendIds));
         }
       }
 
@@ -83,12 +85,12 @@ export class Explore implements OnInit {
       // Option B: show only my own posts (if uid)
       if (!uid) {
         this.posts = [];
-      } else if (feedAuthorIds.length === 0) {
+      } else if (excludedAuthorIds.length === 0) {
         // fall back: only my posts
-        feedAuthorIds = [uid];
+        excludedAuthorIds = [uid];
       }
       console.log("UID =", uid);
-console.log("FEED AUTHOR IDS =", feedAuthorIds);
+console.log("FEED AUTHOR IDS =", excludedAuthorIds);
 
 
       // -------------------------------------------------
@@ -96,7 +98,11 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
       // -------------------------------------------------
       let flurrs: any[] = [];
 
-      if (feedAuthorIds.length > 0) {
+      if(uid) {
+        excludedAuthorIds.push(uid);
+      }
+
+      if (excludedAuthorIds.length > 0) {
         const { data: flurrsData, error: flurrsErr } = await supabase
           .from('flurrs')
           .select(`
@@ -113,9 +119,9 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
               email
             )
           `)
-          .in('poster_id', feedAuthorIds)   // ⭐ only friends + me
+          .not('poster_id', 'in', `(${excludedAuthorIds.join(',')})`)
           .order('created_at', { ascending: false })
-          .limit(100); // a bit larger since we filter
+          .limit(100);
 
         if (flurrsErr) {
           console.warn('flurrsErr:', flurrsErr);
@@ -188,7 +194,7 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(3);
 
         if (notifs) {
           this.notifications = await Promise.all(
@@ -226,23 +232,30 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
       // -------------------------------------------------
       // FRIENDS SUGGESTIONS (users you don't follow yet)
       // -------------------------------------------------
-      const { data: users } = await supabase
-        .from('users')
-        .select('user_id, full_name, avatar_img')
-        .neq('user_id', uid ?? '')
-        .limit(6);
-
-      if (users) {
-        this.friendsSuggestions = users.map(u => ({
-          id: u.user_id,
-          title: u.full_name,
-          imageUrl: u.avatar_img || './assets/images/hama.png',
-          withSubtitle: true,
-          subtitle: 'Suggested user',
-          withButton: true,
-          buttonText: 'Follow',
-          buttonAction: () => this.followUser(u.user_id)
-        }));
+      if (uid) {
+        try {
+          await this.friendsService.loadSuggestions(uid);
+          const suggestions = this.friendsService.suggestions();
+          
+          this.friendsSuggestions = suggestions.slice(0, 6).map(u => ({
+            id: u.id,
+            title: u.name,
+            imageUrl: u.avatar || './assets/images/hama.png',
+            withSubtitle: true,
+            subtitle: u.mutuals > 0 ? `${u.mutuals} mutual${u.mutuals > 1 ? 's' : ''}` : 'Suggested user',
+            withButton: true,
+            buttonText: 'Follow',
+            buttonAction: () => this.followUser(u.id)
+          }));
+          
+          console.log('Loaded suggestions:', this.friendsSuggestions.length);
+        } catch (suggestionError) {
+          console.error('Error loading suggestions:', suggestionError);
+          // Fallback to empty array if suggestions fail
+          this.friendsSuggestions = [];
+        }
+      } else {
+        this.friendsSuggestions = [];
       }
 
     } catch (e: any) {

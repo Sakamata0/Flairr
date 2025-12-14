@@ -4,7 +4,7 @@ import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/f
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
-import { NgIf, NgForOf, NgFor } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
@@ -48,10 +48,6 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     this.loadAllData();
-
-    supabase.auth.onAuthStateChange(() => {
-      this.loadAllData();
-    });
   }
 
   // Handle when a post is changed (follow/unfollow)
@@ -100,6 +96,7 @@ export class Home implements OnInit {
       }
 
       console.log("UID =", uid);
+      console.log("FEED AUTHOR IDS =", feedAuthorIds);
       console.log("FRIENDS (feed authors) =", feedAuthorIds);
       console.log("Number of friends:", feedAuthorIds.length);
 
@@ -264,7 +261,10 @@ export class Home implements OnInit {
           subtitle: s.space_bio ?? '',
           withButton: true,
           buttonText: 'Visit',
-          buttonAction: () => this.router.navigate(['/space', s.space_id])
+          buttonAction: () => {
+            console.log('VISIT CLICKED', s.space_id);
+            this.router.navigate(['/spaces', s.space_id])
+          }
         }));
       }
 
@@ -277,7 +277,7 @@ export class Home implements OnInit {
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(3);
 
         if (notifs) {
           this.notifications = await Promise.all(

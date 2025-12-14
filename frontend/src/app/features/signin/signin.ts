@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { userSignIn } from '../../shared/model/user/usersignin.type';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,7 +23,7 @@ import { NgIf } from '@angular/common';
   templateUrl: './signin.html',
   styleUrl: './signin.css'
 })
-export class Signin {
+export class Signin{
   model: userSignIn = {
     email: '',
     password: '',
@@ -52,7 +52,13 @@ export class Signin {
       if ((res as any).error) {
         // supabase-js v2 returns { error } or { error, data } depending
         const err = (res as any).error;
-        this.errorMessage = err?.message ?? 'Login failed';
+        if(err?.message == "Email not confirmed") {
+          this.errorMessage = "Please verify your email inbox to verify it";
+        }
+        else {
+          this.errorMessage = err?.message ?? 'Login failed';
+        }
+        
         return;
       }
 

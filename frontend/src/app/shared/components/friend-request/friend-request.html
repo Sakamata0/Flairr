@@ -2,17 +2,30 @@
 
 <div class="profile-card" (click)="goToProfile()">
   <div class="banner">
-    <img [src]="info().banner" (error)="onBannerError($event)" class="banner-img" />
-    <img [src]="info().avatar" (error)="onImageError($event)" class="profile-img" />
+    <img
+      [src]="info().banner"
+      (error)="onBannerError($event)"
+      class="banner-img"
+    />
+    <img
+      [src]="info().avatar"
+      (error)="onImageError($event)"
+      class="profile-img"
+    />
 
-    <span *ngIf="info().mutuals === 1" class="mutuals"> {{ info().mutuals }} mutual friend </span>
-    <span *ngIf="info().mutuals > 1" class="mutuals"> {{ info().mutuals }} mutual friends </span>
+    <span *ngIf="info().mutuals === 1" class="mutuals">
+      {{ info().mutuals }} mutual friend
+    </span>
+    <span *ngIf="info().mutuals > 1" class="mutuals">
+      {{ info().mutuals }} mutual friends
+    </span>
   </div>
 
   <div class="content">
     <h2 class="name">{{ info().name }}</h2>
 
     <div class="buttons">
+      <!-- FOLLOW REQUEST -->
       <button
         class="Accept"
         *ngIf="variab() === 0"
@@ -22,6 +35,15 @@
       </button>
 
       <button
+        class="Delete"
+        *ngIf="variab() === 0"
+        (click)="$event.stopPropagation(); reject.emit()"
+      >
+        Reject
+      </button>
+
+      <!-- SUGGESTIONS -->
+      <button
         class="Accept"
         *ngIf="variab() === 1"
         (click)="$event.stopPropagation(); follow.emit()"
@@ -29,6 +51,15 @@
         Follow
       </button>
 
+      <button
+        class="Delete"
+        *ngIf="variab() === 1"
+        (click)="$event.stopPropagation(); remove.emit()"
+      >
+        Delete
+      </button>
+
+      <!-- FOLLOWERS -->
       <button
         class="Accept"
         *ngIf="variab() === 2"
@@ -38,19 +69,20 @@
       </button>
 
       <button
+        class="Delete"
+        *ngIf="variab() === 2"
+        (click)="$event.stopPropagation(); remove.emit()"
+      >
+        Delete
+      </button>
+
+      <!-- FOLLOWING -->
+      <button
         class="Accept"
         *ngIf="variab() === 3"
         (click)="$event.stopPropagation(); follow.emit()"
       >
         Message
-      </button>
-
-      <button
-        class="Delete"
-        *ngIf="variab() !== 3"
-        (click)="$event.stopPropagation(); remove.emit()"
-      >
-        Delete
       </button>
 
       <button

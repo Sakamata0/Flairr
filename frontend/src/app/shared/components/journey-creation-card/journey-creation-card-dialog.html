@@ -51,7 +51,7 @@
       </mat-form-field>
 
       <!-- first Flurr textarea -->
-      <mat-form-field appearance="fill" class="flurr-textarea">
+      <!--<mat-form-field appearance="fill" class="flurr-textarea">
         <mat-label>First Flurr</mat-label>
         <textarea
           required
@@ -64,29 +64,27 @@
           [(ngModel)]="model.flurrContent"
           placeholder="Now, share with us your first Flurr..."
         ></textarea>
-      </mat-form-field>
+      </mat-form-field>-->
 
     </div>
 
     <!-- bottom section: optional media buttons -->
-    <div class="flurr-bottom">
-      <button class="icon">
-        <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
-        <span>Image</span>
-      </button>
-      <button class="icon">
-        <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
-        <span>Video</span>
-      </button>
-      <button class="icon">
-        <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
-        <span>Tags</span>
-      </button>
-      <button class="icon">
-        <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
-        <span>Location</span>
-      </button>
-    </div>
+    <!--<div class="flurr-bottom">
+      <p-fileUpload
+        name="files"
+        [customUpload]="true"
+        [auto]="false"
+        [multiple]="true"
+        accept="image/*,video/*"
+        [maxFileSize]="50 * 1024 * 1024"
+        [showUploadButton]="false"
+        (onSelect)="onFileSelect($event)"
+      >
+        <ng-template #empty>
+          <div>Drag and drop files here</div>
+        </ng-template>
+      </p-fileUpload>
+    </div>-->
 
   </mat-dialog-content>
 
@@ -96,10 +94,15 @@
       class="btn"
       id="flurrBtn"
       matButton
-      [disabled]="f.invalid"
+      [disabled]="f.invalid || isSubmitting"
       (click)="onSubmit()"
     >
-      Flurr it!
+      <ng-container *ngIf="!isSubmitting; else loadingTpl">
+        Add the Journey!
+      </ng-container>
+      <ng-template #loadingTpl>
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      </ng-template>
     </button>
   </mat-dialog-actions>
 </form>

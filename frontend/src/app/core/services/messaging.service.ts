@@ -10,6 +10,7 @@ import {
     DbMessageRow,
     DbUserRow,
 } from '../../shared/model/messaging.models';
+import { SupabaseService } from './supabase.service';
 
 @Injectable({ providedIn: 'root' })
 export class MessagingService implements OnDestroy {
@@ -25,12 +26,16 @@ export class MessagingService implements OnDestroy {
     // Subject to emit contact updates (new messages, read status changes)
     private contactUpdates$ = new Subject<{ conversationId: string; update: Partial<Contact> }>();
 
-    constructor(private ngZone: NgZone) {
-        this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+    constructor(
+        private ngZone: NgZone,
+        private supabaseService: SupabaseService
+    ) {
+        this.supabase = this.supabaseService.client;
 
+        // optional, only for debugging
         try {
             (window as any).supabase = this.supabase;
-        } catch { }
+        } catch {}
     }
 
     /**

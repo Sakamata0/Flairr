@@ -1,11 +1,11 @@
-// profile-header.ts - WITH DEBUG LOGGING
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { NgIf ,CommonModule} from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
 import { UserService } from '../../../../core/services/user.service';
 import { MessagingService } from '../../../../core/services/messaging.service';
+import { FlurrsService } from '../../../../core/services/flurrs.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -14,32 +14,52 @@ import { MessagingService } from '../../../../core/services/messaging.service';
   templateUrl: './profile-header.html',
   styleUrls: ['./profile-header.css']
 })
-export class ProfileHeader {
+export class ProfileHeader implements OnChanges {
   @Input() profile: any | null = null;
   
   isLoadingMessage = false;
+
+  flurrsNumber: number = 0;
 
   constructor(
     private dialog: MatDialog,
     private userService: UserService,
     private messagingService: MessagingService,
-    private router: Router
+    private router: Router,
+    private flurrsService: FlurrsService
+
   ) {}
 
+
+  async ngOnChanges(changes: SimpleChanges) {
+    if (changes['profile'] && this.profile?.user_id) {
+      await this.totalFlurrs();
+    }
+  }
+
+  async totalFlurrs() {
+    try {
+      const total = await this.flurrsService.getFlurrsNumber(
+        this.profile!.user_id,
+        'flurr'
+      );
+      this.flurrsNumber = total;
+    } catch (err) {
+      console.warn('[Profile] flurrsErr', err);
+      this.flurrsNumber = 0;
+    }
+  }
+
   get effectiveProfile() {
-    if (!this.profile) return null;
     return this.profile;
   }
 
   get isOwnProfile(): boolean {
-    const p = this.effectiveProfile;
+    const p = this.profile;
     const me = this.userService.currentUser();
     if (!p || !me) return false;
-    
-    const profileId = p.user_id ?? p.userID;
-    const meId = me.userID;
-    
-    return profileId === meId;
+
+    return (p.user_id ?? p.userID) === me.userID;
   }
 
   formatFollowerCount(count: number | null | undefined): string {
@@ -60,20 +80,24 @@ export class ProfileHeader {
       bannerUrl: p.cover_img ?? p.coverImg ?? '',
       email: p.email ?? ''
     };
+    if (!this.profile) return;
 
     const dialogRef = this.dialog.open(EditProfilePopup, {
       width: '100vw',
       maxWidth: '700px',
       maxHeight: '90vh',
       panelClass: 'edit-profile-dialog',
-      data: dialogData
+      data: {
+        fullName: this.profile.full_name ?? '',
+        bio: this.profile.bio ?? '',
+        avatarUrl: this.profile.avatar_img ?? '',
+        bannerUrl: this.profile.cover_img ?? '',
+        email: this.profile.email ?? ''
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Profile updated, reloading...');
-        window.location.reload();
-      }
+      if (result) window.location.reload();
     });
   }
 

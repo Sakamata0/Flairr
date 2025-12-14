@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -8,15 +8,16 @@ import {
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
+  MAT_DIALOG_DATA
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../../core/services/user.service';
-import { Flurr } from '../../model/classes/flurrs';
-import { ActivatedRoute } from '@angular/router';
-
+import { FileUpload } from 'primeng/fileupload';
+import { MessageService } from 'primeng/api';
+import { FlurrsService } from '../../../core/services/flurrs.service';
 
 @Component({
   selector: 'app-space-flurr-creation-card',
@@ -32,24 +33,23 @@ import { ActivatedRoute } from '@angular/router';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class SpaceFlurrCreationCard {
   readonly dialog = inject(MatDialog);
 
-  // method that opens the dialog
+  /** Space ID passed from parent component */
+  @Input() currentSpaceID!: string;
+
   openSpaceFlurrCreationDialog(): void {
     const dialogRef = this.dialog.open(SpaceFlurrCreationCardDialog, {
       panelClass: 'custom-flurr-creation-dialog',
+      data: { spaceId: this.currentSpaceID } // Pass the space ID to the dialog
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Dialog closed');
-    });
+    dialogRef.afterClosed().subscribe(() => console.log('Dialog closed'));
   }
 }
 
-// Dialog component content
-// Definition of the dialog component
+// -------------------- Dialog Component --------------------
 @Component({
   selector: 'app-space-flurr-creation-card-dialog',
   standalone: true,
@@ -66,48 +66,74 @@ export class SpaceFlurrCreationCard {
     MatDialogContent,
     MatDialogActions,
     MatSelectModule,
+    FileUpload,
   ],
+  providers: [MessageService]
 })
-// Dialog component class
 export class SpaceFlurrCreationCardDialog {
-  // --- Injected dependencies ---
-  readonly dialogRef = inject(MatDialogRef<SpaceFlurrCreationCardDialog>);
-  //private readonly dialog = inject(MatDialog);
-  // inject username 
-  user = inject(UserService).currentUser
-  newSpaceFlurr?: Flurr;
-  private currentSpaceID;
-  private route = inject(ActivatedRoute);
+  uploadedFiles: File[] = [];
+  model = { flurrContent: '' };
+  isSubmitting = false;
 
-  constructor() {
-    // Read the `id` param from the route
-    const id = this.route.snapshot.paramMap.get('spaceId'); 
-    this.currentSpaceID = id; // combine
+  readonly dialogRef = inject(MatDialogRef<SpaceFlurrCreationCardDialog>);
+  private flurrService = inject(FlurrsService);
+  private messageService = inject(MessageService);
+  user = inject(UserService).currentUser;
+
+  /** Correctly receive space ID from parent via MAT_DIALOG_DATA */
+  private currentSpaceID: string;
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { spaceId: string }) {
+    this.currentSpaceID = data.spaceId;
   }
 
-  // --- UI state variables ---
-  model = {
-    flurrContent: ""
-  };
+  onFileSelect(event: any) {
+    this.uploadedFiles.push(...event.files);
+  }
 
-  // --- Methods ---
   onNoClick(): void {
     this.dialogRef.close();
   }
 
-  submitted=false;
-  submit() : void {
-    this.newSpaceFlurr =  new Flurr({
-      flurrID: "flurr-" + crypto.randomUUID(),
-      type: "space",
-      content: this.model.flurrContent,
-      privacy: "public",
-      datePosted: new Date(),
-      spaceID: this.currentSpaceID!,
-      poster: this.user()?.userID
-    });
-    this.submitted = true;
-    this.onNoClick();
-    console.log("space-fluur",this.newSpaceFlurr); 
+  async onSubmit() {
+    if (this.isSubmitting || !this.model.flurrContent) return;
+
+    this.isSubmitting = true;
+
+    try {
+      // Insert Flurr with correct space_id
+      const flurr = await this.flurrService.insertFlurr(
+        'space',
+        this.model.flurrContent,
+        undefined,           // no journey
+        this.currentSpaceID  // correct space ID
+      );
+
+      if (!flurr) return;
+
+      // Upload files + insert file records
+      for (const file of this.uploadedFiles) {
+        const uploaded = await this.flurrService.uploadFlurrFile(flurr.flurr_id, file);
+        await this.flurrService.insertFlurrFileRecord(flurr.flurr_id, uploaded.url, uploaded.type);
+      }
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Flurr created',
+        detail: 'Flurr and files uploaded'
+      });
+
+      this.dialogRef.close();
+
+    } catch (err) {
+      console.error(err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to create flurr'
+      });
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

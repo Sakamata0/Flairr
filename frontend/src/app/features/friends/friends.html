@@ -2,7 +2,7 @@
 
 <div class="layout">
   <nav style="width: fit-content">
-    <app-friends-options (selectedOption)="onFriendOptionSelected($event)"> </app-friends-options>
+    <app-friends-options (selectedOption)="onFriendOptionSelected($event)"></app-friends-options>
   </nav>
 
   <main style="width: fit-content">
@@ -15,6 +15,8 @@
           [info]="r"
           [variab]="key"
           (follow)="onFollow(r.id)"
+          (accept)="onAccept(r.id)"
+          (reject)="onReject(r.id)"
           (remove)="onDelete(r.id)"
         >
         </app-friend-request>
@@ -23,11 +25,18 @@
   </main>
 </div>
 
-
+<!-- SHARED CONFIRM DIALOG -->
 <app-confirm-dialog
   [open]="confirmOpen"
-  title="Remove suggestion"
-  message="Are you sure you want to remove this user from your suggestions?"
-  (confirm)="onConfirmDelete()"
-  (cancel)="onCancelDelete()">
+  [title]="confirmMode === 'delete' ? 'Remove suggestion' : 'Reject follow request'"
+  [message]="
+    confirmMode === 'delete'
+      ? 'Are you sure you want to remove this user from your suggestions?'
+      : 'Are you sure you want to reject this follow request?'
+  "
+  confirmLabel="Confirm"
+  cancelLabel="Cancel"
+  (confirm)="onConfirmAction()"
+  (cancel)="onCancelAction()"
+>
 </app-confirm-dialog>
