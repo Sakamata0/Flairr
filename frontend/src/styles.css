@@ -63,7 +63,7 @@ body {
   max-width: 90vw !important; /* allow responsiveness even at larger screens */
   max-height: 90vh !important;
   padding: 12px 16px !important;
-  background-color: #ffffff00 !important;
+  background-color: #ffffff !important;
   color: #000 !important;
   font-family: "anek-bangla-variable", sans-serif, "Helvetica Neue", sans-serif;
   border-radius: 25px !important;
