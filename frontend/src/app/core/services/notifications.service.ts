@@ -52,10 +52,10 @@ export class NotificationsService {
      */
     private getIconUrl(type: string): string {
     const iconMap: { [key: string]: string } = {
-        'like': 'assets/icons/post/like.png',        
-        'comment': 'assets/icons/post/comment.png',  
+        'like': 'assets/icons/panel/like.png',        
+        'comment': 'assets/icons/panel/comment.png',  
         'follow': 'assets/icons/panel/follow.png',
-        'reply': 'assets/icons/post/comment.png'     
+        'reply': 'assets/icons/panel/comment.png'     
     };
     
     const iconPath = iconMap[type] || 'assets/icons/panel/notification.png';
