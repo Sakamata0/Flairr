@@ -7,7 +7,12 @@
     <p>No comments yet — be the first to write one!</p>
   </div>
 
-<comment-tree [comments]="comments" [currentUser]="data.currentUser"></comment-tree>
+  <!-- Pass flurrId to comment-tree, convert null to undefined for type safety -->
+  <comment-tree 
+    [comments]="comments" 
+    [currentUser]="data.currentUser"
+    [flurrId]="flurrId ?? undefined">
+  </comment-tree>
 
   <div class="add-comment">
     <textarea [(ngModel)]="text" cols="60" rows="3" placeholder="Add a new comment..."></textarea>

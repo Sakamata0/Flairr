@@ -1,4 +1,4 @@
-// home.ts - FIXED VERSION with proper likes and comments aggregation
+// home.ts - FIXED VERSION with proper suggestions
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { FriendsService } from '../../core/services/friends.service';
 
 @Component({
   selector: 'app-home',
@@ -41,7 +42,8 @@ export class Home implements OnInit {
     private elementRef: ElementRef<HTMLElement>,
     private router: Router,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private friendsService: FriendsService
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +52,15 @@ export class Home implements OnInit {
     supabase.auth.onAuthStateChange(() => {
       this.loadAllData();
     });
+  }
+
+  // Handle when a post is changed (follow/unfollow)
+  onPostChanged() {
+    console.log('Post changed - refreshing feed');
+    // Small delay to ensure database transaction is complete
+    setTimeout(() => {
+      this.loadAllData();
+    }, 300);
   }
 
   async loadAllData() {
@@ -63,7 +74,6 @@ export class Home implements OnInit {
       console.log('Home - Loading data for user:', uid);
 
       if (uid) {
-        // ⭐ IMPORTANT: Wait for user data to load completely
         const result = await this.userService.loadFromAuthUserId(uid);
         console.log('Home - User loaded:', result.data);
       } else {
@@ -79,13 +89,12 @@ export class Home implements OnInit {
           .from('friends')
           .select('followed_id')
           .eq('follower_id', uid)
-          .neq('followed_id', uid);  // ⭐ EXCLUDE yourself from friends list
+          .neq('followed_id', uid);
 
         if (friendsErr) {
           console.warn('friendsErr:', friendsErr);
         } else if (friends && friends.length > 0) {
           const friendIds = friends.map((f: any) => f.followed_id as string);
-          // Extra safety: filter out your own ID just in case
           feedAuthorIds = Array.from(new Set(friendIds)).filter(id => id !== uid);
         }
       }
@@ -94,11 +103,9 @@ export class Home implements OnInit {
       console.log("FRIENDS (feed authors) =", feedAuthorIds);
       console.log("Number of friends:", feedAuthorIds.length);
 
-      // If no logged user or no friends, show empty feed
       if (!uid || feedAuthorIds.length === 0) {
         this.posts = [];
         console.log("No friends to show posts from - feed will be empty");
-        // Continue to load other data (shortcuts, notifications, etc.)
       }
 
       // -------------------------------------------------
@@ -123,8 +130,8 @@ export class Home implements OnInit {
               email
             )
           `)
-          .in('poster_id', feedAuthorIds)  // ⭐ Only friends' posts
-          .neq('poster_id', uid)            // ⭐ DOUBLE CHECK: exclude your own posts
+          .in('poster_id', feedAuthorIds)
+          .neq('poster_id', uid)
           .order('created_at', { ascending: false })
           .limit(100);
 
@@ -134,13 +141,11 @@ export class Home implements OnInit {
           flurrs = flurrsData as any[];
           console.log(`Loaded ${flurrs.length} posts from ${feedAuthorIds.length} friends`);
           
-          // Debug: Log poster IDs to verify
           if (flurrs.length > 0) {
             const posterIds = flurrs.map(f => f.poster_id);
             console.log("Poster IDs in feed:", posterIds);
             console.log("Your ID:", uid);
             
-            // Extra safety check: filter out any posts from yourself
             flurrs = flurrs.filter(f => f.poster_id !== uid);
             console.log(`After filtering: ${flurrs.length} posts`);
           }
@@ -150,11 +155,10 @@ export class Home implements OnInit {
       }
 
       // -------------------------------------------------
-      // 3) LOAD LIKES AND COMMENTS COUNTS (NEW)
+      // 3) LOAD LIKES AND COMMENTS COUNTS
       // -------------------------------------------------
       const flurrIds = flurrs.map(f => f.flurr_id);
       
-      // Get likes counts
       const likesMap = new Map<string, number>();
       if (flurrIds.length > 0) {
         const { data: likesData } = await supabase
@@ -171,7 +175,6 @@ export class Home implements OnInit {
         }
       }
 
-      // Get comments counts
       const commentsMap = new Map<string, number>();
       if (flurrIds.length > 0) {
         const { data: commentsData } = await supabase
@@ -189,7 +192,26 @@ export class Home implements OnInit {
       }
 
       // -------------------------------------------------
-      // 4) MAP POSTS WITH PROPER COUNTS
+      // 4) CHECK USER'S LIKE STATUS FOR EACH POST
+      // -------------------------------------------------
+      const userLikesMap = new Map<string, boolean>();
+      if (uid && flurrIds.length > 0) {
+        const { data: userLikes } = await supabase
+          .from('flurr_action')
+          .select('flurr_id')
+          .eq('user_id', uid)
+          .in('flurr_id', flurrIds)
+          .eq('is_liked', true);
+
+        if (userLikes) {
+          for (const like of userLikes) {
+            userLikesMap.set(like.flurr_id, true);
+          }
+        }
+      }
+
+      // -------------------------------------------------
+      // 5) MAP POSTS WITH PROPER COUNTS
       // -------------------------------------------------
       this.posts = flurrs.map((r: any) => {
         const posterRaw = r.poster;
@@ -217,11 +239,11 @@ export class Home implements OnInit {
           reactions: { 
             like: likesMap.get(r.flurr_id) || 0 
           },
-          commentsCount: commentsMap.get(r.flurr_id) || 0
+          commentsCount: commentsMap.get(r.flurr_id) || 0,
+          userHasLiked: userLikesMap.get(r.flurr_id) || false
         };
       });
 
-      // Apply ranking
       this.applySorting();
 
       // -------------------------------------------------
@@ -291,25 +313,32 @@ export class Home implements OnInit {
       }
 
       // -------------------------------------------------
-      // FRIENDS SUGGESTIONS
+      // FRIENDS SUGGESTIONS - USING FRIENDSSERVICE
       // -------------------------------------------------
-      const { data: users } = await supabase
-        .from('users')
-        .select('user_id, full_name, avatar_img')
-        .neq('user_id', uid ?? '')
-        .limit(6);
-
-      if (users) {
-        this.friendsSuggestions = users.map(u => ({
-          id: u.user_id,
-          title: u.full_name,
-          imageUrl: u.avatar_img || './assets/images/hama.png',
-          withSubtitle: true,
-          subtitle: 'Suggested user',
-          withButton: true,
-          buttonText: 'Follow',
-          buttonAction: () => this.followUser(u.user_id)
-        }));
+      if (uid) {
+        try {
+          await this.friendsService.loadSuggestions(uid);
+          const suggestions = this.friendsService.suggestions();
+          
+          this.friendsSuggestions = suggestions.slice(0, 6).map(u => ({
+            id: u.id,
+            title: u.name,
+            imageUrl: u.avatar || './assets/images/hama.png',
+            withSubtitle: true,
+            subtitle: u.mutuals > 0 ? `${u.mutuals} mutual${u.mutuals > 1 ? 's' : ''}` : 'Suggested user',
+            withButton: true,
+            buttonText: 'Follow',
+            buttonAction: () => this.followUser(u.id)
+          }));
+          
+          console.log('Loaded suggestions:', this.friendsSuggestions.length);
+        } catch (suggestionError) {
+          console.error('Error loading suggestions:', suggestionError);
+          // Fallback to empty array if suggestions fail
+          this.friendsSuggestions = [];
+        }
+      } else {
+        this.friendsSuggestions = [];
       }
 
     } catch (e: any) {
@@ -320,7 +349,7 @@ export class Home implements OnInit {
     }
   }
 
-  private applySorting() {
+  applySorting() {
     if (!this.posts || this.posts.length === 0) return;
 
     if (this.sortType === 'Recent') {
@@ -358,8 +387,20 @@ export class Home implements OnInit {
   async followUser(userId: string) {
     const uid = await this.getUid();
     if (!uid) return;
-    await supabase.from('friends').insert([{ follower_id: uid, followed_id: userId }]);
-    this.friendsSuggestions = this.friendsSuggestions.filter(u => u.id !== userId);
+    
+    try {
+      await supabase.from('friends').insert([{ follower_id: uid, followed_id: userId }]);
+      
+      // Remove from suggestions list immediately
+      this.friendsSuggestions = this.friendsSuggestions.filter(u => u.id !== userId);
+      
+      console.log(`Followed user ${userId}`);
+      
+      // Refresh feed to show new friend's posts
+      this.loadAllData();
+    } catch (error) {
+      console.error('Error following user:', error);
+    }
   }
 
   private async getUid() {

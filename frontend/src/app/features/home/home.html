@@ -1,4 +1,3 @@
-
 <div class="layout">
     <nav>
         <app-mini-profile-card></app-mini-profile-card>
@@ -14,25 +13,33 @@
             <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
                 <button 
                     role="menuitem" 
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'; applySorting()">
                     Top
                 </button>
                 <button
                     role="menuitem"
-                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'; applySorting()">
                     Recent
                 </button>
             </div>
         </div>
         
-       <ng-container *ngIf="!loading; else loadingTpl">
-    <app-post *ngFor="let p of posts" [post]="p"></app-post>
-    <div *ngIf="posts.length === 0" class="no-posts">No posts yet.</div>
-  </ng-container>
+        <ng-container *ngIf="!loading; else loadingTpl">
+            <!-- Listen to postChanged event to refresh feed when user unfollows someone -->
+            <app-post 
+                *ngFor="let p of posts" 
+                [post]="p"
+                (postChanged)="onPostChanged()">
+            </app-post>
+            <div *ngIf="posts.length === 0" class="no-posts">
+                <p>No posts to show.</p>
+                <p>Follow some users to see their posts in your feed!</p>
+            </div>
+        </ng-container>
 
-  <ng-template #loadingTpl>
-    <div class="loading">Loading feed…</div>
-  </ng-template>
+        <ng-template #loadingTpl>
+            <div class="loading">Loading feed…</div>
+        </ng-template>
     </main>
     <aside>
         <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications" link="notifications"></app-card-panel>

@@ -1,4 +1,4 @@
-// src/app/features/profile/profile.ts
+// profile.ts - FIXED VERSION with proper data loading
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
@@ -43,7 +43,16 @@ export class Profile implements OnInit {
 
   ngOnInit(): void {
     this.loadProfileFromRoute();
-    supabase.auth.onAuthStateChange(() => this.loadProfileFromRoute());
+    
+    // Reload when auth state changes
+    supabase.auth.onAuthStateChange(() => {
+      this.loadProfileFromRoute();
+    });
+
+    // Reload when route params change (navigating between profiles)
+    this.route.paramMap.subscribe(() => {
+      this.loadProfileFromRoute();
+    });
   }
 
   async loadProfileFromRoute() {
@@ -69,6 +78,9 @@ export class Profile implements OnInit {
 
       this.isOwnProfile = targetId === currentUid;
 
+      // -------------------------
+      // LOAD USER PROFILE
+      // -------------------------
       const { data: userRow, error: userErr } = await supabase
         .from('users')
         .select('*')
@@ -81,24 +93,67 @@ export class Profile implements OnInit {
         return;
       }
 
-      this.profile = userRow;
+      // -------------------------
+      // LOAD FOLLOWERS COUNT
+      // -------------------------
+      const { count: followersCount } = await supabase
+        .from('friends')
+        .select('*', { count: 'exact', head: true })
+        .eq('followed_id', targetId);
 
-      this.userService.setUser({
-        userID: userRow.user_id,
-        fullName: userRow.full_name ?? '',
-        email: userRow.email ?? '',
-        bio: userRow.bio ?? '',
-        avatarImg: userRow.avatar_img ?? '',
-        coverImg: userRow.cover_img ?? '',
-        followers: [],
-        following: [],
-        journeys: [],
-        flurrs:[],
-        spacesCreated: [],
-        spacesJoined: [],
-        getUser() { throw new Error('not implemented'); },
-        editProfile() { throw new Error('not implemented'); }
+      // -------------------------
+      // LOAD FOLLOWING COUNT
+      // -------------------------
+      const { count: followingCount } = await supabase
+        .from('friends')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', targetId);
+
+      // -------------------------
+      // LOAD FOLLOWERS LIST (for display)
+      // -------------------------
+      const { data: followersData } = await supabase
+        .from('friends')
+        .select(`
+          follower_id,
+          follower:follower_id(user_id, full_name, avatar_img)
+        `)
+        .eq('followed_id', targetId);
+
+      const followersDisplay = (followersData || []).map((f: any) => {
+        const follower = Array.isArray(f.follower) ? f.follower[0] : f.follower;
+        return {
+          id: follower?.user_id || f.follower_id,
+          name: follower?.full_name || 'Unknown',
+          avatarUrl: follower?.avatar_img || './assets/images/hama.png'
+        };
       });
+
+      // Extract IDs for UserService
+      const followersIds = (followersData || []).map((f: any) => f.follower_id);
+
+      // -------------------------
+      // LOAD FOLLOWING LIST (for display)
+      // -------------------------
+      const { data: followingData } = await supabase
+        .from('friends')
+        .select(`
+          followed_id,
+          followed:followed_id(user_id, full_name, avatar_img)
+        `)
+        .eq('follower_id', targetId);
+
+      const followingDisplay = (followingData || []).map((f: any) => {
+        const followed = Array.isArray(f.followed) ? f.followed[0] : f.followed;
+        return {
+          id: followed?.user_id || f.followed_id,
+          name: followed?.full_name || 'Unknown',
+          avatarUrl: followed?.avatar_img || './assets/images/hama.png'
+        };
+      });
+
+      // Extract IDs for UserService
+      const followingIds = (followingData || []).map((f: any) => f.followed_id);
 
       // -------------------------
       // LOAD POSTS (flurrs)
@@ -115,16 +170,36 @@ export class Profile implements OnInit {
       this.posts = flurrs ?? [];
 
       // -------------------------
-      // LOAD SPACES OWNED
+      // LOAD SPACES OWNED/JOINED
       // -------------------------
-      const { data: spaces, error: spacesErr } = await supabase
+      const { data: ownedSpaces } = await supabase
         .from('spaces')
         .select('*')
         .eq('space_owner', targetId);
 
-      if (spacesErr) console.warn('[Profile] spacesErr', spacesErr);
+      const { data: joinedSpaces } = await supabase
+        .from('spaces_users')
+        .select(`
+          space_id,
+          space:space_id(space_id, space_name, space_bio, avatar_img, space_owner)
+        `)
+        .eq('user_id', targetId);
 
-      this.FlairrSpaces = (spaces ?? []).map((s: any) => ({
+      // Combine owned and joined spaces
+      const allSpaces = new Map();
+      
+      (ownedSpaces || []).forEach((s: any) => {
+        allSpaces.set(s.space_id, s);
+      });
+
+      (joinedSpaces || []).forEach((sj: any) => {
+        const space = Array.isArray(sj.space) ? sj.space[0] : sj.space;
+        if (space && !allSpaces.has(space.space_id)) {
+          allSpaces.set(space.space_id, space);
+        }
+      });
+
+      this.FlairrSpaces = Array.from(allSpaces.values()).map((s: any) => ({
         id: s.space_id,
         title: s.space_name,
         imageUrl: s.avatar_img || './assets/images/hama.png',
@@ -135,13 +210,94 @@ export class Profile implements OnInit {
         buttonAction: () => this.router.navigate(['/space', s.space_id])
       }));
 
+      // -------------------------
+      // BUILD COMPLETE PROFILE OBJECT
+      // -------------------------
+      this.profile = {
+        user_id: userRow.user_id,
+        full_name: userRow.full_name,
+        username: userRow.username,
+        email: userRow.email,
+        bio: userRow.bio,
+        avatar_img: userRow.avatar_img,
+        cover_img: userRow.cover_img,
+        followers: followersDisplay,
+        following: followingDisplay,
+        flurrs: flurrs || [],
+        spacesCreated: ownedSpaces || [],
+        spacesJoined: Array.from(allSpaces.values())
+      };
+
+      // -------------------------
+      // UPDATE USERSERVICE (if viewing own profile)
+      // -------------------------
+      if (this.isOwnProfile) {
+        this.userService.setUser({
+          userID: userRow.user_id,
+          fullName: userRow.full_name ?? '',
+          email: userRow.email ?? '',
+          bio: userRow.bio ?? '',
+          avatarImg: userRow.avatar_img ?? '',
+          coverImg: userRow.cover_img ?? '',
+          followers: followersIds,
+          following: followingIds,
+          journeys: [], // TODO: load journeys
+          flurrs: flurrs || [],
+          spacesCreated: ownedSpaces || [],
+          spacesJoined: Array.from(allSpaces.values()),
+          getUser() { throw new Error('not implemented'); },
+          editProfile() { throw new Error('not implemented'); }
+        });
+      }
+
+      console.log('[Profile] Complete profile loaded:', {
+        user: this.profile.full_name,
+        followers: followersDisplay.length,
+        following: followingDisplay.length,
+        posts: this.posts.length,
+        spaces: this.FlairrSpaces.length
+      });
+
     } catch (err: any) {
       console.error('[Profile] unexpected error', err);
       this.error = err?.message ?? 'Unexpected error';
     } finally {
       this.loading = false;
-      console.log('[Profile] Loaded:', { profile: this.profile, posts: this.posts });
     }
+  }
+
+  applySorting() {
+    if (!this.posts || this.posts.length === 0) return;
+
+    if (this.sortType === 'Recent') {
+      this.posts.sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at || a.date_publish).getTime();
+        const dateB = new Date(b.created_at || b.date_publish).getTime();
+        return dateB - dateA;
+      });
+    } else if (this.sortType === 'Top') {
+      // Sort by engagement (likes + comments) with time decay
+      this.posts.sort((a: any, b: any) => {
+        return this.computeScore(b) - this.computeScore(a);
+      });
+    }
+
+    console.log(`[Profile] Sorted ${this.posts.length} posts by ${this.sortType}`);
+  }
+
+  private computeScore(post: any): number {
+    const now = Date.now();
+    const created = new Date(post.created_at || post.date_publish).getTime();
+    const ageHours = Math.max(1, (now - created) / 3_600_000);
+
+    // These would need to be loaded from flurr_action table
+    const likes = post.likes_count ?? 0;
+    const comments = post.comments_count ?? 0;
+
+    const engagement = likes * 3 + comments * 4;
+    const decay = ageHours * 0.5;
+
+    return engagement - decay;
   }
 
   toggleSortingMethodMenu(ev?: Event) {
