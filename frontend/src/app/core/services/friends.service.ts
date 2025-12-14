@@ -156,7 +156,7 @@ export class FriendsService {
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requester:users!request_follow_requester_id_fkey (
+          requester:users!user_id (
             user_id,
             full_name,
             avatar_img,
@@ -262,7 +262,7 @@ export class FriendsService {
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requester:users!request_follow_requester_id_fkey (
+          requester:users!user_id (
             user_id,
             full_name,
             avatar_img,
@@ -305,7 +305,7 @@ export class FriendsService {
       const { data, error } = await this.supabase
         .from('request_follow')
         .select(`
-          requested:users!request_follow_requested_id_fkey (
+          requested:users!user_id (
             user_id,
             full_name,
             avatar_img,
