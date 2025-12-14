@@ -96,63 +96,27 @@ export class JourneyCreationCardDialog {
   
   // --- Methods ---
   onNoClick(): void {
-    this.dialogRef.close();
-  }
-
-  /*onFileSelect(event: any) {
-    for (const file of event.files) {
-      this.uploadedFiles.push(file);
-    }
-  }*/
-
-  submitted = false;
-  isSubmitting = false
-  async onSubmit() {
-    this.isSubmitting = true
-    const newJourneyID = await this.journeysService.insertJourney(this.model.journeyName).finally(() => this.isSubmitting = false)
-    console.log('Journey inserted:', newJourneyID)
-    this.submitted = true;
-    /*try {
-    //  Insert first flurr
-      const flurr = await this.flurrService.insertFlurr(
-        'flurr',
-        this.model.flurrContent,
-        newJourneyID
-      );
-
-      if (!flurr) return;
-
-      // Upload files + insert records
-      for (const file of this.uploadedFiles) {
-        const uploaded = await this.flurrService.uploadFlurrFile(
-          flurr.flurr_id,
-          file
-        );
-
-        await this.flurrService.insertFlurrFileRecord(
-          flurr.flurr_id,
-          uploaded.url,
-          uploaded.type
-        );
-      }
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Flurr created',
-        detail: 'Flurr and files uploaded'
-      });
-
       this.dialogRef.close();
+    }
 
-    } catch (err) {
-      console.error(err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to create flurr'
-      });
-    }*/
+    submitted = false;
+    isSubmitting = false
+    async onSubmit() {
+    this.isSubmitting = true;
 
-    
+    try {
+      const newJourneyID = await this.journeysService
+        .insertJourney(this.model.journeyName);
+
+      console.log('Journey inserted:', newJourneyID);
+
+      this.submitted = true;
+
+      // CLOSE THE DIALOG
+      this.dialogRef.close(newJourneyID); // you can pass data back if you want
+    } finally {
+      this.isSubmitting = false;
+    }
   }
+
 }

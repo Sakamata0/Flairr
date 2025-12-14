@@ -234,7 +234,7 @@ export class Profile implements OnInit, OnDestroy {
         subtitle: s.space_bio ?? '',
         withButton: true,
         buttonText: 'Visit',
-        buttonAction: () => this.router.navigate(['/space', s.space_id])
+        buttonAction: () => this.router.navigate(['/spaces', s.space_id])
       }));
 
       // -------------------------

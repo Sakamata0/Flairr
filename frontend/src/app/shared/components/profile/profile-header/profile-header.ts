@@ -14,6 +14,7 @@ import { FlurrsService } from '../../../../core/services/flurrs.service';
 })
 export class ProfileHeader implements OnChanges {
   @Input() profile: any | null = null;
+  //@Input() spaceID: any | null = null;
 
   flurrsNumber: number = 0;
 
@@ -49,10 +50,28 @@ export class ProfileHeader implements OnChanges {
   get isOwnProfile(): boolean {
     const p = this.profile;
     const me = this.userService.currentUser();
+
     if (!p || !me) return false;
 
-    return (p.user_id ?? p.userID) === me.userID;
+    // USER PROFILE
+    if (p.user_id) {
+      return p.user_id === me.userID;
+    }
+
+    // SPACE PROFILE
+    if (p.space_id && p.owner_id) {
+      return p.owner_id === me.userID;
+    }
+    console.log({
+      profile: this.profile,
+      me: this.userService.currentUser(),
+      isOwnProfile: this.isOwnProfile
+    });
+
+
+    return false;
   }
+
 
   formatFollowerCount(count: number | null | undefined): string {
     const c = count ?? 0;
