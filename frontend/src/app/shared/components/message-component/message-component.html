@@ -1,21 +1,24 @@
+<!-- message-component.html - UPDATED VERSION -->
 <div class="container">
   <div class="left">
     <div class="image">
       <img
-        [src]="contact.avatar || 'assets/images/profile-picture-test.jpg'"
+        [src]="displayContact?.avatar || contact.avatar || 'assets/images/profile-picture-test.jpg'"
         id="photo"
         height="53"
-        alt="{{ contact.name || 'avatar' }}"
+        alt="{{ displayContact?.name || contact.name || 'avatar' }}"
       >
     </div>
 
     <div class="info">
-      <h4 class="username">{{ displayContact?.name || 'Unknown' }}</h4>
+      <h4 class="username">{{ displayContact?.name || contact.name || 'Unknown' }}</h4>
 
       <span class="span">
-        <p class="text">{{ contact.lastMessage || 'No messages yet. Say hi 👋' }}</p>
-        <p>&ThickSpace;
-          {{ contact.lastAt ? (contact.lastAt | date:'shortTime') : '' }}
+        <p class="text" [class.no-message]="!contact.lastMessage">
+          {{ contact.lastMessage || 'No messages yet' }}
+        </p>
+        <p class="time" *ngIf="contact.lastAt">
+          &ThickSpace;{{ contact.lastAt | date:'shortTime' }}
         </p>
       </span>
     </div>
@@ -23,7 +26,7 @@
 
   <div class="right" *ngIf="contact.unreadCount && contact.unreadCount !== 0">
     <span class="bubble">
-      {{ (contact.unreadCount > 9) ? '+ 9' : contact.unreadCount }}
+      {{ (contact.unreadCount > 9) ? '9+' : contact.unreadCount }}
     </span>
   </div>
 </div>

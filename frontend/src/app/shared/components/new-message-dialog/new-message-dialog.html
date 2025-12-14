@@ -1,0 +1,93 @@
+<!-- src/app/shared/components/new-message-dialog/new-message-dialog.component.html -->
+<div class="dialog-overlay" (click)="onOverlayClick($event)">
+  <div class="dialog-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2>New Message</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dialog-body">
+      
+      <!-- Search Input -->
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input
+            #searchInput
+            type="text"
+            class="search-input"
+            placeholder="Search for a user by name or email..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput()"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      <div class="results-section" *ngIf="searchQuery.trim().length > 0">
+        
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Searching...</p>
+        </div>
+
+        <!-- Results List -->
+        <div *ngIf="!loading && searchResults.length > 0" class="results-list">
+          <div
+            *ngFor="let user of searchResults"
+            class="user-result"
+            (click)="selectUser(user)"
+            tabindex="0"
+            (keydown.enter)="selectUser(user)"
+          >
+            <img
+              [src]="user.avatar_img || 'assets/images/profile-picture-test.jpg'"
+              [alt]="user.full_name"
+              class="user-avatar"
+            />
+            <div class="user-info">
+              <h4 class="user-name">{{ user.full_name }}</h4>
+              <p class="user-email" *ngIf="user.email">{{ user.email }}</p>
+            </div>
+            <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && searchQuery.trim().length > 0 && searchResults.length === 0" class="empty-state">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 8v3m0 3h.01" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>No users found matching <strong>"{{ searchQuery }}"</strong></p>
+          <span class="hint">Try a different name or email</span>
+        </div>
+      </div>
+
+      <!-- Initial State -->
+      <div *ngIf="searchQuery.trim().length === 0" class="initial-state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#609966" stroke-width="1.5">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Find someone to message</h3>
+        <p>Search by name or email to start a new conversation</p>
+      </div>
+      
+    </div>
+  </div>
+</div>

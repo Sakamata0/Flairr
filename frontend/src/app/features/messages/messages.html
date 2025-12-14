@@ -1,6 +1,10 @@
+<!-- messages.html - UPDATED VERSION -->
 <div class="layout">
-  <!-- contacts list emits openThread which we handle in the parent -->
-  <app-contacts-list [contacts]="contacts" (openThread)="openConversation($event)">
+  <!-- contacts list emits openThread AND newMessage -->
+  <app-contacts-list 
+    [contacts]="contacts" 
+    (openThread)="openConversation($event)"
+    (newMessage)="openNewMessageDialog()">
   </app-contacts-list>
 
   <!-- render chat view only when a thread/contact is selected -->
@@ -44,7 +48,9 @@
           </p>
 
           <div class="placeholder-actions">
-            <button class="btn-secondary" type="button">New message</button>
+            <button class="btn-secondary" type="button" (click)="openNewMessageDialog()">
+              New message
+            </button>
           </div>
         </div>
       </div>
@@ -55,3 +61,10 @@
 <div class="loading-screen" *ngIf="loading">
   <h2>F</h2>
 </div>
+
+<!-- New Message Dialog -->
+<app-new-message-dialog
+  *ngIf="showNewMessageDialog"
+  (userSelected)="onUserSelected($event)"
+  (closed)="closeNewMessageDialog()"
+></app-new-message-dialog>
