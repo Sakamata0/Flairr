@@ -7,6 +7,7 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { supabase } from '../../core/supabase/supabase.client';
 import { Router } from '@angular/router';
+import { FriendsService } from '../../core/services/friends.service';
 
 @Component({
   selector: 'app-explore',
@@ -36,7 +37,8 @@ export class Explore implements OnInit {
     private elementRef: ElementRef<HTMLElement>,
     private router: Router,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private friendsService: FriendsService
   ) {}
 
   ngOnInit(): void {
@@ -230,23 +232,30 @@ console.log("FEED AUTHOR IDS =", excludedAuthorIds);
       // -------------------------------------------------
       // FRIENDS SUGGESTIONS (users you don't follow yet)
       // -------------------------------------------------
-      const { data: users } = await supabase
-        .from('users')
-        .select('user_id, full_name, avatar_img')
-        .neq('user_id', uid ?? '')
-        .limit(6);
-
-      if (users) {
-        this.friendsSuggestions = users.map(u => ({
-          id: u.user_id,
-          title: u.full_name,
-          imageUrl: u.avatar_img || './assets/images/hama.png',
-          withSubtitle: true,
-          subtitle: 'Suggested user',
-          withButton: true,
-          buttonText: 'Follow',
-          buttonAction: () => this.followUser(u.user_id)
-        }));
+      if (uid) {
+        try {
+          await this.friendsService.loadSuggestions(uid);
+          const suggestions = this.friendsService.suggestions();
+          
+          this.friendsSuggestions = suggestions.slice(0, 6).map(u => ({
+            id: u.id,
+            title: u.name,
+            imageUrl: u.avatar || './assets/images/hama.png',
+            withSubtitle: true,
+            subtitle: u.mutuals > 0 ? `${u.mutuals} mutual${u.mutuals > 1 ? 's' : ''}` : 'Suggested user',
+            withButton: true,
+            buttonText: 'Follow',
+            buttonAction: () => this.followUser(u.id)
+          }));
+          
+          console.log('Loaded suggestions:', this.friendsSuggestions.length);
+        } catch (suggestionError) {
+          console.error('Error loading suggestions:', suggestionError);
+          // Fallback to empty array if suggestions fail
+          this.friendsSuggestions = [];
+        }
+      } else {
+        this.friendsSuggestions = [];
       }
 
     } catch (e: any) {
