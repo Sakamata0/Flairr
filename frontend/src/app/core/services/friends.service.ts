@@ -263,12 +263,12 @@ export class FriendsService {
         if (error) throw error;
 
         const mapped: FriendsProfile[] = (data ?? [])
-            .filter((row: any) => row.users)
+            .filter((row: any) => row.requester)
             .map((row: any) => ({
-                id: row.users.user_id,
-                name: row.users.full_name,
-                avatar: row.users.avatar_img,
-                banner: row.users.cover_img,
+                id: row.requester.user_id,
+                name: row.requester.full_name,
+                avatar: row.requester.avatar_img,
+                banner: row.requester.cover_img,
                 mutuals: 0
             }));
 
@@ -285,7 +285,7 @@ export class FriendsService {
             .from('request_follow')
             .select(`
             requested_id,
-            requester:users!requester_id (
+            requested:users!requested_id (
                 user_id,
                 full_name,
                 avatar_img,
@@ -298,22 +298,17 @@ export class FriendsService {
         if (error) throw error;
 
         const mapped: FriendsProfile[] = (data ?? [])
-            .filter((row: any) => row.users)
+            .filter((row: any) => row.requested)
             .map((row: any) => ({
-                id: row.users.user_id,
-                name: row.users.full_name,
-                avatar: row.users.avatar_img,
-                banner: row.users.cover_img,
+                id: row.requested.user_id,
+                name: row.requested.full_name,
+                avatar: row.requested.avatar_img,
+                banner: row.requested.cover_img,
                 mutuals: 0
             }));
 
-        this.followersSig.set(mapped);
+        this.followingSig.set(mapped);
 
         console.log('✅ Following loaded:', mapped);
     }
-
-
-
-
-
 }

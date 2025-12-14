@@ -1,56 +1,17 @@
-import { Component } from '@angular/core';
-import { ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  MatDialog,
-  MatDialogModule,
-  MatDialogActions,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CommonModule } from '@angular/common';
-import { Space } from '../../model/classes/space';
+import { MessageService } from 'primeng/api';
+
 import { UserService } from '../../../core/services/user.service';
+import { SpacesService } from '../../../core/services/spaces.service';
+import { Space } from '../../model/classes/space';
 
-
-@Component({
-  selector: 'app-space-creation-card',
-  standalone: true,
-  templateUrl: './space-creation-card.html',
-  styleUrls: ['./space-creation-card.css'],
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatButtonModule,
-    MatDialogModule,
-    
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-
-export class SpaceCreationCard {
-  readonly dialog = inject(MatDialog);
-
-  // method that opens the dialog
-  openSpaceCreationDialog(): void {
-    const dialogRef = this.dialog.open(SpaceCreationCardDialog, {
-      panelClass: 'custom-flurr-creation-dialog',
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Dialog closed');
-    });
-  }
-}
-
-// Dialog component content
-// Definition of the dialog component
 @Component({
   selector: 'app-space-creation-card-dialog',
   standalone: true,
@@ -66,71 +27,102 @@ export class SpaceCreationCard {
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatSelectModule,
-    FormsModule
+    MatSelectModule
   ],
+  providers: [MessageService]
 })
-// Dialog component class
 export class SpaceCreationCardDialog {
+  private dialogRef = inject(MatDialogRef<SpaceCreationCardDialog>);
+  private messageService = inject(MessageService);
+  private spacesService = inject(SpacesService);
+  user = inject(UserService).currentUser;
 
-  // validator, yay !!!
-  validateCollaborators(input: string): string[] | null {
-    if (!input) return []; // optional, empty is allowed
-
-    // Split by commas, trim spaces
-    const emails = input.split(',').map(e => e.trim());
-
-    // Simple email regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    const invalidEmails = emails.filter(email => !emailRegex.test(email));
-
-    if (invalidEmails.length) {
-      console.error('Invalid emails:', invalidEmails);
-      return null; // invalid input
-    }
-
-    return emails; // valid array
-  }
-
-  // --- Injected dependencies ---
-  readonly dialogRef = inject(MatDialogRef<SpaceCreationCardDialog>);
-  // inject username 
-  user = inject(UserService).currentUser
-  newSpace?: Space;
-  
-  // --- Journey creation form ---
   model = {
-    selectedPrivacy: "public",
-    spaceName: "",
-    spaceBio: "",
-    collaborators: ""
+    selectedPrivacy: 'public',
+    spaceName: '',
+    spaceBio: '',
+    collaborators: ''
   };
 
-  // --- Methods ---
-  onNoClick(): void {
+  submitted = false;
+  isSubmitting = false;
+  newSpace?: Space;
+
+  // --- validate collaborator emails ---
+  validateCollaborators(input: string): string[] | null {
+    if (!input) return [];
+    const emails = input.split(',').map(e => e.trim());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalid = emails.filter(e => !emailRegex.test(e));
+    return invalid.length ? null : emails;
+  }
+
+  onNoClick() {
     this.dialogRef.close();
   }
 
-  submitted: boolean = false;
-  submit(): void {
-    const collaboratorsArray = this.validateCollaborators(this.model.collaborators);
-    if (collaboratorsArray === null) {
-      // Stop submission, invalid email format
+  async submit() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
+    const collaborators = this.validateCollaborators(this.model.collaborators);
+    if (collaborators === null) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Invalid emails',
+        detail: 'Please enter valid email addresses separated by commas.'
+      });
+      this.isSubmitting = false;
       return;
     }
-    this.submitted = true;
-    this.newSpace = new Space({
-      spaceID: "space-" + crypto.randomUUID(),
-      spaceName: this.model.spaceName,
-      spaceBio: this.model.spaceBio,
-      avatarImg: "assets/avatars/default.png", // default
-      coverImg: "assets/covers/default.jpg",   // default
-      dateCreated: new Date(),
-      ownerID: this.user()?.userID,
-      collaborators: collaboratorsArray
-    });
-    this.onNoClick();
-    console.log("space: ",this.newSpace)
+
+    if (!this.model.spaceName || !this.model.spaceBio) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Missing fields',
+        detail: 'Space name and bio are required.'
+      });
+      this.isSubmitting = false;
+      return;
+    }
+
+    try {
+      const spaceId = await this.spacesService.insertSpace(this.model.spaceName, this.model.spaceBio);
+
+      /*this.newSpace = {
+        space_id: spaceId,
+        space_name: this.model.spaceName,
+        space_bio: this.model.spaceBio,
+        avatar_img: null,
+        cover_img: null,
+        space_owner: this.user()?.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };*/
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Space created',
+        detail: `Your space "${this.model.spaceName}" has been created!`
+      });
+
+      // handle collaborators here (optional)
+      if (collaborators.length > 0) {
+        console.log('Collaborators:', collaborators);
+        // send invites logic
+      }
+
+      this.dialogRef.close(this.newSpace);
+
+    } catch (err) {
+      console.error(err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Creation failed',
+        detail: 'Could not create space, please try again.'
+      });
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }
