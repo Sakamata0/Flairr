@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -10,7 +10,7 @@ import { LogoutDialog } from '../logout-dialog/logout-dialog';
 @Component({
     selector: 'app-flurr-header',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule,NgIf],
     templateUrl: './flurr-header.html',
     styleUrls: ['./flurr-header.css']
 })
