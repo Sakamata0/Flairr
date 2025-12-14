@@ -78,14 +78,6 @@ export class FlurrCreationCardDialog {
     this.journeys.set(mapped);
   }
 
-  // File upload handler
-  /*onUpload(event: FileUploadEvent) {
-    for (let file of event.files) {
-      this.uploadedFiles.push(file);
-    }
-    this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
-  }*/
-
   onFileSelect(event: any) {
     for (const file of event.files) {
       this.uploadedFiles.push(file);

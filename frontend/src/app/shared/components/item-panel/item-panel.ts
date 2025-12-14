@@ -23,6 +23,10 @@ export class ItemPanel {
         // toggle clicked class
         this.buttonClicked.set(!this.buttonClicked());
       }
+
+      if (currentInfo?.buttonText?.includes("Visit")) {
+        currentInfo.buttonAction();
+      }
     }
   }
 

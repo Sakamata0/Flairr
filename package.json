@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "@supabase/supabase-js": "^2.86.2"
+    "@primeuix/themes": "^2.0.2",
+    "@supabase/supabase-js": "^2.86.2",
+    "primeicons": "^6.0.1",
+    "primeng": "^20.4.0"
   }
 }

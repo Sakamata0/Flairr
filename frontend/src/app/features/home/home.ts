@@ -179,7 +179,10 @@ export class Home implements OnInit {
           subtitle: s.space_bio ?? '',
           withButton: true,
           buttonText: 'Visit',
-          buttonAction: () => this.router.navigate(['/space', s.space_id])
+          buttonAction: () => {
+            console.log('VISIT CLICKED', s.space_id);
+            this.router.navigate(['/spaces', s.space_id])
+          }
         }));
       }
 

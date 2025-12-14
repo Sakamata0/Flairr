@@ -13,9 +13,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-import { Journey } from '../../model/classes/journey';
 import { UserService } from '../../../core/services/user.service';
 import { JourneysService } from '../../../core/services/journeys.service';
+import { FileUpload } from 'primeng/fileupload';
 
 
 @Component({
@@ -67,26 +67,31 @@ export class JourneyCreationCard {
     MatDialogContent,
     MatDialogActions,
     MatSelectModule,
-    FormsModule
+    FormsModule,
+    FileUpload,
   ],
 })
+
 // Dialog component class
 export class JourneyCreationCardDialog {
+  // File Upload
+  //uploadedFiles: File[] = [];
 
   constructor(private journeysService: JourneysService) {}
+  /*private flurrService = inject(FlurrsService);
+  private messageService = inject(MessageService);*/
 
   // --- Injected dependencies ---
   readonly dialogRef = inject(MatDialogRef<JourneyCreationCardDialog>);
   // inject username 
   user = inject(UserService).currentUser
-  newJourney?: Journey;
   
   // --- Journey creation form ---
   model = {
     selectedPrivacy: "public",
     journeyName: "",
     journeyDescription: "",
-    flurrContent: ""
+    //flurrContent: ""
   };
   
   // --- Methods ---
@@ -94,43 +99,60 @@ export class JourneyCreationCardDialog {
     this.dialogRef.close();
   }
 
-  
-  submitted = false;
-  onSubmit() {
-    //const newJourneyID = "journey-" + crypto.randomUUID(); /** not needed */
+  /*onFileSelect(event: any) {
+    for (const file of event.files) {
+      this.uploadedFiles.push(file);
+    }
+  }*/
 
-    this.journeysService.insertJourney(this.model.journeyName)
-      .then((data) => {
-        console.log('Journey inserted:', data);
-        this.dialogRef.close();
-      })
-      .catch(err => {
-        console.error('Error inserting journey:', err);
+  submitted = false;
+  isSubmitting = false
+  async onSubmit() {
+    this.isSubmitting = true
+    const newJourneyID = await this.journeysService.insertJourney(this.model.journeyName).finally(() => this.isSubmitting = false)
+    console.log('Journey inserted:', newJourneyID)
+    this.submitted = true;
+    /*try {
+    //  Insert first flurr
+      const flurr = await this.flurrService.insertFlurr(
+        'flurr',
+        this.model.flurrContent,
+        newJourneyID
+      );
+
+      if (!flurr) return;
+
+      // Upload files + insert records
+      for (const file of this.uploadedFiles) {
+        const uploaded = await this.flurrService.uploadFlurrFile(
+          flurr.flurr_id,
+          file
+        );
+
+        await this.flurrService.insertFlurrFileRecord(
+          flurr.flurr_id,
+          uploaded.url,
+          uploaded.type
+        );
+      }
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Flurr created',
+        detail: 'Flurr and files uploaded'
       });
 
-    this.submitted = true;
+      this.dialogRef.close();
+
+    } catch (err) {
+      console.error(err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to create flurr'
+      });
+    }*/
+
+    
   }
-
-
 }
-
-
-/*const firstFlurr = new Flurr({
-      flurrID: "flurr-" + crypto.randomUUID(),
-      type: "journey",
-      content: this.model.flurrContent,
-      privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
-      datePosted: new Date(),
-      journeyID: newJourneyID,
-    });
-
-    // journey created
-    this.newJourney = new Journey({
-      journeyID: newJourneyID,
-      journeyName: this.model.journeyName,
-      dateCreated: new Date(),
-      journeyDescription: this.model.journeyDescription,
-      ownerID: this.user()?.userID,
-      privacy: this.model.selectedPrivacy as "public" | "private" | "friends",
-      fluurs: [firstFlurr.getFlurrID()]
-    }),*/

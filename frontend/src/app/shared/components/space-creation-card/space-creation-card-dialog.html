@@ -1,14 +1,93 @@
+<!--<h2 mat-dialog-title>Create Your Space</h2>
+<form #f="ngForm">
+  <mat-dialog-content>
+    <div class="flurr-upper">
+      <div class="user-info">
+        <img [src]="user()?.avatarImg" alt="avatar" />
+      </div>
+      <div class="user-details">
+        <h4>{{ user()?.fullName }}</h4>
+        <mat-form-field appearance="outline">
+          <mat-select placeholder="Privacy" [(ngModel)]="model.selectedPrivacy" name="selectedPrivacy">
+            <mat-option value="public">Public</mat-option>
+            <mat-option value="private">Private</mat-option>
+            <mat-option value="friends">Friends</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Space Name</mat-label>
+      <input required matInput [(ngModel)]="model.spaceName" name="spaceName" placeholder="Space name..." />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Collaborators (optional)</mat-label>
+      <input matInput [(ngModel)]="model.collaborators" name="collaborators" placeholder="email1, email2..." />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Bio</mat-label>
+      <textarea
+        required
+        matInput
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="3"
+        [(ngModel)]="model.spaceBio"
+        name="spaceBio"
+        placeholder="Describe your space..."
+      ></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button [disabled]="f.invalid || isSubmitting" (click)="submit()">
+      <ng-container *ngIf="!isSubmitting; else loadingTpl">Create Space!</ng-container>
+      <ng-template #loadingTpl>
+        <i class="pi pi-spin pi-spinner"></i>
+      </ng-template>
+    </button>
+
+    <button mat-button [disabled]="isSubmitting" (click)="onNoClick()">Cancel</button>
+  </mat-dialog-actions>
+</form>
+-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <h2 class="header-dialog" mat-dialog-title>Create Your Space</h2>
 <form #f="ngForm" action="">
 <mat-dialog-content class="content-dialog">
-  <!-- upper section -->
   <div class="flurr-upper">
     <div class="user-info">
       <img [src]="user()?.avatarImg" alt="avatar-example" />
     </div>
     <div class="user-details">
       <h4>{{ user()?.fullName }}</h4>
-      <!-- select -->
       <mat-form-field appearance="outline" class="flurr-select" id="privacy-select">
         <!--<mat-label>Choose privacy</mat-label>-->
         <mat-select placeholder="public" [(ngModel)]="model.selectedPrivacy" name="selectedPrivacy">
@@ -20,7 +99,6 @@
     </div>
   </div>
 
-  <!-- form section -->
   <div class="journey-inputs">
     <mat-form-field appearance="fill" class="journey-field">
       <mat-label>Space name</mat-label>
@@ -36,13 +114,12 @@
       <mat-label>Choose Collaborators (optional)</mat-label>
       <input
         matInput
-        placeholder="eg: username1, username2, username3..."
+        placeholder="eg: email1, email2, email3..."
         [(ngModel)]="model.collaborators"
         name="collaborators"
       />
     </mat-form-field>
 
-    <!-- first Flurr textarea -->
     <mat-form-field appearance="fill" class="flurr-textarea">
       <mat-label>Bio</mat-label>
       <textarea
@@ -58,29 +135,14 @@
       ></textarea>
     </mat-form-field>
   </div>
-
-  <!-- bottom section -->
-  <!--<div class="flurr-bottom">
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/image.png" alt="image-icon" />
-      <span>Image</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/video.png" alt="video-icon" />
-      <span>Video</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/tags.png" alt="tags-icon" />
-      <span>Tags</span>
-    </button>
-    <button class="icon">
-      <img src="./assets/icons/flurr-dialog/location.png" alt="location-icon" />
-      <span>Location</span>
-    </button>
-  </div>-->
 </mat-dialog-content>
 
 <mat-dialog-actions class="footer-dialog">
-  <button class="btn" id="flurrBtn" matButton [disabled]=f.invalid (click)="submit()">Create Space!</button>
+  <button id="flurrBtn" class="btn" mat-button [disabled]="f.invalid || isSubmitting" (click)="submit()">
+    <ng-container *ngIf="!isSubmitting; else loadingTpl">Create Space!</ng-container>
+    <ng-template #loadingTpl>
+      <i class="pi pi-spin pi-spinner"></i>
+    </ng-template>
+  </button>
 </mat-dialog-actions>
 </form>
