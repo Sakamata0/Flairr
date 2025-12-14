@@ -7,14 +7,9 @@ import { CommentPopUp } from '../comment-pop-up/comment-pop-up';
 import { CommentTree, CommentNode } from '../comment-tree/comment-tree';
 import { PostInfo } from '../../../model/post/post-info.type';
 import { MediaItem } from '../../../model/post/media-item.type';
-<<<<<<< HEAD
 import { supabase } from '../../../../core/supabase/supabase.client'; // adjust path if needed
 import { UserService } from '../../../../core/services/user.service'; // adjust path if needed
 import { GalleriaModule } from 'primeng/galleria';
-=======
-import { supabase } from '../../../../core/supabase/supabase.client';
-import { UserService } from '../../../../core/services/user.service';
->>>>>>> f2bb757212641971b5a5bf66d8a611b66923becc
 
 @Component({
   selector: 'app-post',
@@ -24,7 +19,6 @@ import { UserService } from '../../../../core/services/user.service';
   styleUrls: ['./post.css']
 })
 export class Post implements OnInit, OnDestroy {
-<<<<<<< HEAD
   responsiveOptions = [
     { breakpoint: '1024px', numVisible: 5 },
     { breakpoint: '768px', numVisible: 3 },
@@ -46,9 +40,6 @@ export class Post implements OnInit, OnDestroy {
     viewsCount: 1500,
     createdAt: new Date()
   };
-=======
-  @Input() post: PostInfo | null = null;
->>>>>>> f2bb757212641971b5a5bf66d8a611b66923becc
   @Input() show: number = 0;
   @Input() currentUser: { name: string; avatarUrl: string | null } | null = null;
   @Output() postChanged = new EventEmitter<void>();
@@ -69,7 +60,6 @@ export class Post implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-<<<<<<< HEAD
   // fetch helper that will load flurr media files
   private async loadPostMedia(): Promise<void> {
     if (!this.post) return;
@@ -103,8 +93,6 @@ export class Post implements OnInit, OnDestroy {
   // ----------------------------
   // Utility helpers
   // ----------------------------
-=======
->>>>>>> f2bb757212641971b5a5bf66d8a611b66923becc
   private async getCurrentUid(): Promise<string | null> {
     try {
       const u = this.userService.currentUser?.();
@@ -404,14 +392,11 @@ export class Post implements OnInit, OnDestroy {
     await this.ensureAuthorLoaded();
     await this.refreshFollowState();
     await this.refreshLikeState();
-<<<<<<< HEAD
 
     // Load attached media
     await this.loadPostMedia();
-=======
     await this.loadLikeCount();
     await this.loadComments();
->>>>>>> f2bb757212641971b5a5bf66d8a611b66923becc
   }
 
   ngOnDestroy(): void {

@@ -4,7 +4,7 @@ import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/f
 import { CardPanel } from '../../shared/components/card-panel/card-panel';
 import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
 import { Post } from '../../shared/components/post-components/post/post';
-import { NgIf, NgForOf, NgFor } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
@@ -100,12 +100,9 @@ export class Home implements OnInit {
       }
 
       console.log("UID =", uid);
-<<<<<<< HEAD
       console.log("FEED AUTHOR IDS =", feedAuthorIds);
-=======
       console.log("FRIENDS (feed authors) =", feedAuthorIds);
       console.log("Number of friends:", feedAuthorIds.length);
->>>>>>> f2bb757212641971b5a5bf66d8a611b66923becc
 
       if (!uid || feedAuthorIds.length === 0) {
         this.posts = [];

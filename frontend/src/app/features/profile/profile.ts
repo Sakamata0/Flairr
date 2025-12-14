@@ -241,7 +241,7 @@ export class Profile implements OnInit {
         cover_img: userRow.cover_img,
         followers: followersDisplay,
         following: followingDisplay,
-        flurrs: flurrs || [],
+        flurrs: /*flurrs ||*/ [],
         spacesCreated: ownedSpaces || [],
         spacesJoined: Array.from(allSpaces.values())
       };
@@ -260,7 +260,7 @@ export class Profile implements OnInit {
           followers: followersIds,
           following: followingIds,
           journeys: [], // TODO: load journeys
-          flurrs: flurrs || [],
+          flurrs: /*flurrs ||*/ [],
           spacesCreated: ownedSpaces || [],
           spacesJoined: Array.from(allSpaces.values()),
           getUser() { throw new Error('not implemented'); },
