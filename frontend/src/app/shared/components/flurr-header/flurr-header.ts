@@ -184,10 +184,12 @@ export class FlurrHeaderComponent {
         });
 
         dialogRef.afterClosed().subscribe(ok => {
+            
             if (ok) {
                 this.auth.logout();
                 this.router.navigate(['/signin']);
             }
         });
+        
     }
 }

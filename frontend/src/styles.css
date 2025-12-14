@@ -154,6 +154,7 @@ hr {
   font-size: 3em;
   font-family: 'Pacifico', cursive;
   font-weight: 500;
+  user-select: none;
 }
 
 .loading-screen h2 {

@@ -32,6 +32,7 @@ export class Signin {
 
   showPassword = false;
   errorMessage = '';
+  loading: boolean = true;
 
   constructor(
     private auth: AuthService,
@@ -52,7 +53,13 @@ export class Signin {
       if ((res as any).error) {
         // supabase-js v2 returns { error } or { error, data } depending
         const err = (res as any).error;
-        this.errorMessage = err?.message ?? 'Login failed';
+        if(err?.message == "Email not confirmed") {
+          this.errorMessage = "Please verify your email inbox to verify it";
+        }
+        else {
+          this.errorMessage = err?.message ?? 'Login failed';
+        }
+        
         return;
       }
 

@@ -63,7 +63,7 @@ export class Explore implements OnInit {
       // -------------------------------------------------
       // 1) GET FRIENDS (people I follow)
       // -------------------------------------------------
-      let feedAuthorIds: string[] = [];
+      let excludedAuthorIds: string[] = [];
       if (uid) {
         const { data: friends, error: friendsErr } = await supabase
           .from('friends')
@@ -74,7 +74,7 @@ export class Explore implements OnInit {
           console.warn('friendsErr:', friendsErr);
         } else if (friends) {
           const friendIds = friends.map((f: any) => f.followed_id as string);
-          feedAuthorIds = Array.from(new Set(friendIds));
+          excludedAuthorIds = Array.from(new Set(friendIds));
         }
       }
 
@@ -83,12 +83,12 @@ export class Explore implements OnInit {
       // Option B: show only my own posts (if uid)
       if (!uid) {
         this.posts = [];
-      } else if (feedAuthorIds.length === 0) {
+      } else if (excludedAuthorIds.length === 0) {
         // fall back: only my posts
-        feedAuthorIds = [uid];
+        excludedAuthorIds = [uid];
       }
       console.log("UID =", uid);
-console.log("FEED AUTHOR IDS =", feedAuthorIds);
+console.log("FEED AUTHOR IDS =", excludedAuthorIds);
 
 
       // -------------------------------------------------
@@ -96,7 +96,11 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
       // -------------------------------------------------
       let flurrs: any[] = [];
 
-      if (feedAuthorIds.length > 0) {
+      if(uid) {
+        excludedAuthorIds.push(uid);
+      }
+
+      if (excludedAuthorIds.length > 0) {
         const { data: flurrsData, error: flurrsErr } = await supabase
           .from('flurrs')
           .select(`
@@ -113,9 +117,9 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
               email
             )
           `)
-          .in('poster_id', feedAuthorIds)   // ⭐ only friends + me
+          .not('poster_id', 'in', `(${excludedAuthorIds.join(',')})`)
           .order('created_at', { ascending: false })
-          .limit(100); // a bit larger since we filter
+          .limit(100);
 
         if (flurrsErr) {
           console.warn('flurrsErr:', flurrsErr);
@@ -188,7 +192,7 @@ console.log("FEED AUTHOR IDS =", feedAuthorIds);
           .select('notification_id, type, content, actor_id, flurr_id, created_at')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(3);
 
         if (notifs) {
           this.notifications = await Promise.all(
