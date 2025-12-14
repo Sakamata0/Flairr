@@ -5,6 +5,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FlurrCreationCardDialog } from './flurr-creation-card-dialog';
+import { UserService } from '../../../core/services/user.service';
 
 
 @Component({
@@ -24,6 +25,8 @@ import { FlurrCreationCardDialog } from './flurr-creation-card-dialog';
 
 export class FlurrCreationCard {
   readonly dialog = inject(MatDialog);
+  // User info
+  user = inject(UserService).currentUser;
 
   // method that opens the dialog
   openFlurrCreationDialog(): void {
