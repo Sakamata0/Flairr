@@ -1,7 +1,7 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, NgZone, signal } from "@angular/core";
 import { FriendsProfile } from '../../shared/model/friends-profile.type';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from "../../../environments/environment";
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseService } from '../../core/services/supabase.service';
 
 
 @Injectable({ providedIn: 'root' })
@@ -11,13 +11,17 @@ export class FriendsService {
     // nesna3 fi supabase client
     private supabase: SupabaseClient;
 
-    constructor() {
-        this.supabase = createClient(
-            environment.supabaseUrl,
-            environment.supabaseAnonKey
-        );
-    }
+    constructor(
+        private ngZone: NgZone,
+        private supabaseService: SupabaseService
+    ) {
+        this.supabase = this.supabaseService.client;
 
+        // optional, only for debugging
+        try {
+            (window as any).supabase = this.supabase;
+        } catch { }
+    }
     //declarations mta3 el signals
     private allUsersSig = signal<FriendsProfile[]>([]);
     private friendRequestsSig = signal<FriendsProfile[]>([]);
@@ -155,6 +159,160 @@ export class FriendsService {
             list.filter(u => u.id !== userId)
         );
     }
+
+    //load friend requests
+    async loadFriendRequests(currentUserId: string) {
+        console.log('🔍 Loading friend requests for user:', currentUserId);
+
+        const { data, error } = await this.supabase
+            .from('request_follow')
+            .select(`
+            requester_id,
+            requester:users!requester_id (
+                user_id,
+                full_name,
+                avatar_img,
+                cover_img
+            )
+        `)
+            .eq('requested_id', currentUserId)
+            .eq('status', 'pending');
+
+        if (error) {
+            console.error('❌ Friend request error:', error);
+            this.friendRequestsSig.set([]);
+            return;
+        }
+
+        const mapped: FriendsProfile[] = (data ?? [])
+            .filter((row: any) => row.requester)
+            .map((row: any) => ({
+                id: row.requester.user_id,
+                name: row.requester.full_name,
+                avatar: row.requester.avatar_img,
+                banner: row.requester.cover_img,
+                mutuals: 0
+            }));
+
+        console.log('✅ Mapped friend requests:', mapped);
+
+        this.friendRequestsSig.set(mapped);
+    }
+
+    // accept follow request
+    async acceptFollowRequest(requesterId: string, currentUserId: string) {
+        // 1. Mark request as accepted
+        const { error: updateErr } = await this.supabase
+            .from('request_follow')
+            .update({ status: 'accepted', responded_at: new Date().toISOString() })
+            .eq('requester_id', requesterId)
+            .eq('requested_id', currentUserId);
+
+        if (updateErr) throw updateErr;
+
+        // 2. Create friendship (follower -> followed)
+        const { error: friendErr } = await this.supabase
+            .from('friends')
+            .insert({
+                follower_id: requesterId,
+                followed_id: currentUserId
+            });
+
+        if (friendErr) throw friendErr;
+
+        // 3. Update UI (remove request)
+        this.friendRequestsSig.update(list =>
+            list.filter(u => u.id !== requesterId)
+        );
+    }
+
+    // reject Follow Request
+    async rejectFollowRequest(requesterId: string, currentUserId: string) {
+        const { error } = await this.supabase
+            .from('request_follow')
+            .update({ status: 'rejected', responded_at: new Date().toISOString() })
+            .eq('requester_id', requesterId)
+            .eq('requested_id', currentUserId);
+
+        if (error) throw error;
+
+        // Remove from UI
+        this.friendRequestsSig.update(list =>
+            list.filter(u => u.id !== requesterId)
+        );
+    }
+
+    // people who follow me
+    async loadFollowers(currentUserId: string) {
+        console.log('🔍 Loading followers for user:', currentUserId);
+
+        const { data, error } = await this.supabase
+            .from('request_follow')
+            .select(`
+            requester_id,
+            requester:users!requester_id (
+                user_id,
+                full_name,
+                avatar_img,
+                cover_img
+            )
+        `)
+            .eq('requested_id', currentUserId)
+            .eq('status', 'accepted');
+
+        if (error) throw error;
+
+        const mapped: FriendsProfile[] = (data ?? [])
+            .filter((row: any) => row.users)
+            .map((row: any) => ({
+                id: row.users.user_id,
+                name: row.users.full_name,
+                avatar: row.users.avatar_img,
+                banner: row.users.cover_img,
+                mutuals: 0
+            }));
+
+        this.followersSig.set(mapped);
+
+        console.log('✅ Followers loaded:', mapped);
+    }
+
+    // people i follow
+    async loadFollowing(currentUserId: string) {
+        console.log('🔍 Loading following for user:', currentUserId);
+
+        const { data, error } = await this.supabase
+            .from('request_follow')
+            .select(`
+            requested_id,
+            requester:users!requester_id (
+                user_id,
+                full_name,
+                avatar_img,
+                cover_img
+            )
+        `)
+            .eq('requester_id', currentUserId)
+            .eq('status', 'accepted');
+
+        if (error) throw error;
+
+        const mapped: FriendsProfile[] = (data ?? [])
+            .filter((row: any) => row.users)
+            .map((row: any) => ({
+                id: row.users.user_id,
+                name: row.users.full_name,
+                avatar: row.users.avatar_img,
+                banner: row.users.cover_img,
+                mutuals: 0
+            }));
+
+        this.followersSig.set(mapped);
+
+        console.log('✅ Following loaded:', mapped);
+    }
+
+
 
 
 
