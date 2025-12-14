@@ -1,4 +1,4 @@
-<!-- profile-header.html -->
+<!-- profile-header.html - FIXED VERSION -->
 <ng-container *ngIf="effectiveProfile as profile; else emptyTpl">
   <div id="main-container">
     <div id="banner-image">
@@ -19,7 +19,7 @@
         <div id="name-a-bio-container">
           <div id="info">
             <h3>{{ (profile.full_name || profile.fullName) ?? 'Unnamed' }}</h3>
-            <h4>{{ (profile.username) ?? ((profile.email || '').split('@')[0]) ?? 'handle' }}</h4>
+            <h4>@{{ (profile.username) ?? ((profile.email || '').split('@')[0]) ?? 'handle' }}</h4>
 
             <p id="bio" *ngIf="profile.bio || profile.description">
               {{ profile.bio || profile.description }}
@@ -35,15 +35,17 @@
 
         <div id="stats-container">
           <span>
-            <strong>{{ formatFollowerCount(profile.followersCount ?? profile.followers?.length ?? 0) }}</strong>
+            <strong>{{ formatFollowerCount(profile.followers?.length ?? 0) }}</strong>
             Followers
           </span>
+
           <span>
-            <strong>{{ formatFollowerCount(profile.followingCount ?? profile.following?.length ?? 0) }}</strong>
+            <strong>{{ formatFollowerCount(profile.following?.length ?? 0) }}</strong>
             Following
           </span>
+
           <span>
-            <strong>{{ formatFollowerCount(profile.postsCount ?? profile.journeys?.length ?? 0) }}</strong>
+            <strong>{{ formatFollowerCount(profile.flurrs?.length ?? 0) }}</strong>
             Flurrs
           </span>
         </div>
@@ -54,6 +56,6 @@
 
 <ng-template #emptyTpl>
   <div id="main-container" class="empty">
-    <p>No profile to show</p>
+    <p>Loading profile...</p>
   </div>
 </ng-template>

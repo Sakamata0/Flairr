@@ -68,4 +68,8 @@ export class JourneysSelector implements OnInit {
       year: this.selectedYear
     });
   }
+
+  toggleExpandList() {
+    this.expandedList = !this.expandedList;
+  }
 }

@@ -27,7 +27,7 @@ export class ContactsList implements OnInit, OnDestroy {
     constructor(
         private messagingService: MessagingService,
         private cdr: ChangeDetectorRef
-    ) {}
+    ) { }
 
     async ngOnInit(): Promise<void> {
         // Load contacts from service
@@ -138,7 +138,15 @@ export class ContactsList implements OnInit, OnDestroy {
     }
 
     selectContact(c: Contact): void {
-        console.log('📱 Selected contact:', c.name);
+        console.log('📱 ContactsList.selectContact called with:', c);
+        console.log('📊 Contact structure:', {
+            id: c.id,
+            name: c.name,
+            conversationId: c.conversationId,
+            avatar: c.avatar,
+            lastMessage: c.lastMessage
+        });
+
         this.selected = c;
         this.currentOpenConversationId = c.conversationId || null;
 
@@ -153,6 +161,8 @@ export class ContactsList implements OnInit, OnDestroy {
             }
         }
 
+        // Emit the ORIGINAL contact, not the updated one
+        console.log('📤 Emitting contact to parent:', c);
         this.openThread.emit(c);
     }
 

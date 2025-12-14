@@ -1,280 +1,133 @@
-import { Component, ElementRef } from '@angular/core';
-import { FlurrCreationCard } from '../../shared/components/flurr-creation-card/flurr-creation-card';
-import { FriendsOptions } from '../../shared/components/friends-options/friends-options';
-import { MiniProfileCard } from '../../shared/components/mini-profile-card/mini-profile-card';
-import { Post } from '../../shared/components/post-components/post/post';
-import { ItemPanel } from '../../shared/components/item-panel/item-panel';
-import { FriendRequest } from '../../shared/components/friend-request/friend-request';
-import { profileInfo } from '../../shared/model/profile-info.type';
+import { Component, ElementRef, inject, OnInit } from '@angular/core';
+import { NgFor } from '@angular/common';
 
-import { NgFor, NgIf } from '@angular/common';
+import { FriendsOptions } from '../../shared/components/friends-options/friends-options';
+import { FriendRequest } from '../../shared/components/friend-request/friend-request';
+import { ConfirmDialog } from './confirm-dialog/confirm-dialog';
+
+import { FriendsService } from '../../core/services/friends.service';
+import { MessagingService } from '../../core/services/messaging.service';
 
 @Component({
-  selector: 'app-friends',
-  standalone: true,
-  imports: [
-    FriendRequest,
-    FriendsOptions,
-    NgFor
-  ],
-  templateUrl: './friends.html',
-  styleUrl: './friends.css'
+    selector: 'app-friends',
+    standalone: true,
+    imports: [
+        FriendRequest,
+        FriendsOptions,
+        NgFor,
+        ConfirmDialog
+    ],
+    templateUrl: './friends.html',
+    styleUrl: './friends.css'
 })
-export class Friends {
-  selectedType: string = 'Follow Request';
-  key:number=0;
+export class Friends implements OnInit {
 
-  
-  
-  constructor(private elementRef: ElementRef<HTMLElement>) {}
-  
-  
+    private friendsService = inject(FriendsService);
+    private messagingService = inject(MessagingService);
 
-  onFriendOptionSelected(option: { key: number; name: string }) {
-    this.selectedType = option.name;
-    this.key=option.key; 
-  }
+    private currentUserId!: string;
 
+    selectedType = 'Follow Request';
+    key = 0;
 
-  friendRequests: profileInfo[] = [
-  {
-    username: 'Ismail Mechkene',
-    firstName: 'Ismail',
-    lastName: 'Mechkene',
-    profileImageUrl: '',
-    bannerImageUrl: '',
-    bio: 'Frontend engineer • Angular fan',
-    followersCount: 1200,
-    followingCount: 150,
-    postsCount: 15,
-    birthdate: '1999-03-15',
-    country: 'Tunisia'
-  },
-  {
-    username: 'Skander Boughnimi',
-    firstName: 'Skander',
-    lastName: 'Boughnimi',
-    profileImageUrl: '',
-    bannerImageUrl: '',
-    bio: 'Fullstack developer',
-    followersCount: 4700,
-    followingCount: 320,
-    postsCount: 58,
-    country: 'Tunisia'
-  },
-  {
-    username: 'Mohamed Houcine',
-    firstName: 'Mohamed',
-    lastName: 'Houcine',
-    profileImageUrl: '/assets/images/hama.png',
-    bannerImageUrl: '/assets/images/banner-test.png',
-    bio: 'Fullstack developer',
-    followersCount: 4700,
-    followingCount: 320,
-    postsCount: 58,
-    country: 'Tunisia'
-  }
-];
+    list$ = this.friendsService.suggestions;
 
-friendsSuggestions: profileInfo[] = [
-  {
-    username: 'Amine Dev',
-    firstName: 'Amine',
-    lastName: 'Dev',
-    profileImageUrl: '/assets/images/profiles/amine.png',
-    bannerImageUrl: '/assets/images/banners/banner3.png',
-    bio: 'Backend & infrastructure',
-    followersCount: 10900,
-    followingCount: 410,
-    postsCount: 132,
-    birthdate: '1996-05-21',
-    country: 'Tunisia'
-  },
-  {
-    username: 'Noura',
-    firstName: 'Noura',
-    lastName: '',
-    profileImageUrl: '/assets/images/profiles/noura.png',
-    bio: 'Photographer & designer',
-    followersCount: 2300,
-    followingCount: 120,
-    postsCount: 22,
-    country: 'Tunisia'
-  },
-  {
-    username: 'Ali Mansour',
-    firstName: 'Ali',
-    lastName: 'Mansour',
-    profileImageUrl: '/assets/images/profiles/ali.png',
-    bio: 'Digital artist & illustrator',
-    followersCount: 900,
-    followingCount: 80,
-    postsCount: 9,
-    country: 'Tunisia'
-  }
-];
+    // confirm dialog state
+    confirmOpen = false;
+    confirmMode: 'delete' | 'reject' | null = null;
+    userToActOn: string | null = null;
 
-followers: profileInfo[] = [
-  {
-    username: 'Yassine Bouhlel',
-    firstName: 'Yassine',
-    lastName: 'Bouhlel',
-    profileImageUrl: '/assets/images/profiles/yassine.png',
-    bio: 'Computer science student',
-    followersCount: 540,
-    followingCount: 230,
-    postsCount: 9,
-    birthdate: '2001-08-10',
-    country: 'Tunisia'
-  },
-  {
-    username: 'Sara Ben Slimane',
-    firstName: 'Sara',
-    lastName: 'Ben Slimane',
-    profileImageUrl: '/assets/images/profiles/sara.png',
-    bio: 'UI designer & artist',
-    followersCount: 800,
-    followingCount: 100,
-    postsCount: 24,
-    country: 'Tunisia'
-  },
-  {
-    username: 'Zied Amri',
-    firstName: 'Zied',
-    lastName: 'Amri',
-    profileImageUrl: '/assets/images/profiles/zied.png',
-    bio: 'UX researcher and writer',
-    followersCount: 6200,
-    followingCount: 500,
-    postsCount: 92,
-    country: 'Tunisia'
-  }
-];
+    constructor(private elementRef: ElementRef<HTMLElement>) { }
 
-following: profileInfo[] = [
-  {
-    username: 'Mohamed Houcine',
-    firstName: 'Mohamed',
-    lastName: 'Houcine',
-    profileImageUrl: '/assets/images/profiles/mohamed.png',
-    bio: 'Mobile & game developer',
-    followersCount: 2500,
-    followingCount: 180,
-    postsCount: 45,
-    birthdate: '1998-12-01',
-    country: 'Tunisia'
-  },
-  {
-    username: 'Lina Trabelsi',
-    firstName: 'Lina',
-    lastName: 'Trabelsi',
-    profileImageUrl: '/assets/images/profiles/lina.png',
-    bio: 'Frontend developer • JS lover',
-    followersCount: 1400,
-    followingCount: 300,
-    postsCount: 33,
-    country: 'Tunisia'
-  },
-  {
-    username: 'Ahmed Nasri',
-    firstName: 'Ahmed',
-    lastName: 'Nasri',
-    profileImageUrl: '/assets/images/profiles/ahmed.png',
-    bio: 'Cloud & DevOps Engineer',
-    followersCount: 5800,
-    followingCount: 600,
-    postsCount: 75,
-    country: 'Tunisia'
-  }
-];
+    async ngOnInit() {
+        const user = await this.messagingService.getCurrentUser();
+        if (!user) return;
 
+        this.currentUserId = user.id;
 
-
-
-  get currentList() {
-    switch (this.selectedType) {
-      case 'Follow Request':
-        return this.friendRequests;
-      case 'Suggestions':
-        return this.friendsSuggestions;
-      case 'All Followers':
-        return this.followers;
-      case 'All Following':
-        return this.following;
-      default:
-        return this.friendRequests;
+        await Promise.all([
+            this.friendsService.loadSuggestions(user.id),
+            this.friendsService.loadFriendRequests(user.id),
+            this.friendsService.loadFollowers(user.id),
+            this.friendsService.loadFollowing(user.id),
+        ]);
     }
-  }
-
-  DisplayedArray=this.currentList;
 
 
-  sortType: string = 'Top';
-  sortingPostsMethodOpen: boolean = false;
+    onFriendOptionSelected(option: { key: number; name: string }) {
+        this.selectedType = option.name;
+        this.key = option.key;
 
-  toggleSortingMethodMenu(ev?: Event) {
-    ev?.stopPropagation();
-    this.sortingPostsMethodOpen = !this.sortingPostsMethodOpen;
-    const wrap = this.elementRef.nativeElement.querySelector('.sorting-posts-method-wrap');
-    if (wrap) {
-      wrap.classList.toggle('sorting-posts-method-open', this.sortingPostsMethodOpen);
+        switch (option.key) {
+            case 0:
+                this.list$ = this.friendsService.friendRequests;
+                break;
+            case 1:
+                this.list$ = this.friendsService.suggestions;
+                break;
+            case 2:
+                this.list$ = this.friendsService.followers;
+                break;
+            case 3:
+                this.list$ = this.friendsService.following;
+                break;
+        }
     }
-  }
 
+    async onFollow(userId: string) {
+        const user = await this.messagingService.getCurrentUser();
+        if (!user) return;
 
+        await this.friendsService.sendFollowRequest(userId, user.id);
+    }
 
+    // ---------- DELETE (suggestion) ----------
+    onDelete(userId: string) {
+        this.userToActOn = userId;
+        this.confirmMode = 'delete';
+        this.confirmOpen = true;
+    }
 
-private removeFromSource(item: profileInfo, source: string) {
-  const username = item.username;
-  switch ((source || '').toLowerCase()) {
-    case 'follow request':
-    case 'follow requests':
-    case 'followrequest':
-    case 'requests':
-      this.friendRequests = this.friendRequests.filter(u => u.username !== username);
-      break;
-    case 'suggestions':
-      this.friendsSuggestions = this.friendsSuggestions.filter(u => u.username !== username);
-      break;
-    case 'all followers':
-    case 'followers':
-      this.followers = this.followers.filter(u => u.username !== username);
-      break;
-    case 'all following':
-    case 'following':
-      this.following = this.following.filter(u => u.username !== username);
-      break;
-    default:
-      this.friendRequests = this.friendRequests.filter(u => u.username !== username);
-      this.friendsSuggestions = this.friendsSuggestions.filter(u => u.username !== username);
-      this.followers = this.followers.filter(u => u.username !== username);
-      this.following = this.following.filter(u => u.username !== username);
-      break;
-  }
-}
+    // ---------- REJECT (follow request) ----------
+    onReject(userId: string) {
+        this.userToActOn = userId;
+        this.confirmMode = 'reject';
+        this.confirmOpen = true;
+    }
 
-private addToFollowers(item: profileInfo) {
-  const exists = this.followers.some(u => u.username === item.username);
-  if (!exists) {
-    // optionally, you might want to clone to avoid accidental object reuse
-    this.followers = [ { ...item }, ...this.followers ];
-  }
-}
+    // ---------- ACCEPT ----------
+    async onAccept(userId: string) {
+        await this.friendsService.acceptFollowRequest(
+            userId,
+            this.currentUserId
+        );
+    }
 
-onAccept(item: profileInfo, source: string) {
-  this.addToFollowers(item);
-  this.removeFromSource(item, source);
-}
+    // ---------- CONFIRM HANDLER ----------
+    async onConfirmAction() {
+        if (!this.userToActOn || !this.confirmMode) return;
 
-onFollow(item: profileInfo, source: string) {
-  this.addToFollowers(item);
-  this.removeFromSource(item, source);
-}
+        if (this.confirmMode === 'delete') {
+            this.friendsService.removeFromSuggestions(this.userToActOn);
+        }
 
-onRemove(item: profileInfo, source: string) {
-  this.removeFromSource(item, source);
-}
+        if (this.confirmMode === 'reject') {
+            await this.friendsService.rejectFollowRequest(
+                this.userToActOn,
+                this.currentUserId
+            );
+        }
 
+        this.resetConfirm();
+    }
 
+    onCancelAction() {
+        this.resetConfirm();
+    }
 
+    private resetConfirm() {
+        this.confirmOpen = false;
+        this.confirmMode = null;
+        this.userToActOn = null;
+    }
 }

@@ -1,9 +1,9 @@
-// src/app/shared/components/profile/profile-header/profile-header.ts
+// profile-header.ts - FIXED VERSION
 import { Component, Input } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
-import { UserService } from '../../../../core/services/user.service'; // adjust path if needed
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -20,24 +20,25 @@ export class ProfileHeader {
     private userService: UserService
   ) {}
 
-  // return the profile to display: input OR current user from service
   get effectiveProfile() {
-    return this.profile ?? this.userService.currentUser();
+    if (!this.profile) return null;
+
+    // Always return the profile from @Input with properly loaded data
+    return this.profile;
   }
 
-  // boolean: true if the shown profile matches the logged-in user
   get isOwnProfile(): boolean {
-    const shown = this.effectiveProfile;
+    const p = this.effectiveProfile;
     const me = this.userService.currentUser();
-    if (!shown || !me) return false;
-
-    // DB user row uses user_id; internal User uses userID — check both
-    const shownId = shown.user_id ?? shown.userID ?? shown.id ?? null;
-    const myId = (me as any).userID ?? (me as any).user_id ?? (me as any).id ?? null;
-    return !!(shownId && myId && shownId === myId);
+    if (!p || !me) return false;
+    
+    const profileId = p.user_id ?? p.userID;
+    const meId = me.userID;
+    
+    return profileId === meId;
   }
 
-  formatFollowerCount(count: number | undefined | null): string {
+  formatFollowerCount(count: number | null | undefined): string {
     const c = count ?? 0;
     if (c >= 1_000_000) return (c / 1_000_000).toFixed(1) + 'M';
     if (c >= 1_000) return (c / 1_000).toFixed(1) + 'K';
@@ -48,14 +49,30 @@ export class ProfileHeader {
     const p = this.effectiveProfile;
     if (!p) return;
 
-    this.dialog.open(EditProfilePopup, {
+    // Transform profile data to match EditProfilePopup expectations
+    const dialogData = {
+      fullName: p.full_name ?? p.fullName ?? '',
+      bio: p.bio ?? '',
+      avatarUrl: p.avatar_img ?? p.avatarImg ?? '',
+      bannerUrl: p.cover_img ?? p.coverImg ?? '',
+      email: p.email ?? ''
+    };
+
+    const dialogRef = this.dialog.open(EditProfilePopup, {
       width: '100vw',
       maxWidth: '700px',
-      height: 'auto',
       maxHeight: '90vh',
       panelClass: 'edit-profile-dialog',
-      autoFocus: false,
-      data: p
+      data: dialogData
+    });
+
+    // Reload profile after edit
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Profile updated, reloading...');
+        // Trigger a reload by dispatching a custom event or calling parent component
+        window.location.reload(); // Simple solution, or use a better pattern
+      }
     });
   }
 }

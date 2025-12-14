@@ -1,0 +1,53 @@
+
+<div class="layout">
+    <nav>
+        <app-mini-profile-card></app-mini-profile-card>
+        <app-card-panel title="Shorcuts" noItemsMessage="You have no shortcuts yet." [items]="shortcuts"></app-card-panel>
+    </nav>
+    <main>
+        <div id="sort-selection">
+            <hr>
+            <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
+                <img src="assets/icons/home/arrow-down.png">
+            </span>
+            <div class="sorting-posts-menu" *ngIf="sortingPostsMethodOpen" role="menu" (click)="$event.stopPropagation()">
+                <button 
+                    role="menuitem" 
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Top'">
+                    Top
+                </button>
+                <button
+                    role="menuitem"
+                    (click)="toggleSortingMethodMenu($event); sortType = 'Recent'">
+                    Recent
+                </button>
+            </div>
+        </div>
+        
+       <ng-container *ngIf="!loading; else loadingTpl">
+    <app-post *ngFor="let p of posts" [post]="p"></app-post>
+    <div *ngIf="posts.length === 0" class="no-posts">No posts yet.</div>
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <div class="loading">Loading feed…</div>
+  </ng-template>
+    </main>
+    <aside>
+        <app-card-panel title="Notifications" noItemsMessage="You have no notification yet." [items]="this.notifications" link="notifications"></app-card-panel>
+        <app-card-panel title="Friends Suggestions" noItemsMessage="You have no friends suggestions." [items]="this.friendsSuggestions"></app-card-panel>
+        <div id="credits">
+            <a>About us</a>
+            <span>·</span>
+            <a>Privacy Policy</a>
+            <span>·</span>
+            <a>Cookie Policy</a>
+            <span>·</span>
+            <p>© 2025 Flairr, Inc</p>
+        </div>
+    </aside>
+</div>
+
+<div class="loading-screen" *ngIf="loading">
+  <h2>F</h2>
+</div>

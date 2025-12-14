@@ -121,7 +121,8 @@
 <comment-tree
   *ngIf="post && post.comments && post.comments.length!=0"
   [comments]="[post.comments[post.comments.length-1]]"
-  [currentUser]="currentUser || { name: '', avatarUrl: null }">
+  [currentUser]="currentUser || { name: '', avatarUrl: null }"
+  [flurrId]="post.id ">
 </comment-tree>
 
 

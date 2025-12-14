@@ -1,24 +1,42 @@
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-<div class="layout">
-    <nav style="width: fit-content;">
-        <app-friends-options (selectedOption)="onFriendOptionSelected($event)"></app-friends-options>
-    </nav>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
 
-    <main style="width: fit-content;">
-        <div class="request-container">
-            <span>{{ selectedType }}</span>
-            <div class="request-row">
-                <app-friend-request
-                    *ngFor="let r of currentList"
-                    [info]="r"
-                    [variab]="key"
-                    (accept)="onAccept(r, selectedType)"
-                    (follow)="onFollow(r, selectedType)"
-                    (remove)="onRemove(r, selectedType)">
-                </app-friend-request>
-            </div>
-        </div>
-       
-    </main>
+<div class="layout">
+  <nav style="width: fit-content">
+    <app-friends-options (selectedOption)="onFriendOptionSelected($event)"></app-friends-options>
+  </nav>
+
+  <main style="width: fit-content">
+    <div class="request-container">
+      <span>{{ selectedType }}</span>
+
+      <div class="request-row">
+        <app-friend-request
+          *ngFor="let r of list$()"
+          [info]="r"
+          [variab]="key"
+          (follow)="onFollow(r.id)"
+          (accept)="onAccept(r.id)"
+          (reject)="onReject(r.id)"
+          (remove)="onDelete(r.id)"
+        >
+        </app-friend-request>
+      </div>
+    </div>
+  </main>
 </div>
 
+<!-- SHARED CONFIRM DIALOG -->
+<app-confirm-dialog
+  [open]="confirmOpen"
+  [title]="confirmMode === 'delete' ? 'Remove suggestion' : 'Reject follow request'"
+  [message]="
+    confirmMode === 'delete'
+      ? 'Are you sure you want to remove this user from your suggestions?'
+      : 'Are you sure you want to reject this follow request?'
+  "
+  confirmLabel="Confirm"
+  cancelLabel="Cancel"
+  (confirm)="onConfirmAction()"
+  (cancel)="onCancelAction()"
+>
+</app-confirm-dialog>
