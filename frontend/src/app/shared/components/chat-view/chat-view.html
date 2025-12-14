@@ -1,85 +1,95 @@
 <div class="container">
-  <header class="chat-header" role="banner" aria-label="Conversation header">
+  <header class="chat-header">
     <div class="header-left">
-      <!-- Show loading skeleton or blank state while fetching user details -->
-      <ng-container *ngIf="loadingThreadHeader; else showThread">
-        <div class="avatar skeleton-avatar"></div>
-        <div class="person">
-          <div class="name skeleton-text"></div>
-        </div>
-      </ng-container>
-
-      <ng-template #showThread>
-        <img
-          class="avatar"
-          [src]="displayThread?.avatar || 'assets/images/profile-picture-test.jpg'"
-          alt="avatar"
-        />
-        <div class="person">
-          <div class="name">{{ displayThread?.name || 'Conversation' }}</div>
-        </div>
-      </ng-template>
+      <img
+        class="avatar"
+        [src]="displayThread?.avatar"
+        alt="avatar"
+      />
+      <div class="person">
+        <div class="name">{{ displayThread?.name || 'Conversation' }}</div>
+      </div>
     </div>
 
     <div class="header-right">
-      <button class="icon-btn" aria-label="notifications">
-        <img src="assets/icons/header/notifications.svg" alt="" />
+      <button class="icon-btn">
+        <img src="assets/icons/header/notifications.svg" />
       </button>
-      <button class="icon-btn" aria-label="settings">
-        <img src="assets/icons/header/settings.svg" alt="" />
+      <button class="icon-btn">
+        <img src="assets/icons/header/settings.svg" />
       </button>
     </div>
   </header>
+
   <section class="chat-section">
-    <!-- messages list (scrollable area) -->
-    <div class="messages-list" #scrollContainer role="log" aria-live="polite">
-      <!-- center timestamp example -->
-      <div class="center-time">10:35PM</div>
-      <!-- message bubbles -->
-      <ng-container *ngIf="messages.length; else noMessages">
+    <div class="messages-list" #scrollContainer>
+      <ng-container *ngIf="messages.length; else empty">
         <div
           *ngFor="let m of messages; trackBy: trackByMsg"
           class="message-row"
           [class.me]="m.from === 'me'"
         >
-          <img *ngIf="m.from === 'them'" class="msg-avatar" [src]="m.avatar" alt="" />
+          <img *ngIf="m.from === 'them'" class="msg-avatar" [src]="m.avatar" />
+
           <div class="bubble-wrapper" [class.me]="m.from === 'me'">
             <div class="bubble">{{ m.content }}</div>
-            <div class="bubble-time">{{ m.created_at | date : 'shortTime' }}</div>
+            <div class="bubble-time">
+              {{ m.created_at | date : 'shortTime' }}
+            </div>
           </div>
-          <img *ngIf="m.from === 'me'" class="msg-avatar" [src]="m.avatar" alt="" />
+
+          <img *ngIf="m.from === 'me'" class="msg-avatar" [src]="m.avatar" />
         </div>
       </ng-container>
-      <ng-template #noMessages>
-        <div class="empty" style="text-align: center; padding: 18px; color: #6b7f68">
-          No messages yet. Say hi 👋
-        </div>
+
+      <ng-template #empty>
+        <div class="empty">No messages yet. Say hi 👋</div>
       </ng-template>
-      <!-- optional loader when fetching older messages -->
-      <div *ngIf="loadingOlder" class="loading-old">Loading…</div>
     </div>
-    <!-- input area -->
-    <div class="messages-input" role="form" aria-label="Send message">
-      <button class="flat-btn" aria-label="attach image">
-        <img src="assets/icons/flurr-dialog/image.png" alt="attach image" />
+
+    <div class="messages-input">
+      <button class="flat-btn">
+        <img src="assets/icons/flurr-dialog/image.png" />
       </button>
-      <button class="flat-btn" aria-label="attach file">
-        <img src="assets/icons/flurr-dialog/video.png" alt="attach file" />
+
+      <button class="flat-btn">
+        <img src="assets/icons/flurr-dialog/video.png" />
       </button>
+
       <div class="input-wrap">
-        <form (ngSubmit)="send()" #f="ngForm" style="display: flex; gap: 8px; align-items: center">
+        <form (ngSubmit)="send()" style="display:flex; gap:8px">
           <input
-            name="text"
             class="text-input"
             type="text"
             placeholder="Aa"
-            aria-label="Type a message"
             [(ngModel)]="text"
-            autocomplete="off"
+            name="text"
           />
-          <button type="submit" class="flat-btn like-btn" aria-label="send message">
-            <img src="assets/icons/flurr-dialog/like.svg" alt="send" />
-          </button>
+
+          <div class="send-slot">
+            <button
+              *ngIf="text.trim()"
+              type="submit"
+              class="flat-btn send-btn"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+
+            <button *ngIf="!text.trim()" type="button" class="flat-btn like-btn" (click)="sendLike()">
+              <img src="assets/icons/flurr-dialog/like.svg" />
+            </button>
+          </div>
         </form>
       </div>
     </div>

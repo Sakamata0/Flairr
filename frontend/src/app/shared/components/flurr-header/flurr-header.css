@@ -8,7 +8,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 18px;
+  padding-right: 18px;
+  padding-left: 18px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   gap: 18px;
   background-color: #fff;
@@ -36,7 +39,7 @@
 }
 
 .search-wrap {
-  position: relative; /* 🔥 anchor dropdown */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +52,7 @@
   margin-left: 20ox;
   width: 100%;
 }
+
 .search-container input {
   width: 100%;
   height: 47px;
@@ -61,6 +65,7 @@
   font-family: 'Inter', 'Helvetica Neue', sans-serif;
   font-size: 14px;
 }
+
 .search-container .fa-magnifying-glass {
   position: absolute;
   right: 12px;
@@ -72,49 +77,105 @@
 
 .search-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   width: 100%;
-  background: #ffffff; /* 👈 NOT black */
-  border-radius: 14px;
-  padding: 6px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   z-index: 100;
+  max-height: 400px;
+  overflow-y: auto;
+  animation: dropdownFadeIn 0.15s ease;
 }
 
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.search-loading {
+  text-align: center;
+  padding: 16px;
+  color: #999;
+  font-size: 14px;
+}
 
 .search-group {
   margin-bottom: 10px;
 }
 
 .search-title {
-  font-size: 12px;
-  color: #6b7280; /* muted gray */
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+  padding: 8px 12px 6px 12px;
 }
 
 .search-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.12s ease;
 }
 
 .search-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: #f5f5f5;
+}
+
+.search-item:active {
+  background: #ebebeb;
 }
 
 .search-item img {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.search-item span {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .search-empty {
   text-align: center;
-  opacity: 0.6;
-  padding: 10px;
+  color: #999;
+  padding: 20px 16px;
+  font-size: 14px;
 }
 
 /* Center icons group */
@@ -142,7 +203,6 @@
   border: none;
 }
 
-/* only the active (selected) item gets the highlighted background */
 .icon-item.active {
   background-color: #ece6f0;
 }
@@ -163,7 +223,6 @@
   transform: translateY(-1px);
 }
 
-/* Label box: hidden by default and expands when active */
 .icon-label {
   display: inline-block;
   white-space: nowrap;
@@ -178,12 +237,12 @@
   font-family: 'Pacifico', cursive;
 }
 
-/* Active state: show label and slightly highlight bubble */
 .icon-item.active .icon-label {
   max-width: 120px;
   opacity: 1;
   transform: translateX(0);
 }
+
 .icon-item.active .icon-bubble {
   transform: none;
 }
@@ -195,6 +254,7 @@
   justify-content: right;
   gap: 10px;
   width: 600px;
+  padding-right: 18px;
 }
 
 .right a {
@@ -202,6 +262,7 @@
   align-items: center;
   justify-content: center;
 }
+
 .right a img {
   height: 30px;
   margin-right: 25px;
@@ -223,97 +284,194 @@
   border: none;
   transition: background 0.14s ease;
 }
+
 .small-btn:hover {
   background: rgba(0, 0, 0, 0.04);
 }
 
+/* ===== ENHANCED AVATAR DROPDOWN ===== */
+
 /* Wrapper keeps avatar + overlay together */
 .avatar-wrap {
   position: relative;
-  width: 40px; /* match your avatar sizing */
+  width: 40px;
   height: 40px;
   display: inline-block;
 }
 
-/* avatar image */
+/* Avatar image with enhanced hover effect */
 .avatar-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  border: 2px solid transparent;
 }
 
-/* small circular toggle positioned over bottom-right */
+.avatar-img:hover {
+  box-shadow: 0 4px 12px rgba(96, 153, 102, 0.2);
+  transform: scale(1.02);
+}
+
+/* Small circular toggle positioned over bottom-right */
 .avatar-toggle {
   position: absolute;
-  right: -4px; /* nudges the button slightly outside avatar circle */
+  right: -4px;
   bottom: -4px;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: none;
+  border: 2px solid #ffffff;
   display: inline-grid;
   place-items: center;
-  background: #609966; /* white circle */
-  color: #ffffff; /* chevron color */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: #609966;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   padding: 0;
-  transition: transform 0.12s ease, background 0.12s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 0;
+  z-index: 2;
 }
 
-/* hover / focus */
+.avatar-toggle svg {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .avatar-toggle:hover,
 .avatar-toggle:focus {
-  transform: translateY(-1px);
-  background: #609966;
+  transform: translateY(-2px) scale(1.1);
+  background: #527d56;
   outline: none;
-  box-shadow: 0 2px 6px rgba(11, 102, 209, 0.12);
+  box-shadow: 0 4px 10px rgba(96, 153, 102, 0.3);
 }
 
-/* rotate chevron when open (use .open on wrap or bind style via Angular) */
+.avatar-toggle:active {
+  transform: translateY(-1px) scale(1.05);
+}
+
+/* Rotate chevron when menu is open */
 .avatar-wrap.profile-open .avatar-toggle svg {
   transform: rotate(180deg);
-  transition: transform 0.18s ease;
 }
 
-/* optional menu styling */
+/* Enhanced dropdown menu */
 .avatar-menu {
   position: absolute;
   right: 0;
-  top: calc(100% + 8px);
-  min-width: 160px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(11, 66, 130, 0.12);
-  padding: 6px 8px;
+  top: calc(100% + 12px);
+  min-width: 200px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  z-index: 40;
+  gap: 2px;
+  z-index: 100;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  animation: menuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top right;
 }
 
-/* menu links */
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Menu items with icons */
 .avatar-menu a {
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border-radius: 8px;
   background: transparent;
   border: none;
-  color: #111;
+  color: #1a1a1a;
   text-decoration: none;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   width: 100%;
   display: flex;
-  justify-content: left;
-}
-.avatar-menu a:hover {
-  background: rgba(11, 102, 209, 0.06);
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
 }
 
+.avatar-menu a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: #609966;
+  transform: translateX(-3px);
+  transition: transform 0.2s ease;
+}
+
+.avatar-menu a:hover {
+  background: linear-gradient(135deg, rgba(96, 153, 102, 0.08) 0%, rgba(96, 153, 102, 0.12) 100%);
+  color: #609966;
+  padding-left: 18px;
+}
+
+.avatar-menu a:hover::before {
+  transform: translateX(0);
+}
+
+.avatar-menu a:active {
+  background: rgba(96, 153, 102, 0.15);
+  transform: scale(0.98);
+}
+
+/* Add subtle divider before logout */
+.avatar-menu a:last-child {
+  margin-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  color: #dc2626;
+}
+
+.avatar-menu a:last-child:hover {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(220, 38, 38, 0.12) 100%);
+  color: #b91c1c;
+}
+
+.avatar-menu a:last-child:hover::before {
+  background: #dc2626;
+}
+
+/* Add smooth backdrop click close effect */
+.avatar-menu::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+/* Optional: Add keyboard focus styles */
+.avatar-menu a:focus-visible {
+  outline: 2px solid #609966;
+  outline-offset: -2px;
+}
+
+/* Tablet view adjustments */
 @media (max-width: 1024px) {
   .left {
     width: auto;
@@ -331,7 +489,6 @@
     min-width: auto;
   }
 
-  /* Hide search input, show only icon */
   .search-container input {
     display: none;
   }
@@ -365,9 +522,13 @@
   .icon-item.active .icon-label {
     display: none;
   }
+
+  .avatar-menu {
+    min-width: 180px;
+  }
 }
 
-/* Mobile phone view (under 768px) - Facebook-style compact layout */
+/* Mobile phone view (under 768px) */
 @media (max-width: 768px) {
   .site-header {
     height: 56px;
@@ -413,7 +574,6 @@
     color: #0a66c2;
   }
 
-  /* Center: Show only key icons, hide some labels */
   .center {
     flex: 1;
     gap: 0;
@@ -436,7 +596,6 @@
     opacity: 0;
   }
 
-  /* Right side */
   .right {
     width: auto;
     gap: 4px;
@@ -459,12 +618,23 @@
   }
 
   .avatar-toggle {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    border-width: 1.5px;
+  }
+
+  .avatar-menu {
+    min-width: 160px;
+    right: -8px;
+  }
+
+  .avatar-menu a {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 }
 
-/* Small phone view (under 480px) - Extra compact */
+/* Small phone view (under 480px) */
 @media (max-width: 480px) {
   .site-header {
     height: 52px;
@@ -499,5 +669,14 @@
   .avatar-wrap {
     width: 32px;
     height: 32px;
+  }
+
+  .avatar-toggle {
+    width: 16px;
+    height: 16px;
+  }
+
+  .avatar-menu {
+    min-width: 150px;
   }
 }
