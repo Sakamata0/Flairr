@@ -50,11 +50,6 @@ export class Profile implements OnInit, OnDestroy {
       console.log('[Profile] Route params changed:', params.get('id'));
       this.loadProfileFromRoute();
     });
-
-    // Also reload when auth state changes
-    supabase.auth.onAuthStateChange(() => {
-      this.loadProfileFromRoute();
-    });
   }
 
   ngOnDestroy(): void {
