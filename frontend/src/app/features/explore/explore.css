@@ -37,10 +37,7 @@ nav, aside {
     gap: var(--spacing-between-sections);
     overflow: hidden;
     height: auto;
-}
-
-nav {
-  position: sticky;
+    position: sticky;
 }
 
 #sort-selection {
