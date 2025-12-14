@@ -177,7 +177,7 @@ export class Profile implements OnInit {
       // -------------------------
       try {
         this.posts = await this.flurrsService.getUserFlurrs(
-          currentUid!,
+          targetId!, /*currentUid!*/
           this.selectedJourneyId,
           this.selectedYear
         );
@@ -225,7 +225,7 @@ export class Profile implements OnInit {
         subtitle: s.space_bio ?? '',
         withButton: true,
         buttonText: 'Visit',
-        buttonAction: () => this.router.navigate(['/space', s.space_id])
+        buttonAction: () => this.router.navigate(['/spaces', s.space_id])
       }));
 
       // -------------------------
@@ -241,7 +241,7 @@ export class Profile implements OnInit {
         cover_img: userRow.cover_img,
         followers: followersDisplay,
         following: followingDisplay,
-        flurrs: /*flurrs ||*/ [],
+        flurrs: this.posts || [],
         spacesCreated: ownedSpaces || [],
         spacesJoined: Array.from(allSpaces.values())
       };
@@ -260,7 +260,7 @@ export class Profile implements OnInit {
           followers: followersIds,
           following: followingIds,
           journeys: [], // TODO: load journeys
-          flurrs: /*flurrs ||*/ [],
+          flurrs: this.posts || [],
           spacesCreated: ownedSpaces || [],
           spacesJoined: Array.from(allSpaces.values()),
           getUser() { throw new Error('not implemented'); },

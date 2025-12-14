@@ -37,6 +37,19 @@ export class FlurrsService {
         return data ?? [];
     }
 
+    async getFlurrsNumber(userID: string, type: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('flurrs')
+            .select('*', { count: 'exact', head: true })
+            .eq('poster_id', userID)
+            .eq('type', type);
+
+        if (error) throw error;
+
+        return count ?? 0;
+    }
+
+
 
     async uploadFlurrFile(flurrId: string, file: File) {
         const fileExt = file.name.split('.').pop();

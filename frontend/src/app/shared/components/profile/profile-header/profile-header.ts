@@ -1,9 +1,9 @@
-// profile-header.ts - FIXED VERSION
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { EditProfilePopup } from '../edit-profile-popup/edit-profile-popup';
 import { UserService } from '../../../../core/services/user.service';
+import { FlurrsService } from '../../../../core/services/flurrs.service';
 
 @Component({
   selector: 'app-profile-header',
@@ -12,30 +12,46 @@ import { UserService } from '../../../../core/services/user.service';
   templateUrl: './profile-header.html',
   styleUrls: ['./profile-header.css']
 })
-export class ProfileHeader {
+export class ProfileHeader implements OnChanges {
   @Input() profile: any | null = null;
+
+  flurrsNumber: number = 0;
 
   constructor(
     private dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private flurrsService: FlurrsService
   ) {}
 
-  get effectiveProfile() {
-    if (!this.profile) return null;
+  async ngOnChanges(changes: SimpleChanges) {
+    if (changes['profile'] && this.profile?.user_id) {
+      await this.totalFlurrs();
+    }
+  }
 
-    // Always return the profile from @Input with properly loaded data
+  async totalFlurrs() {
+    try {
+      const total = await this.flurrsService.getFlurrsNumber(
+        this.profile!.user_id,
+        'flurr'
+      );
+      this.flurrsNumber = total;
+    } catch (err) {
+      console.warn('[Profile] flurrsErr', err);
+      this.flurrsNumber = 0;
+    }
+  }
+
+  get effectiveProfile() {
     return this.profile;
   }
 
   get isOwnProfile(): boolean {
-    const p = this.effectiveProfile;
+    const p = this.profile;
     const me = this.userService.currentUser();
     if (!p || !me) return false;
-    
-    const profileId = p.user_id ?? p.userID;
-    const meId = me.userID;
-    
-    return profileId === meId;
+
+    return (p.user_id ?? p.userID) === me.userID;
   }
 
   formatFollowerCount(count: number | null | undefined): string {
@@ -46,33 +62,24 @@ export class ProfileHeader {
   }
 
   openEditProfileDialog() {
-    const p = this.effectiveProfile;
-    if (!p) return;
-
-    // Transform profile data to match EditProfilePopup expectations
-    const dialogData = {
-      fullName: p.full_name ?? p.fullName ?? '',
-      bio: p.bio ?? '',
-      avatarUrl: p.avatar_img ?? p.avatarImg ?? '',
-      bannerUrl: p.cover_img ?? p.coverImg ?? '',
-      email: p.email ?? ''
-    };
+    if (!this.profile) return;
 
     const dialogRef = this.dialog.open(EditProfilePopup, {
       width: '100vw',
       maxWidth: '700px',
       maxHeight: '90vh',
       panelClass: 'edit-profile-dialog',
-      data: dialogData
+      data: {
+        fullName: this.profile.full_name ?? '',
+        bio: this.profile.bio ?? '',
+        avatarUrl: this.profile.avatar_img ?? '',
+        bannerUrl: this.profile.cover_img ?? '',
+        email: this.profile.email ?? ''
+      }
     });
 
-    // Reload profile after edit
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Profile updated, reloading...');
-        // Trigger a reload by dispatching a custom event or calling parent component
-        window.location.reload(); // Simple solution, or use a better pattern
-      }
+      if (result) window.location.reload();
     });
   }
 }
