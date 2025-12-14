@@ -1,0 +1,20 @@
+<div class="overlay" *ngIf="open">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      </div>
+      <h3>{{ title }}</h3>
+    </div>
+    <p>{{ message }}</p>
+
+    <div class="actions">
+      <button class="cancel" (click)="cancel.emit()">Cancel</button>
+      <button class="confirm" (click)="confirm.emit()">Confirm</button>
+    </div>
+  </div>
+</div>
