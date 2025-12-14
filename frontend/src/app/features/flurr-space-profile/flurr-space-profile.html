@@ -9,7 +9,7 @@
         </div>
     </nav>
     <main>
-        <app-space-flurr-creation-card></app-space-flurr-creation-card>
+        <app-space-flurr-creation-card [currentSpaceID]="currentSpaceID"></app-space-flurr-creation-card>
         <div id="sort-selection">
             <hr>
             <span (click)="toggleSortingMethodMenu($event)">Sort by: {{sortType}}
