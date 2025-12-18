@@ -1,5 +1,5 @@
 import { Component, ElementRef, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 
 import { FriendsOptions } from '../../shared/components/friends-options/friends-options';
 import { FriendRequest } from '../../shared/components/friend-request/friend-request';
@@ -17,7 +17,8 @@ import { Router, RouterModule } from '@angular/router';
         FriendsOptions,
         CommonModule,
         ConfirmDialog,
-        RouterModule
+        RouterModule,
+        NgIf
     ],
     templateUrl: './friends.html',
     styleUrl: './friends.css'
@@ -28,6 +29,7 @@ export class Friends implements OnInit {
     private messagingService = inject(MessagingService);
     private currentUserId!: string;
     private router = inject(Router);
+    loading: boolean = true;
 
     selectedType = 'Follow Request';
     key = 0;
@@ -55,6 +57,7 @@ export class Friends implements OnInit {
         ]);
 
         this.onFriendOptionSelected({ key: 0, name: 'Follow Request' });
+        this.loading = false;
     }
 
     get confirmTitle(): string {

@@ -14,7 +14,7 @@ import { supabase } from '../../core/supabase/supabase.client';
   styleUrls: ['./spaces.css']
 })
 export class Spaces implements OnInit {
-  loading = false;
+  loading = true;
   error = '';
 
   joinedSpaces: any[] = [];
@@ -83,7 +83,7 @@ export class Spaces implements OnInit {
           .select('space_id')
           .eq('space_owner', uid);
 
-        const ownedSpaceIds = ownedSpaces?.map(os => os.space_id) || [];
+  const ownedSpaceIds: string[] = ownedSpaces?.map((os: any) => os.space_id) || [];
         const allSpaceIds = Array.from(new Set([...joinedSpaceIds, ...ownedSpaceIds]));
 
         if (allSpaceIds.length > 0) {
@@ -316,6 +316,7 @@ export class Spaces implements OnInit {
     if (!type) return 'assets/icons/panel/notification.png';
     if (type.includes('like')) return 'assets/icons/panel/like.png';
     if (type.includes('comment')) return 'assets/icons/panel/comment.png';
+    if (type.includes('reply')) return 'assets/icons/panel/comment.png';
     return 'assets/icons/panel/notification.png';
   }
 }

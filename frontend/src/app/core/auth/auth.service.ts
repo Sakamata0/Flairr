@@ -1,7 +1,7 @@
 // src/app/core/auth/auth.service.ts
 import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { supabase } from '../supabase/supabase.client';
+import { getSupabase } from '../supabase/supabase.client';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { Router, RouteReuseStrategy } from '@angular/router';
 import { CustomRouteReuseStrategy } from '../routing/custom-reuse.strategy';
@@ -18,6 +18,9 @@ export interface SignupData {
 export class AuthService {
   session = signal<Session | null>(null);
   user = signal<SupabaseUser | null>(null);
+  // Promise that resolves once initial session restore has completed
+  private _sessionReadyResolve: (() => void) | null = null;
+  private _sessionReady: Promise<void> = new Promise((res) => { this._sessionReadyResolve = res; });
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
@@ -34,13 +37,51 @@ export class AuthService {
   }
 
   private async init() {
+    console.debug('[AuthService] init: starting session restore');
+    const supabase = getSupabase();
+    if (typeof window === 'undefined') {
+      console.debug('[AuthService] init: running on server, skipping supabase calls');
+      this._sessionReadyResolve?.();
+      return;
+    }
+
     const { data } = await supabase.auth.getSession();
     this.session.set(data.session ?? null);
     this.user.set(data.session?.user ?? null);
+    console.debug('[AuthService] init: session', !!data.session, data?.session?.user?.id ?? null);
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      console.debug('[AuthService] onAuthStateChange event, session:', !!session, session?.user?.id ?? null);
       this.session.set(session ?? null);
       this.user.set(session?.user ?? null);
+    });
+
+    // mark session restoration as complete
+    this._sessionReadyResolve?.();
+  }
+
+  /**
+   * Wait for initial session restore to complete (with optional timeout in ms).
+   * Guards can call this to avoid racing Supabase's async restore.
+   */
+  async waitForSessionRestore(timeoutMs = 1000): Promise<void> {
+    if (!this.isBrowser()) return;
+
+    if (!this._sessionReady) return;
+
+    console.debug(`[AuthService] waitForSessionRestore: waiting up to ${timeoutMs}ms`);
+
+    if (timeoutMs <= 0) {
+      await this._sessionReady;
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const t = setTimeout(() => resolve(), timeoutMs);
+      this._sessionReady.then(() => {
+        clearTimeout(t);
+        resolve();
+      });
     });
   }
 
@@ -56,6 +97,7 @@ export class AuthService {
       console.log('🔵 Starting signup process...');
 
       // ÉTAPE 1: Vérifier si l'email existe déjà
+      const supabase = getSupabase();
       const { data: existingUser } = await supabase
         .from('users')
         .select('user_id, email')
@@ -134,8 +176,8 @@ export class AuthService {
       }
 
       // ÉTAPE 6: Mettre à jour les signaux
-      this.session.set(authData.session ?? null);
-      this.user.set(authData.user);
+  this.session.set(authData.session ?? null);
+  this.user.set(authData.user);
 
       return { data: authData, error: null };
 
@@ -158,6 +200,7 @@ export class AuthService {
     if (!this.isBrowser()) {
       return { error: { message: 'not-browser' } };
     }
+    const supabase = getSupabase();
     return await supabase.auth.signUp({ email, password });
   }
 
@@ -165,11 +208,13 @@ export class AuthService {
     if (!this.isBrowser()) {
       return { error: { message: 'not-browser' } };
     }
+    const supabase = getSupabase();
     return await supabase.auth.signInWithPassword({ email, password });
   }
 
   async logout() {
     if (!this.isBrowser()) return;
+    const supabase = getSupabase();
     await supabase.auth.signOut();
     this.session.set(null);
     this.user.set(null);
@@ -181,6 +226,7 @@ export class AuthService {
   async isLoggedIn(): Promise<boolean> {
     if (!this.isBrowser()) return false;
     if (this.session()) return true;
+    const supabase = getSupabase();
     const { data } = await supabase.auth.getSession();
     this.session.set(data.session ?? null);
     this.user.set(data.session?.user ?? null);
@@ -194,6 +240,7 @@ export class AuthService {
     if (this.session()) return true;
 
     // Otherwise, fetch session from Supabase
+    const supabase = getSupabase();
     const { data } = await supabase.auth.getSession();
     this.session.set(data.session ?? null);
     this.user.set(data.session?.user ?? null);
@@ -208,6 +255,7 @@ export class AuthService {
     const userId = this.getUserId();
     if (!userId) return null;
 
+    const supabase = getSupabase();
     const { data, error } = await supabase
       .from('users')
       .select('*')

@@ -31,9 +31,13 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideAnimationsAsync(),
     providePrimeNG({
-        theme: {
-            preset: Aura
+      theme: {
+        preset: Aura,
+        // disable automatic dark-mode selection so Aura always uses the light tokens
+        options: {
+          darkModeSelector: 'none'
         }
+      }
     })
   ],
 };

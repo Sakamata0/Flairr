@@ -147,7 +147,7 @@ export class FlurrDetailComponent implements OnInit {
         .limit(6);
 
       if (users) {
-        this.friendsSuggestions = users.map(u => ({
+        this.friendsSuggestions = users.map((u: any) => ({
           id: u.user_id,
           title: u.full_name,
           imageUrl: u.avatar_img || './assets/images/hama.png',

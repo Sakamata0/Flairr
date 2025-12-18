@@ -27,7 +27,7 @@ import { FriendsService } from '../../core/services/friends.service';
 })
 export class Home implements OnInit {
 
-  loading = false;
+  loading = true;
   error = '';
 
   shortcuts: any[] = [];
@@ -53,7 +53,6 @@ export class Home implements OnInit {
   // Handle when a post is changed (follow/unfollow)
   onPostChanged() {
     console.log('Post changed - refreshing feed');
-    // Small delay to ensure database transaction is complete
     setTimeout(() => {
       this.loadAllData();
     }, 300);

@@ -175,7 +175,7 @@ console.log("FEED AUTHOR IDS =", excludedAuthorIds);
           .select('space_id')
           .eq('user_id', currentUserId);
 
-        const joinedIds = joinedSpaces?.map(js => js.space_id) || [];
+  const joinedIds: string[] = joinedSpaces?.map((js: any) => js.space_id) || [];
 
         // Fetch spaces NOT joined AND NOT owned
         const { data: spaces } = await supabase

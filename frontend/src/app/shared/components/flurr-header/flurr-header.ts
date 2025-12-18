@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
 import { AuthService } from '../../../core/auth/auth.service';
@@ -19,7 +19,34 @@ import { UserService } from '../../../core/services/user.service';
 })
 export class FlurrHeaderComponent {
 
+    ngOnInit(): void {
+        // set initial active key based on current URL
+        this.updateActiveFromUrl(this.router.url);
+
+        // update active key on subsequent navigations
+        this.router.events.subscribe(ev => {
+            if (ev instanceof NavigationEnd) {
+                this.updateActiveFromUrl(ev.urlAfterRedirects || ev.url);
+            }
+        });
+
+        // If UserService has no current user yet, attempt to load from auth session
+        if (!this.userService.currentUser()) {
+            const authId = this.auth.getUserId();
+            if (authId) {
+                this.userService.loadFromAuthUserId(authId).catch(err => console.warn('Header load user error', err));
+            } else {
+                // fallback to supabase session check
+                supabase.auth.getSession().then(({ data }: { data: any }) => {
+                    const sid = data.session?.user?.id ?? null;
+                    if (sid) this.userService.loadFromAuthUserId(sid).catch(err => console.warn('Header load user error', err));
+                }).catch((e: any) => console.warn('Header supabase session error', e));
+            }
+        }
+    }
+
     @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('searchContainer') searchContainer!: ElementRef<HTMLElement>;
 
     activeKey: string | null = null;
     profileOpen = false;
@@ -30,8 +57,8 @@ export class FlurrHeaderComponent {
     users: any[] = [];
     spaces: any[] = [];
 
-    defaultAvatar = '/assets/default-user.png';
-    defaultSpace = '/assets/default-space.png';
+    defaultAvatar = '/assets/images/default-profile-picture.png';
+    defaultSpace = '/assets/images/default-profile-picture.png';
 
     userAvatar = this.defaultAvatar;
     userId!: string;
@@ -148,6 +175,40 @@ export class FlurrHeaderComponent {
         this.activeKey = key;
     }
 
+    private updateActiveFromUrl(url: string) {
+        if (!url) {
+            this.activeKey = null;
+            return;
+        }
+
+        // normalize
+        const path = url.split('?')[0].split('#')[0];
+
+        if (path === '/' || path === '/home') {
+            this.activeKey = 'home';
+            return;
+        }
+
+        if (path.startsWith('/explore')) {
+            this.activeKey = 'explore';
+            return;
+        }
+
+        if (path.startsWith('/friends')) {
+            this.activeKey = 'friends';
+            return;
+        }
+
+        if (path.startsWith('/spaces')) {
+            // includes /spaces and /spaces/:id (space profile)
+            this.activeKey = 'spaces';
+            return;
+        }
+
+        // default: no active nav
+        this.activeKey = null;
+    }
+
     onKeydown(e: KeyboardEvent, index: number) {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -177,9 +238,21 @@ export class FlurrHeaderComponent {
 
     /* ================= GLOBAL CLICK ================= */
 
-    @HostListener('document:click')
-    onDocumentClick() {
-        this.profileOpen = false;
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent) {
+        const searchWrap = this.elementRef.nativeElement.querySelector('.search-wrap');
+        const avatarWrap = this.elementRef.nativeElement.querySelector('.avatar-wrap');
+        const target = event.target as HTMLElement;
+
+        // Close search only if click is outside search container
+        if (searchWrap && !searchWrap.contains(target)) {
+            this.searchOpen = false;
+        }
+
+        // Close profile only if click is outside avatar container
+        if (avatarWrap && !avatarWrap.contains(target)) {
+            this.profileOpen = false;
+        }
     }
 
 

@@ -4,7 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { NgIf } from '@angular/common';
@@ -36,7 +36,8 @@ export class Signin{
   constructor(
     private auth: AuthService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   async onSubmit(f: NgForm): Promise<void> {
@@ -78,7 +79,9 @@ export class Signin{
         // still continue: user may not have a profile if you rely on a trigger or expect manual creation
       }
 
-      this.router.navigate(['/']); // navigate to root (adjust if you want another route)
+  // After sign-in, redirect back to the page the user originally requested (if provided)
+  const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
+  this.router.navigateByUrl(redirectTo);
     } catch (err: any) {
       console.error('Unexpected login error', err);
       this.errorMessage = err?.message ?? 'Unexpected error during login';

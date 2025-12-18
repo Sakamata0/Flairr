@@ -1,5 +1,5 @@
 // profile.ts - FIXED VERSION with proper route parameter handling
-import { Component, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ProfileHeader } from "../../shared/components/profile/profile-header/profile-header";
 import { CardPanel } from "../../shared/components/card-panel/card-panel";
 import { FlurrCreationCard } from "../../shared/components/flurr-creation-card/flurr-creation-card";
@@ -18,7 +18,8 @@ import { AuthService } from '../../core/auth/auth.service';
   standalone: true,
   imports: [ProfileHeader, CardPanel, FlurrCreationCard, Post, NgIf, NgForOf, JourneysSelector],
   templateUrl: './profile.html',
-  styleUrls: ['./profile.css']
+  styleUrls: ['./profile.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Profile implements OnInit, OnDestroy {
 
@@ -41,7 +42,8 @@ export class Profile implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -62,6 +64,8 @@ export class Profile implements OnInit, OnDestroy {
     this.posts = [];
     this.FlairrSpaces = [];
     this.isOwnProfile = false;
+    this.loading = true;
+    this.cdr.markForCheck(); // Ensure loading-screen renders immediately
 
     try {
       // Get the user ID from the route parameter
@@ -288,6 +292,7 @@ export class Profile implements OnInit, OnDestroy {
       this.error = err?.message ?? 'Unexpected error';
     } finally {
       this.loading = false;
+      this.cdr.markForCheck(); // Update view when loading completes
     }
   }
 

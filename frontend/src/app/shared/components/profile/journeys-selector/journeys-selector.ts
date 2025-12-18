@@ -46,11 +46,11 @@ export class JourneysSelector implements OnInit {
 
       if (data && data.length > 0) {
         // Set journey names
-        this.journeys.set(data.map(j => j.journey_name));
+  this.journeys.set(data.map((j: any) => j.journey_name));
 
         // Extract unique years
         const yearsSet = new Set<string>();
-        data.forEach(j => {
+        data.forEach((j: any) => {
           if (j.year) {
             yearsSet.add(j.year.toString());
           } else if (j.created_at) {

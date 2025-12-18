@@ -295,7 +295,7 @@ async loadComments(): Promise<void> {
       return;
     }
 
-    const rootCommentIds = actions.map(a => a.comment_id).filter(Boolean);
+  const rootCommentIds = actions.map((a: any) => a.comment_id).filter(Boolean);
     console.log('Root comment IDs:', rootCommentIds);
 
     // Step 2: Get ALL comments (root + their replies) WITH user_id

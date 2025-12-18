@@ -22,7 +22,7 @@
       </div>
 
       <!-- DROPDOWN -->
-      <div class="search-dropdown" *ngIf="searchOpen">
+      <div class="search-dropdown" *ngIf="searchOpen" (click)="$event.stopPropagation()">
         <div *ngIf="loading" class="search-loading">Searching…</div>
 
         <ng-container *ngIf="!loading">

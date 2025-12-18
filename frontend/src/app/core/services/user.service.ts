@@ -1,7 +1,7 @@
 // src/app/core/services/user.service.ts - FIXED VERSION
 import { Injectable, signal } from '@angular/core';
 import { User } from '../../shared/model/classes/user';
-import { supabase } from '../supabase/supabase.client'; 
+import { getSupabase } from '../supabase/supabase.client';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +46,7 @@ export class UserService {
       // -------------------------
       // 1) BASE USER ROW
       // -------------------------
+      const supabase = getSupabase();
       const { data: userRow, error: userErr } = await supabase
         .from('users')
         .select('*')
@@ -172,6 +173,7 @@ export class UserService {
     console.log('UserService - Creating profile:', profile);
     
     try {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from('users')
         .insert([profile])
@@ -212,6 +214,7 @@ export class UserService {
     console.log('UserService - Updating profile:', userId, updates);
     
     try {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from('users')
         .update(updates)
