@@ -1,13 +1,9 @@
 import { Injectable } from '@angular/core';
-import { createClient } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
+import { getSupabase } from '../supabase/supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class JourneysService {
-    private supabase = createClient(
-        environment.supabaseUrl,
-        environment.supabaseAnonKey
-    );
+    private supabase: any = getSupabase();
 
     async getCurrentUserJourneys() {
         // get the logged in user

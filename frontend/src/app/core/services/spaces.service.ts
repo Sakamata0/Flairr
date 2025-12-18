@@ -1,13 +1,9 @@
 import { Injectable } from '@angular/core';
-import { createClient } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
+import { getSupabase } from '../supabase/supabase.client';
 
 @Injectable({ providedIn: 'root' })
 export class SpacesService {
-  private supabase = createClient(
-    environment.supabaseUrl,
-    environment.supabaseAnonKey
-  );
+  private supabase: any = getSupabase();
 
   async insertSpace(spaceName: string, spaceBio: string) {
     // get logged-in user

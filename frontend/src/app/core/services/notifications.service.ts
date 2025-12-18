@@ -2,7 +2,8 @@
 // notifications.service.ts (FIXED - Properly fetches actor data)
 // ============================================
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
+import { getSupabase } from '../supabase/supabase.client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Notification } from '../../shared/model/notification.type';
@@ -21,7 +22,7 @@ export type DBNotification = {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
-    public supabase: SupabaseClient;
+    public supabase: any;
     
     private notificationsSubject = new BehaviorSubject<Notification[]>([]);
     public notifications$ = this.notificationsSubject.asObservable();
@@ -32,14 +33,8 @@ export class NotificationsService {
     private realtimeChannel?: RealtimeChannel;
 
     constructor() {
-        this.supabase = createClient(
-            environment.supabaseUrl, 
-            environment.supabaseAnonKey
-        );
-
-        try {
-            (window as any).supabase = this.supabase;
-        } catch { }
+        this.supabase = getSupabase();
+        try { (window as any).supabase = this.supabase; } catch {}
     }
     
     async getUserId(): Promise<string | null> {
@@ -245,7 +240,7 @@ export class NotificationsService {
                     table: 'notifications',
                     filter: `user_id=eq.${userId}`
                 },
-                async (payload) => {
+                async (payload: any) => {
                     console.log('New notification received:', payload);
                     // Refresh notifications when a new one arrives
                     await this.fetchNotifications();
@@ -253,6 +248,7 @@ export class NotificationsService {
             )
             .subscribe();
 
+        if (!this.realtimeChannel) throw new Error('Realtime channel not initialized');
         return this.realtimeChannel;
     }
 
