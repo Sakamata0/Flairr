@@ -74,7 +74,7 @@ export class FlurrCreationCardDialog {
 
   async ngOnInit() {
     const journeyList = await this.journeysService.getCurrentUserJourneys();
-    const mapped = journeyList.map(j => ({ id: j.journey_id, name: j.journey_name }));
+  const mapped = journeyList.map((j: any) => ({ id: j.journey_id, name: j.journey_name }));
     this.journeys.set(mapped);
   }
 
