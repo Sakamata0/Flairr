@@ -1,44 +1,22 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabase } from '../supabase/supabase.client';
 
 @Injectable({
     providedIn: 'root'
 })
 export class SupabaseService {
-    private _client: SupabaseClient | null = null;
+    private _client: SupabaseClient | any = null;
     private platformId = inject(PLATFORM_ID);
 
-    get client(): SupabaseClient {
+    /**
+     * Return a Supabase client. Delegates to getSupabase() factory which
+     * will return a real client in browser and a safe stub during SSR.
+     */
+    get client(): SupabaseClient | any {
         if (!this._client) {
-            // Only create client in browser environment
-            if (!isPlatformBrowser(this.platformId)) {
-                throw new Error('Supabase client can only be initialized in browser');
-            }
-
-            this._client = createClient(
-                environment.supabaseUrl,
-                environment.supabaseAnonKey,
-                {
-                    auth: {
-                        autoRefreshToken: true,
-                        persistSession: true,
-                        detectSessionInUrl: true,
-                        flowType: 'pkce',
-                        // Use default storage with a unique key
-                        storageKey: `sb-${environment.supabaseUrl.split('//')[1].split('.')[0]}-auth-token`
-                    },
-                    realtime: {
-                        params: {
-                            eventsPerSecond: 2
-                        }
-                    }
-                }
-            );
-
-            // Log for debugging
-            console.log('✅ Supabase client initialized');
+            this._client = getSupabase();
         }
         return this._client;
     }
