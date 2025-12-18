@@ -90,8 +90,8 @@ export class Home implements OnInit {
         if (friendsErr) {
           console.warn('friendsErr:', friendsErr);
         } else if (friends && friends.length > 0) {
-          const friendIds = friends.map((f: any) => f.followed_id as string);
-          feedAuthorIds = Array.from(new Set(friendIds)).filter(id => id !== uid);
+          const friendIds: string[] = friends.map((f: any) => f.followed_id as string);
+          feedAuthorIds = Array.from(new Set(friendIds)).filter((id: string) => id !== uid);
         }
       }
 
@@ -255,7 +255,7 @@ export class Home implements OnInit {
           .select('space_id')
           .eq('user_id', currentUserId);
 
-        const joinedIds = joinedSpaces?.map(js => js.space_id) || [];
+  const joinedIds = joinedSpaces?.map((js: any) => js.space_id) || [];
 
         // Fetch spaces NOT joined AND NOT owned
         const { data: spaces } = await supabase
