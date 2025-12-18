@@ -216,23 +216,46 @@ export class Spaces implements OnInit {
       this.applySorting();
 
       // --- 3) NOTIFICATIONS ---
-      const { data: notifs } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', uid)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      if (uid) {
+        const { data: notifs } = await supabase
+          .from('notifications')
+          .select('notification_id, type, content, actor_id, flurr_id, created_at')
+          .eq('user_id', uid)
+          .order('created_at', { ascending: false })
+          .limit(3);
 
-      this.notifications = (notifs ?? []).map((n: any) => ({
-        id: n.notification_id,
-        title: 'Activity',
-        imageUrl: './assets/images/hama.png',
-        withSubtitle: true,
-        subtitle: n.content,
-        subtitleOnSameLevel: true,
-        withIcon: true,
-        iconUrl: this.iconForNotificationType(n.type)
-      }));
+        if (notifs) {
+          this.notifications = await Promise.all(
+            notifs.map(async (n: any) => {
+              let actor = { full_name: 'Someone', avatar_img: './assets/images/hama.png' };
+
+              if (n.actor_id) {
+                const { data: actorRow } = await supabase
+                  .from('users')
+                  .select('full_name, avatar_img')
+                  .eq('user_id', n.actor_id)
+                  .single();
+
+                if (actorRow) {
+                  actor.full_name = actorRow.full_name;
+                  actor.avatar_img = actorRow.avatar_img || './assets/images/hama.png';
+                }
+              }
+
+              return {
+                id: n.notification_id,
+                title: actor.full_name,
+                imageUrl: actor.avatar_img,
+                withSubtitle: true,
+                subtitle: n.content,
+                subtitleOnSameLevel: true,
+                withIcon: true,
+                iconUrl: this.iconForNotificationType(n.type)
+              };
+            })
+          );
+        }
+      }
 
       // --- 4) SUGGESTED SPACES ---
       const { data: suggestions2 } = await supabase

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { RenderMode } from '@angular/ssr'; // Add this import
 import { DefaultLayout } from './layouts/default-layout/default-layout';
 import { SimpleLayout } from './layouts/simple-layout/simple-layout';
 import { AuthGuard } from './core/auth/auth.guard';
@@ -8,7 +9,7 @@ import { FlurrDetailComponent } from './features/flurr-detail/flurr-detail';
 export const routes: Routes = [
   {
     path: '',
-    component: DefaultLayout, // Layout with header
+    component: DefaultLayout,
     canActivate: [AuthGuard],
     children: [
       {
@@ -21,7 +22,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile/:profileId',
-        loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
+        loadComponent: () => import('./features/profile/profile').then(m => m.Profile)        
       },
       {
         path: 'friends',
@@ -56,7 +57,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    component: SimpleLayout, // Layout without header
+    component: SimpleLayout,
     children: [
       {
         path: 'signin',
