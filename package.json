@@ -13,5 +13,8 @@
     "@supabase/supabase-js": "^2.86.2",
     "primeicons": "^6.0.1",
     "primeng": "^20.4.0"
+  },
+  "devDependencies": {
+    "@angular/cli": "^20.3.13"
   }
 }
