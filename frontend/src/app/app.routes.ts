@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { RenderMode } from '@angular/ssr'; // Add this import
 import { DefaultLayout } from './layouts/default-layout/default-layout';
 import { SimpleLayout } from './layouts/simple-layout/simple-layout';
 import { AuthGuard } from './core/auth/auth.guard';
