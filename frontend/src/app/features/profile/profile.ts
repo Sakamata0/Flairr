@@ -29,6 +29,7 @@ export class Profile implements OnInit, OnDestroy {
 
   profile: any = null;
   posts: any[] = [];
+  journeys: any[] = [];
   FlairrSpaces: any[] = [];
   userId!: string | null;
 
@@ -65,6 +66,7 @@ export class Profile implements OnInit, OnDestroy {
     this.error = '';
     this.profile = null;
     this.posts = [];
+    this.journeys = [];
     this.FlairrSpaces = [];
     this.isOwnProfile = false;
     this.loading = true;
@@ -123,6 +125,22 @@ export class Profile implements OnInit, OnDestroy {
       }
 
       console.log('[Profile] Loaded user:', userRow.full_name);
+
+      // -------------------------
+      // LOAD JOURNEYS
+      // -------------------------
+      const { data: journeysData, error: journeysErr } = await supabase
+        .from('journeys')
+        .select('journey_id, journey_name, date_creation')
+        .eq('user_id', targetId)
+        .order('date_creation', { ascending: false });
+
+      if (journeysErr) {
+        console.warn('[Profile] Error loading journeys:', journeysErr);
+        this.journeys = [];
+      } else {
+        this.journeys = journeysData || [];
+      }
 
       // -------------------------
       // LOAD FOLLOWERS COUNT

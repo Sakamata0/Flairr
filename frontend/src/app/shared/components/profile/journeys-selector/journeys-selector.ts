@@ -1,5 +1,5 @@
 // journeys-selector.ts - FIXED VERSION with real data loading
-import { Component, Input, OnInit, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, Output, EventEmitter, signal, computed, SimpleChanges } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { supabase } from '../../../../core/supabase/supabase.client';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -17,9 +17,9 @@ interface Journey {
   templateUrl: './journeys-selector.html',
   styleUrl: './journeys-selector.css'
 })
-export class JourneysSelector implements OnInit {
+export class JourneysSelector implements OnInit, OnChanges {
   constructor(private auth: AuthService, private flurrsService: FlurrsService){}
-  userId: string | null = null;
+  @Input() journeyInput: any[] = [];
 
   journeyData = signal<Journey[]>([]);
   journeys = computed(() => this.journeyData().map(j => j.journey_name));
@@ -49,65 +49,41 @@ export class JourneysSelector implements OnInit {
   @Output() journeySelected = new EventEmitter<{journey_id: string; journey_name: string}>();
 
   ngOnInit() {
-    this.loadJourneys();
-    console.log(this.journeys);
+    this.processJourneys();
   }
 
-  async loadJourneys() {
-    this.userId = await this.auth.getUserId();
-    if (!this.userId) {
-      console.warn('No userId provided for journeys');
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['journeyInput'] && !changes['journeyInput'].firstChange) {
+      this.processJourneys();
+    }
+  }
+
+  private processJourneys() {
+    if (!this.journeyInput || this.journeyInput.length === 0) {
+      this.journeyData.set([]);
+      this.years.set([]);
       return;
     }
 
-    try {
-      // Load journeys from database
-      const { data, error } = await supabase
-        .from('journeys')
-        .select('journey_id, journey_name, date_creation')
-        .eq('user_id', this.userId)
-        .order('date_creation', { ascending: false });
+    // Store full journey data
+    this.journeyData.set(this.journeyInput);
 
-      if (error) {
-        console.error('Error loading journeys:', error);
-        return;
-      }
+    // Extract unique years
+    const yearsSet = new Set<string>();
+    this.journeyInput.forEach((j: Journey) => {
+      const year = new Date(j.date_creation).getFullYear();
+      yearsSet.add(year.toString());
+    });
 
-      if (data && data.length > 0) {
-        // Store full journey data
-        this.journeyData.set(data);
-
-        // Extract unique years
-        const yearsSet = new Set<string>();
-        data.forEach((j: Journey) => {
-          const year = new Date(j.date_creation).getFullYear();
-          yearsSet.add(year.toString());
-        });
-
-        // Sort years descending
-        const sortedYears = Array.from(yearsSet).sort((a, b) => 
-          parseInt(b) - parseInt(a)
-        );
-        
-        this.years.set(sortedYears);
-        // Auto-select the first (most recent) year
-        if (sortedYears.length > 0) {
-          this.selectedYear.set(sortedYears[0]);
-        }
-
-        console.log('Loaded journeys:', {
-          count: data.length,
-          years: sortedYears
-        });
-      } else {
-        // No journeys found - set empty arrays
-        this.journeyData.set([]);
-        this.years.set([]);
-        console.log('No journeys found for user:', this.userId);
-      }
-
-    } catch (err) {
-      console.error('Unexpected error loading journeys:', err);
+    // Sort years descending
+    const sortedYears = Array.from(yearsSet).sort((a, b) => 
+      parseInt(b) - parseInt(a)
+    );
+    
+    this.years.set(sortedYears);
+    // Auto-select the first (most recent) year
+    if (sortedYears.length > 0) {
+      this.selectedYear.set(sortedYears[0]);
     }
   }
 
@@ -122,8 +98,6 @@ export class JourneysSelector implements OnInit {
         journey_id: selectedJourneyData.journey_id,
         journey_name: selectedJourneyData.journey_name
       });
-      
-      console.log('Selected journey:', selectedJourneyData.journey_name);
     }
   }
 
@@ -132,7 +106,6 @@ export class JourneysSelector implements OnInit {
     const selectedYear = target.value;
     this.selectedYear.set(selectedYear);
     this.selectedJourney = 0; // Reset journey selection when year changes
-    console.log('Selected year:', selectedYear);
   }
 
   toggleExpandList() {

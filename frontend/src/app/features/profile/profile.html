@@ -4,7 +4,10 @@
 
 <div class="layout">
   <nav>
-    <app-journeys-selector (journeySelected)="onJourneySelected($event)"></app-journeys-selector>
+    <app-journeys-selector 
+      [journeyInput]="journeys"
+      (journeySelected)="onJourneySelected($event)">
+    </app-journeys-selector>
   </nav>
 
   <main>
