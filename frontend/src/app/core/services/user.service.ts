@@ -109,7 +109,8 @@ export class UserService {
       const { data: flurrs, error: flurrsErr } = await supabase
         .from('flurrs')
         .select('flurr_id')
-        .eq('poster_id', userId);
+        .eq('poster_id', userId)
+        .is('space_id', null);
 
       if (flurrsErr) {
         console.warn('UserService - Flurrs error:', flurrsErr);

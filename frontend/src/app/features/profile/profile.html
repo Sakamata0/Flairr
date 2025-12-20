@@ -4,7 +4,7 @@
 
 <div class="layout">
   <nav>
-    <app-journeys-selector [userId]="profile?.user_id"></app-journeys-selector>
+    <app-journeys-selector (journeySelected)="onJourneySelected($event)"></app-journeys-selector>
   </nav>
 
   <main>

@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { supabase } from '../../core/supabase/supabase.client';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { FlurrsService } from '../../core/services/flurrs.service';
 
 @Component({
   selector: 'app-profile',
@@ -29,6 +30,7 @@ export class Profile implements OnInit, OnDestroy {
   profile: any = null;
   posts: any[] = [];
   FlairrSpaces: any[] = [];
+  userId!: string | null;
 
   isOwnProfile = false;
 
@@ -43,6 +45,7 @@ export class Profile implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private userService: UserService,
     private authService: AuthService,
+    private flurrsService: FlurrsService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -75,6 +78,7 @@ export class Profile implements OnInit, OnDestroy {
       // Get the current logged-in user ID
       const { data: sessionData } = await supabase.auth.getSession();
       const currentUid = sessionData.session?.user?.id ?? this.authService.getUserId();
+      this.userId = currentUid;
 
       // Log ALL route params to debug
       console.log('[Profile] ALL ROUTE PARAMS:', this.route.snapshot.paramMap.keys);
@@ -331,5 +335,30 @@ export class Profile implements OnInit, OnDestroy {
   toggleSortingMethodMenu(ev?: Event) {
     ev?.stopPropagation();
     this.sortingPostsMethodOpen = !this.sortingPostsMethodOpen;
+  }
+
+  async onJourneySelected(event: {journey_id: string; journey_name: string}) {
+    try {
+      if (!this.profile?.user_id) {
+        console.warn('No user ID available');
+        return;
+      }
+
+      // Load flurrs for the selected journey
+      const flurrs = await this.flurrsService.getUserFlurrs(
+        this.profile.user_id,
+        event.journey_id
+      );
+
+      this.posts = flurrs;
+      console.log('Loaded flurrs for journey:', {
+        journey: event.journey_name,
+        count: flurrs.length
+      });
+      
+      this.cdr.markForCheck();
+    } catch (err) {
+      console.error('Error loading flurrs for journey:', err);
+    }
   }
 }

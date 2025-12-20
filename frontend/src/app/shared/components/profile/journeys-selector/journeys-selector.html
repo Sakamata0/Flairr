@@ -1,9 +1,9 @@
 <div class="container">
     <header>
     <h3>Journeys</h3>
-    <select name="Year" id="year-selector">
+    <select name="Year" id="year-selector" (change)="onYearSelected($event)">
         <option value="0" disabled>Year</option>
-        <option *ngFor="let year of years()" [value]="year">{{ year }}</option>
+        <option *ngFor="let year of years()" [value]="year" [selected]="selectedYear() === year">{{ year }}</option>
     </select>
     </header>
     <main>
@@ -20,16 +20,16 @@
             </ul>
             <ul *ngIf="expandedList">
                 <li 
-                    *ngFor="let journey of journeys(); let i = index"
+                    *ngFor="let journey of filteredJourneys(); let i = index"
                     (click)="selectJourney(i)"
-                    [class.selected]="selectedJourney === i">{{ journey }}
+                    [class.selected]="selectedJourney === i">{{ journey.journey_name }}
                 </li>
             </ul>
         </div>
     </main>
     <footer>
         <a  id="see-more"
-            *ngIf="journeys().length > 5"
+            *ngIf="filteredJourneys().length > 5"
             (click)="expandedList = !expandedList">{{expandedList? 'Show less': 'Show more'}}
         </a>
     </footer>
