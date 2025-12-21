@@ -1,0 +1,141 @@
+.dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .dialog-container {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .dialog-header {
+      padding: 32px 32px 24px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--third-color, #609966) 0%, var(--fouth-color, #4a7c59) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: white;
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .dialog-body {
+      padding: 32px;
+    }
+
+    .main-message {
+      font-size: 1.05em;
+      color: #4b5563;
+      line-height: 1.6;
+      margin: 0 0 16px;
+      text-align: center;
+    }
+
+    .sub-message {
+      font-size: 0.95em;
+      color: #6b7280;
+      line-height: 1.5;
+      margin: 0 0 20px;
+      text-align: center;
+    }
+
+    .sub-message strong {
+      color: var(--third-color, #609966);
+      font-weight: 600;
+    }
+
+    .info-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #f0f9ff;
+      border-radius: 12px;
+      border: 1px solid #bae6fd;
+    }
+
+    .info-box svg {
+      flex-shrink: 0;
+      color: #0284c7;
+    }
+
+    .info-box span {
+      font-size: 0.9em;
+      color: #0c4a6e;
+    }
+
+    .dialog-footer {
+      padding: 24px 32px 32px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-confirm {
+      padding: 12px 48px;
+      background: linear-gradient(135deg, var(--third-color, #609966) 0%, var(--fouth-color, #4a7c59) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(96, 153, 102, 0.3);
+    }
+
+    .btn-confirm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(96, 153, 102, 0.4);
+    }
+
+    .btn-confirm:active {
+      transform: translateY(0);
+    }

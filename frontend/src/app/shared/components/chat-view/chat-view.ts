@@ -193,3 +193,4 @@ export class ChatView implements OnChanges, AfterViewChecked, OnDestroy {
     if (this.sub) this.sub.unsubscribe();
   }
 }
+

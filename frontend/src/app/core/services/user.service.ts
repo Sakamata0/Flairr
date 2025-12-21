@@ -9,10 +9,6 @@ import { getSupabase } from '../supabase/supabase.client';
 export class UserService {
   currentUser = signal<User | null>(null);
 
-  constructor() {
-    console.log('UserService initialized');
-  }
-
   private mapRowToUser(row: any): User {
     return {
       userID: row.user_id,

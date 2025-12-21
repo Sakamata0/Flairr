@@ -220,10 +220,10 @@
           <div><hr></div>
         </div>
         <div class="platforms">
-          <div><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
-          <div><img src="assets/icons/signin/google.svg" alt="google"></div>
-          <div><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
-          <div><img src="assets/icons/signin/github.svg" alt="github"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/google.svg" alt="google"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/github.svg" alt="github"></div>
         </div>
         <div class="reg-container">
           <span>Already have an account ?</span>
@@ -238,3 +238,22 @@
     </div>
   </div>
 </div>
+
+<app-email-confirmation-dialog
+  [open]="showEmailConfirmDialog"
+  [title]="'Verify Your Email'"
+  [message]="'Account created successfully! Please check your email to verify your account before logging in.'"
+  [email]="registeredEmail"
+  [confirmLabel]="'Got it!'"
+  (confirm)="onEmailConfirmClose()"
+>
+</app-email-confirmation-dialog>
+
+<app-feature-coming-soon-dialog
+  [open]="showFeatureDialog"
+  [title]="'Coming Soon'"
+  [message]="'Social registration is currently in development. Stay tuned for updates!'"
+  [confirmLabel]="'Register Instead'"
+  (confirm)="onFeatureDialogClose()"
+>
+</app-feature-coming-soon-dialog>

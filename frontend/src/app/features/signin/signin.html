@@ -98,10 +98,10 @@
           <div><hr></div>
         </div>
         <div class="platforms">
-          <div><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
-          <div><img src="assets/icons/signin/google.svg" alt="google"></div>
-          <div><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
-          <div><img src="assets/icons/signin/github.svg" alt="github"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/linkedin.svg" alt="linkedin"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/google.svg" alt="google"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/facebook.svg" alt="facebook"></div>
+          <div (click)="onSocialLogin()"><img src="assets/icons/signin/github.svg" alt="github"></div>
         </div>
         <div class="reg-container">
           <span>Don't have an account ?</span>
@@ -116,3 +116,13 @@
     </div>
   </div>
 </div>
+
+<!-- Feature Coming Soon Dialog -->
+<app-feature-coming-soon-dialog
+  [open]="showFeatureDialog"
+  [title]="'Coming Soon'"
+  [message]="'Social login integration is currently in development. Stay tuned for updates!'"
+  [confirmLabel]="'Login Instead'"
+  (confirm)="onFeatureDialogClose()"
+>
+</app-feature-coming-soon-dialog>

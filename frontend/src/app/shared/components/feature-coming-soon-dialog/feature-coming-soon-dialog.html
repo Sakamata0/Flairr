@@ -1,0 +1,30 @@
+<div class="dialog-overlay" *ngIf="open" (click)="onOverlayClick()">
+      <div class="dialog-container" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <div class="icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+          </div>
+          <h2>{{ title }}</h2>
+        </div>
+        
+        <div class="dialog-body">
+          <p class="main-message">{{ message }}</p>
+          <div class="feature-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>We're working hard to bring you this feature soon!</span>
+          </div>
+        </div>
+        
+        <div class="dialog-footer">
+          <button class="btn-confirm" (click)="onConfirm()">
+            {{ confirmLabel }}
+          </button>
+        </div>
+      </div>
+    </div>

@@ -8,6 +8,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { NgIf } from '@angular/common';
+import { FeatureComingSoonDialog } from '../../shared/components/feature-coming-soon-dialog/feature-coming-soon-dialog';
 
 @Component({
   selector: 'app-signin',
@@ -18,12 +19,13 @@ import { NgIf } from '@angular/common';
     MatInputModule,
     MatButtonModule,
     NgIf,
-    RouterLink
-],
+    RouterLink,
+    FeatureComingSoonDialog
+  ],
   templateUrl: './signin.html',
   styleUrl: './signin.css'
 })
-export class Signin{
+export class Signin {
   model: userSignIn = {
     email: '',
     password: '',
@@ -32,6 +34,9 @@ export class Signin{
 
   showPassword = false;
   errorMessage = '';
+
+  // Feature coming soon dialog state
+  showFeatureDialog = false;
 
   constructor(
     private auth: AuthService,
@@ -48,13 +53,12 @@ export class Signin{
       // call AuthService.login(email, password)
       const res = await this.auth.login(this.model.email, this.model.password);
 
-
       // handle Supabase error
       if ((res as any).error) {
         // supabase-js v2 returns { error } or { error, data } depending
         const err = (res as any).error;
         if(err?.message == "Email not confirmed") {
-          this.errorMessage = "Please verify your email inbox to verify it";
+          this.errorMessage = "Please check your email inbox to verify it";
         }
         else {
           this.errorMessage = err?.message ?? 'Login failed';
@@ -79,12 +83,21 @@ export class Signin{
         // still continue: user may not have a profile if you rely on a trigger or expect manual creation
       }
 
-  // After sign-in, redirect back to the page the user originally requested (if provided)
-  const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
-  this.router.navigateByUrl(redirectTo);
+      // After sign-in, redirect back to the page the user originally requested (if provided)
+      const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
+      this.router.navigateByUrl(redirectTo);
     } catch (err: any) {
       console.error('Unexpected login error', err);
       this.errorMessage = err?.message ?? 'Unexpected error during login';
     }
+  }
+
+  // Show feature coming soon dialog
+  onSocialLogin() {
+    this.showFeatureDialog = true;
+  }
+
+  onFeatureDialogClose() {
+    this.showFeatureDialog = false;
   }
 }
